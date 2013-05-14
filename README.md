@@ -1,4 +1,14 @@
-tc65lib
+TC65Lib (javacint)
 =======
 
-TC65i / TC65i-X common
+The goal of this library is to provide a base library for existing and new programs on all the Gemalto's M2M devices:
+* TC65
+* TC65i / TC65i-X
+* BSG5 / BSG5-X
+
+The features that shall be provided in this library are:
+* Settings
+* Logging
+* SMS
+* Call handling
+* Automatic OTAP management
