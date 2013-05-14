@@ -10,5 +10,8 @@ The features that shall be provided in this library are:
 * Settings
 * Logging
 * SMS
+* Time sync
 * Call handling
 * Automatic OTAP management
+* (Communication with server)
+
