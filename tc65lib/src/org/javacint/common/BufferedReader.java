@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.common;
 
 import java.io.ByteArrayOutputStream;
@@ -10,9 +6,9 @@ import java.io.InputStream;
 import org.javacint.logging.Logger;
 
 /**
- * Buffered reader
+ * Buffered reader.
  *
- * @author Florent Clairambault / www.webingenia.com
+ * @author Florent Clairambault 
  */
 public class BufferedReader {
 

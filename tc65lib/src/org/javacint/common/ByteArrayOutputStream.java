@@ -11,7 +11,7 @@ import java.io.OutputStream;
  * This class allows to write bytes into a memory buffer. When the buffer is
  * full it grows by two times its current size.
  *
- * @author Florent Clairambault / www.webingenia.com
+ * @author Florent Clairambault 
  */
 public class ByteArrayOutputStream extends OutputStream {
 

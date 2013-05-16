@@ -19,7 +19,7 @@ import org.javacint.logging.Logger;
  *
  * This should be ported into the Settings class.
  *
- * @author Florent Clairambault / www.webingenia.com
+ * @author Florent Clairambault 
  */
 public class PropertiesFile {
 

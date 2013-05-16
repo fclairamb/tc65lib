@@ -7,8 +7,9 @@ package org.javacint.common;
 import java.util.Vector;
 
 /**
+ * Vectors handling class.
  *
- * @author florent
+ * @author Florent clairambault
  */
 public class Vectors {
 

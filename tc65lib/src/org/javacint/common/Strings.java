@@ -7,8 +7,9 @@ package org.javacint.common;
 import java.util.Vector;
 
 /**
+ * Strings handling methods.
  *
- * @author florent
+ * @author Florent Clairambault
  */
 public class Strings {
 

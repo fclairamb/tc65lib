@@ -3,7 +3,7 @@ package org.javacint.logging;
 /**
  * Logging class
  *
- * @author Florent Clairambault / www.webingenia.com
+ * @author Florent Clairambault
  */
 public class Logger {
 
@@ -68,7 +68,7 @@ public class Logger {
 	/**
 	 * Logging receiver
 	 */
-	private static ILoggingReceiver receiver;
+	private static LoggingReceiver receiver;
 	/**
 	 * Stdout logging
 	 */
@@ -80,7 +80,7 @@ public class Logger {
 	 *
 	 * @param r Logging receiver
 	 */
-	public static void setLoggingReceiver(ILoggingReceiver r) {
+	public static void setLoggingReceiver(LoggingReceiver r) {
 		receiver = r;
 	}
 

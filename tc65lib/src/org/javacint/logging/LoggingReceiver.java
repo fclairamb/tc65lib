@@ -2,9 +2,9 @@ package org.javacint.logging;
 
 /**
  * Logging receiver
- * @author Florent Clairambault / www.webingenia.com
+ * @author Florent Clairambault 
  */
-public interface ILoggingReceiver {
+public interface LoggingReceiver {
 	/**
 	 * Logging string received
 	 * @param str Logging string

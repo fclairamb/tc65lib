@@ -9,7 +9,7 @@ import org.javacint.logging.Logger;
  *
  * Most of the "dirty" AT commands handling code is put here.
  *
- * @author Florent Clairambault / www.webingenia.com
+ * @author Florent Clairambault 
  */
 public class ATCommandsWrapper {
 

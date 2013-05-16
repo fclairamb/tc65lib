@@ -6,7 +6,6 @@ package org.javacint.time;
 
 import java.util.Calendar;
 import java.util.Date;
-import org.javacint.logging.Logger;
 
 /**
  *
@@ -88,7 +87,7 @@ public class DateManagement {
 		if (second != -1) {
 			cal.set(Calendar.SECOND, second);
 		}
-		
+
 		long calTime = cal.getTime().getTime();
 
 		while (calTime < currentTime) {
@@ -107,13 +106,13 @@ public class DateManagement {
 		return new Date(calTime);
 
 	}
-	public static long THE_PAST = 1361397998;
+	public static long THE_PAST = 1368745211;
 
 	/**
 	 * Check if we have a correct time.
-	 * 
+	 *
 	 * This only check if we are not years in the past.
-	 * 
+	 *
 	 * @return true if we have a correct time
 	 */
 	public static boolean synced() {
