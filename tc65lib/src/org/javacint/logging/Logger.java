@@ -2,8 +2,6 @@ package org.javacint.logging;
 
 /**
  * Logging class
- *
- * @author Florent Clairambault
  */
 public class Logger {
 

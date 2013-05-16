@@ -8,7 +8,6 @@ import org.javacint.watchdog.WatchdogStatusProvider;
 /**
  * Program parts loading class.
  *
- * @author Florent Clairambault 
  */
 public class Loader extends TimerTask implements WatchdogStatusProvider {
 

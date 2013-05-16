@@ -8,8 +8,6 @@ import org.javacint.logging.Logger;
  * AT Commands wrapper.
  *
  * Most of the "dirty" AT commands handling code is put here.
- *
- * @author Florent Clairambault 
  */
 public class ATCommandsWrapper {
 

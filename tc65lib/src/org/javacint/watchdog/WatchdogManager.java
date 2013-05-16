@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.watchdog;
 
 import java.util.Enumeration;
@@ -9,12 +5,9 @@ import java.util.Hashtable;
 import java.util.TimerTask;
 import java.util.Vector;
 import org.javacint.logging.Logger;
-import org.javacint.time.DateManagement;
 
 /**
  * Watchdog manager: Handles watchdogs and watchdog status providers
- *
- * @author Florent Clairambault / www.webingenia.com
  */
 public final class WatchdogManager extends TimerTask {
 

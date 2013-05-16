@@ -8,8 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- *
- * @author Florent
+ * Date management.
  */
 public class DateManagement {
 

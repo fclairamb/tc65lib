@@ -7,7 +7,7 @@ package org.javacint.atwrap.loading;
 /**
  * Named runnabled. Should be used to identify different startup tasks.
  *
- * @author Florent Clairambault 
+ 
  */
 public abstract class NamedRunnable {
 

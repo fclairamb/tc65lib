@@ -7,8 +7,6 @@ import org.javacint.logging.Logger;
 
 /**
  * Buffered reader.
- *
- * @author Florent Clairambault 
  */
 public class BufferedReader {
 

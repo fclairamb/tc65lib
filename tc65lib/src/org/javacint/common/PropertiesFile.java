@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.common;
 
 import com.siemens.icm.io.file.FileConnection;
@@ -19,7 +15,7 @@ import org.javacint.logging.Logger;
  *
  * This should be ported into the Settings class.
  *
- * @author Florent Clairambault 
+ *
  */
 public class PropertiesFile {
 
