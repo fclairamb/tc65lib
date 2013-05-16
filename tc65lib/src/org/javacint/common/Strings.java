@@ -50,7 +50,7 @@ public class Strings {
 
 	} // split
 
-	public static String[] strSplit(String separator, String str) {
+	public static String[] split(String separator, String str) {
 		Vector nodes = new Vector();
 
 		int index = str.indexOf(separator);

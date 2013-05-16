@@ -1,0 +1,508 @@
+package org.javacint.settings;
+
+import com.siemens.icm.io.file.FileConnection;
+import java.io.*;
+import java.util.*;
+import javax.microedition.io.Connector;
+import org.javacint.common.Strings;
+import org.javacint.logging.Logger;
+
+/**
+ * Settings management class
+ *
+ * @author Florent Clairambault / www.webingenia.com
+ */
+public class Settings {
+
+	private Hashtable _settings;
+	private static String fileName_ = "settings.txt";
+	private static Settings _instance;
+	private static final Vector _settingsConsumers = new Vector();
+	/**
+	 * APN setting
+	 */
+	public static final String SETTING_APN = "apn";
+	public static final String SETTING_CODE = "code";
+	public static final String SETTING_MANAGERSPHONE = "phoneManager";
+	public static final String SETTING_IMSI = "imsi";
+	public static final String SETTING_PINCODE = "pincode";
+	/**
+	 * JADUrl setting
+	 */
+	public static final String SETTING_JADURL = "jadurl";
+	private boolean _madeSomeChanges = false;
+	private boolean loading;
+
+	public static synchronized void setFilename(String filename) {
+		fileName_ = filename;
+	}
+
+	public void setLoading(boolean loading) {
+		this.loading = loading;
+	}
+
+	public static String getFilename() {
+		return fileName_;
+	}
+
+	/**
+	 * Get Default instance of the Settings class
+	 *
+	 * @return The default instance of the Settings class
+	 */
+	public static synchronized Settings getInstance() {
+		if (_instance == null) {
+			_instance = new Settings();
+		}
+		return _instance;
+	}
+
+	/**
+	 * Free the singleton instance
+	 */
+	public static synchronized void freeInstance() {
+		_instance = null;
+	}
+
+	/**
+	 * Load settings
+	 */
+	public synchronized void load() {
+		if (Logger.BUILD_DEBUG) {
+			Logger.log("Settings.load();");
+		}
+
+		StringBuffer buffer = new StringBuffer();
+		Hashtable settings = getDefaultSettings();
+		try {
+
+
+			FileConnection fc = (FileConnection) Connector.open("file:///a:/" + fileName_, Connector.READ);
+
+			if (!fc.exists()) {
+				if (Logger.BUILD_WARNING) {
+					Logger.log("Settings.load: File \"" + fileName_ + "\" doesn\'t exist!");
+				}
+
+				fc = (FileConnection) Connector.open("file:///a:/" + fileName_ + ".old", Connector.READ);
+				if (fc.exists()) {
+					if (Logger.BUILD_WARNING) {
+						Logger.log("Settings.load: But \"" + fileName_ + ".old\" exists ! ");
+					}
+				} else {
+					return;
+				}
+			}
+
+			InputStream is = fc.openInputStream();
+
+			while (is.available() > 0) {
+				int c = is.read();
+
+				if (c == '\n') {
+					loadLine(settings, buffer.toString());
+					buffer.setLength(0);
+				} else {
+					buffer.append((char) c);
+				}
+			}
+			is.close();
+			fc.close();
+
+		} catch (IOException ex) {
+			// The exception we shoud have is at first launch : 
+			// There shouldn't be any file to read from
+
+			if (Logger.BUILD_CRITICAL) {
+				Logger.log("Settings.Load", ex);
+			}
+		} finally {
+			_settings = settings;
+		}
+	}
+
+	/**
+	 * Treat each line of the file
+	 *
+	 * @param def Default settings
+	 * @param line Line to parse
+	 */
+	private static void loadLine(Hashtable settings, String line) {
+//		if (Logger.BUILD_VERBOSE) {
+//			Logger.log("loadTreatLine( [...], \"" + line + "\" );");
+//		}
+		String[] spl = Strings.split('=', line);
+		String key = spl[0];
+		String value = spl[1];
+
+		// If default settings hashTable contains this key
+		// we can use this value
+		if (settings.containsKey(key)) {
+			settings.remove(key);
+			settings.put(key, value);
+//			if (Logger.BUILD_DEBUG) {
+//				Logger.log("Settings.loadLine: " + key + "=" + value);
+//			}
+		}
+
+	}
+
+	public void onSettingsChanged(String[] names) {
+		onSettingsChanged(names, null);
+	}
+
+	/**
+	 * Launch an event when some settings
+	 *
+	 * @param names Names of the settings
+	 */
+	public void onSettingsChanged(String[] names, SettingsConsumer caller) {
+//		if (Logger.BUILD_DEBUG) {
+//			Logger.log("Settings.onSettingsChanged( String[" + names.length + "] names );");
+//		}
+		try {
+			synchronized (_settingsConsumers) {
+				for (Enumeration en = _settingsConsumers.elements(); en.hasMoreElements();) {
+					SettingsConsumer cons = (SettingsConsumer) en.nextElement();
+
+					if (cons == caller) {
+						continue;
+					}
+
+					cons.settingsChanged(names);
+				}
+			}
+		} catch (Exception ex) {
+			if (Logger.BUILD_CRITICAL) {
+				Logger.log("Settings.OnSeettingChanged", ex);
+			}
+		}
+	}
+
+	/**
+	 * Get default settings
+	 *
+	 * @return Default settings Hashtable
+	 */
+	public Hashtable getDefaultSettings() {
+//		if (Logger.BUILD_DEBUG) {
+//			Logger.log("Settings.getDefaultSettings();");
+//		}
+
+		Hashtable defaultSettings = new Hashtable();
+
+		// Code is mandatory
+		defaultSettings.put(SETTING_CODE, "8888");
+
+		// Servers are mandatory
+		// No they are not!
+		/*
+		 * 81.57.249.57:3000
+		 */
+		//defaultSettings.put( "m2mp_servers", "94.23.55.152:3000" );
+
+		// APN is mandatory
+		defaultSettings.put(SETTING_APN, "0");
+
+		// IMSI is mandatory
+		defaultSettings.put(SETTING_IMSI, "0");
+
+		//defaultSettings.put("connectionTimeout", "900");
+
+		// Phone manager is mandatory
+		defaultSettings.put(SETTING_MANAGERSPHONE, "+33686955405");
+
+		synchronized (_settingsConsumers) {
+			for (Enumeration en = _settingsConsumers.elements(); en.hasMoreElements();) {
+				SettingsConsumer cons = (SettingsConsumer) en.nextElement();
+				cons.getDefaultSettings(defaultSettings);
+			}
+		}
+
+		return defaultSettings;
+	}
+
+	/**
+	 * Add a settings consumer class
+	 *
+	 * @param consumer Consumer of settings
+	 */
+	public synchronized void addSettingsConsumer(SettingsConsumer consumer) {
+//		if (Logger.BUILD_DEBUG) {
+//			Logger.log("Settings.addSettingsConsumer( " + consumer + " );");
+//		}
+
+		if (!loading) {
+			throw new RuntimeException("Settings.addSettingsConsumer: We're not loading anymore !");
+		}
+
+		synchronized (_settingsConsumers) {
+			_settingsConsumers.addElement(consumer);
+			_settings = null;
+		}
+	}
+
+	/**
+	 * Remove a settings consumer class
+	 *
+	 * @param consumer Consumer of settings
+	 */
+	public synchronized void removeSettingsConsumer(SettingsConsumer consumer) {
+		synchronized (_settingsConsumers) {
+			if (_settingsConsumers.contains(consumer)) {
+				_settingsConsumers.removeElement(consumer);
+			}
+			_settings = null;
+		}
+	}
+
+	/**
+	 * Reset all settings
+	 */
+	public synchronized void resetErything() {
+		try {
+			FileConnection fc = (FileConnection) Connector.open("file:///a:/" + fileName_, Connector.READ_WRITE);
+			if (fc.exists()) {
+				fc.delete();
+			}
+			load();
+			_settings = null;
+		} catch (Exception ex) {
+			if (Logger.BUILD_CRITICAL) {
+				Logger.log("Settings.resetErything", ex);
+			}
+		}
+	}
+
+	/**
+	 * Save setttings
+	 */
+	public synchronized void save() {
+//		if (Logger.BUILD_DEBUG) {
+//			Logger.log("Settings.save();", true);
+//		}
+
+		// If there's no settings, we shouldn't have to save anything
+		if (_settings == null) {
+			return;
+		}
+
+		// If no changes were made, we shouldn't have to save anything
+		if (!_madeSomeChanges) {
+			return;
+		}
+
+		try {
+			Hashtable defSettings = getDefaultSettings();
+
+
+
+			String fileNameTmp = fileName_ + ".tmp";
+			String fileNameOld = fileName_ + ".old";
+
+			String settingFileUrl = "file:///a:/" + fileName_;
+			String settingFileUrlTmp = "file:///a:/" + fileNameTmp;
+			String settingFileUrlOld = "file:///a:/" + fileNameOld;
+
+//			if ( Logger.BUILD_DEBUG ) {
+//				Logger.log("Settings.save: Opening \"" + settingFileUrlTmp + "\"...");
+//			}
+
+			FileConnection fc = (FileConnection) Connector.open(settingFileUrlTmp, Connector.READ_WRITE);
+
+			//fc = (FileConnection) Connector.open("file:///" + _fileName, Connector.READ_WRITE);
+
+			if (fc.exists()) {
+				fc.delete();
+			}
+
+			fc.create();
+			OutputStream os = fc.openOutputStream();
+
+			Enumeration e = defSettings.keys();
+			while (e.hasMoreElements()) {
+				String key = (String) e.nextElement();
+				String value = (String) _settings.get(key);
+				String defValue = (String) defSettings.get(key);
+
+				if ( // if there is a default value
+						defValue != null && // and
+						// the value isn't the same as the default value
+						defValue.compareTo(value) != 0) {
+					String line = key + "=" + value + '\n';
+
+//					if ( Logger.BUILD_DEBUG ) {
+//						Logger.log("Settings.save.line: " + line);
+//					}
+
+					os.write(line.getBytes());
+				}
+
+			}
+			os.flush();
+			os.close();
+
+
+			{ // We move the current setting file to the old one
+				FileConnection currentFile = (FileConnection) Connector.open(settingFileUrl, Connector.READ_WRITE);
+
+//				if ( Logger.BUILD_DEBUG ) {
+//					Logger.log("Settings.save: Renaming \"" + settingFileUrl + "\" to \"" + fileNameOld + "\"");
+//				}
+				if (currentFile.exists()) {
+
+					{ // We delete the old setting file
+//				if ( Logger.BUILD_DEBUG ) {
+//					Logger.log("Settings.save: Deleting \"" + settingFileUrlOld + "\"");
+//				}
+						FileConnection oldFile = (FileConnection) Connector.open(settingFileUrlOld, Connector.READ_WRITE);
+
+						if (oldFile.exists()) {
+							oldFile.delete();
+						}
+					}
+
+					currentFile.rename(fileNameOld);
+				}
+			}
+
+
+
+
+
+			{ // We move the tmp file to the current setting file
+//				if ( Logger.BUILD_DEBUG ) {
+//					Logger.log("Setting.save: Renaming \"" + settingFileUrlTmp + "\" to \"" + _fileName + "\"");
+//				}
+				fc.rename(fileName_);
+				fc.close();
+			}
+
+			// If we savec the file, we can reset the madeSomeChanges information
+			_madeSomeChanges = false;
+		} catch (Exception ex) {
+			if (Logger.BUILD_CRITICAL) {
+				Logger.log("Settings.Save", ex, true);
+			}
+		}
+	}
+
+	/**
+	 * Init (and ReInit) method
+	 */
+	private void checkLoad() {
+		if (_settings == null) {
+			load();
+		}
+	}
+
+	/**
+	 * Get a setting's value as a String
+	 *
+	 * @param key Key Name of the setting
+	 * @return String value of the setting
+	 */
+	public synchronized String getSetting(String key) {
+//		if ( _settings.containsKey(key) ) {
+		return (String) getSettings().get(key);
+//		} else {
+//			return null;
+//		}
+	}
+
+	/**
+	 * Get all the settings
+	 *
+	 * @return All the settings
+	 */
+	public synchronized Hashtable getSettings() {
+		checkLoad();
+		return _settings;
+	}
+
+	/**
+	 * Set a setting
+	 *
+	 * @param key Setting to set
+	 * @param value Value of the setting
+	 */
+	public synchronized void setSetting(String key, String value) {
+		if (Logger.BUILD_DEBUG) {
+			Logger.log("Settings.setSetting( \"" + key + "\", \"" + value + "\" );");
+		}
+
+		if (setSettingWithoutChangeEvent(key, value)) {
+			onSettingsChanged(new String[]{key});
+		}
+	}
+
+	public void setSetting(String key, int value) {
+		setSetting(key, "" + value);
+	}
+
+	/**
+	 * Set a setting without launching the onSettingsChange method
+	 *
+	 * @param key Setting to set
+	 * @param value Value of the setting
+	 * @return If setting was actually changed
+	 */
+	public synchronized boolean setSettingWithoutChangeEvent(String key, String value) {
+		Hashtable settings = getSettings();
+		if (settings.containsKey(key)) {
+			String previousValue = (String) settings.get(key);
+			if (previousValue.compareTo(value) == 0) {
+				return false;
+			}
+		} else {
+			return false;
+		}
+
+		if (loading) {
+			throw new RuntimeException("Settings.setSettingWithoutChangeEvent: You can't change a setting while loading !");
+		}
+		settings.put(key, value);
+		_madeSomeChanges = true;
+		return true;
+	}
+
+	/**
+	 * Get a setting's value as an int
+	 *
+	 * @param key Key Name of the setting
+	 * @return Integer value of the setting
+	 * @throws java.lang.NumberFormatException When the int cannot be parsed
+	 */
+	public int getSettingInt(String key) throws NumberFormatException {
+		String value = getSetting(key);
+
+		if (value == null) {
+			return -1;
+		}
+
+		return Integer.parseInt(value);
+	}
+
+	/**
+	 * Get a setting's value as a boolean
+	 *
+	 * @param key Key name of the setting
+	 * @return The value of the setting (any value not understood will be
+	 * treated as false)
+	 */
+	public boolean getSettingBool(String key) {
+		String value = getSetting(key);
+
+		if (value == null) {
+			return false;
+		}
+
+		if (value.compareTo("1") == 0
+				|| value.compareTo("true") == 0
+				|| value.compareTo("on") == 0
+				|| value.compareTo("yes") == 0) {
+			return true;
+		}
+		return false;
+	}
+}

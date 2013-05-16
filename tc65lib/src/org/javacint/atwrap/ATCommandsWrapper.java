@@ -3,6 +3,7 @@ package org.javacint.atwrap;
 import com.siemens.icm.io.ATCommand;
 import org.javacint.common.Strings;
 import org.javacint.logging.Logger;
+import org.javacint.settings.Settings;
 
 /**
  * AT Commands wrapper.
@@ -124,6 +125,69 @@ public class ATCommandsWrapper {
 			if (Logger.BUILD_CRITICAL) {
 				Logger.log(THIS + ".restart", ex);
 			}
+		}
+	}
+
+	public static void update(final ATCommand atc) {
+		update(atc, null, null);
+	}
+
+	public static void update(final ATCommand atc, String target) {
+		update(atc, null, target);
+	}
+
+	public static void update(ATCommand atc, String apn, String target) {
+		if (apn == null) {
+			apn = Settings.getInstance().getSetting(Settings.SETTING_APN);
+		}
+		if (target == null) {
+			target = Settings.getInstance().getSetting(Settings.SETTING_JADURL);
+		}
+		if (Logger.BUILD_DEBUG) {
+			Logger.log("ATCommandsWrapper.update( ATCommand, \"" + apn + "\", \"" + target + "\" );", true);
+		}
+		try {
+			// If we are on a TC65 and not a TC65i (I hope I could remove this code someday soon)
+			if (true) { // getChipName is broken, I need to fix it
+				String[] spl = Strings.split(",", apn);
+				apn = "";
+				for (int i = 0; i < spl.length && i < 4; i++) {
+					if (i > 0) {
+						apn += ",";
+					}
+
+					// We need to remove "" parameters, they are the one
+					// that make the AT^SJOTAP command fail
+					if (spl[i].compareTo("\"\"") == 0) {
+						continue;
+					}
+
+					apn += spl[i];
+				}
+			}
+
+
+			String ret1 = null, ret2 = null;
+			synchronized (atc) {
+				if (apn != null && target != null) {
+					ret1 = atc.send("AT^SJOTAP=," + target + ",a:,,," + apn + "\r");
+					if (Logger.BUILD_DEBUG) {
+						Logger.log("ATCommandsWrapper.update: ret1=\"" + ret1.replace('\r', '.').
+								replace('\n', '.') + "\"", true);
+					}
+				} else {
+					if (Logger.BUILD_DEBUG) {
+						Logger.log("ATCommandsWrapper.update: No APN or no target !");
+					}
+				}
+				ret2 = atc.send("AT^SJOTAP\r");
+				if (Logger.BUILD_DEBUG) {
+					Logger.log("ATCommandsWrapper.update: ret2=\"" + ret2.replace('\r', '.').
+							replace('\n', '.') + "\"", true);
+				}
+			}
+		} catch (Exception ex) {
+			Logger.log(THIS + ".update();", ex, true);
 		}
 	}
 }
