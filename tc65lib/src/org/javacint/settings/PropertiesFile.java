@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.settings;
 
 import com.siemens.icm.io.file.FileConnection;

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.otap;
 
 import com.siemens.icm.io.ATCommand;
@@ -92,7 +88,7 @@ public class AutoUpdater extends TimerTask {
 	 * @param version
 	 */
 	public AutoUpdater(ATCommand atc, String version) {
-		this(atc, version, Settings.getInstance().getSetting(Settings.SETTING_JADURL));
+		this(atc, version, Settings.getSetting(Settings.SETTING_JADURL));
 	}
 
 	public void run() {

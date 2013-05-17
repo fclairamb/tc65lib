@@ -138,10 +138,10 @@ public class ATCommandsWrapper {
 
 	public static void update(ATCommand atc, String apn, String target) {
 		if (apn == null) {
-			apn = Settings.getInstance().getSetting(Settings.SETTING_APN);
+			apn = Settings.getSetting(Settings.SETTING_APN);
 		}
 		if (target == null) {
-			target = Settings.getInstance().getSetting(Settings.SETTING_JADURL);
+			target = Settings.getSetting(Settings.SETTING_JADURL);
 		}
 		if (Logger.BUILD_DEBUG) {
 			Logger.log("ATCommandsWrapper.update( ATCommand, \"" + apn + "\", \"" + target + "\" );", true);

@@ -543,7 +543,7 @@ public class Utilities {
         }
         String mytime = "";
         try {
-            mytime = ATClass.getInstance().send("AT+CCLK?");
+            mytime = ATClass.send("AT+CCLK?");
         } catch (Exception ex) {
             return "2001-01-01 01:01:01";
         }

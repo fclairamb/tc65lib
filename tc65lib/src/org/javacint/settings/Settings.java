@@ -14,10 +14,9 @@ import org.javacint.logging.Logger;
  */
 public class Settings {
 
-	private Hashtable _settings;
-	private static String fileName_ = "settings.txt";
-	private static Settings _instance;
-	private static final Vector _settingsConsumers = new Vector();
+	private static Hashtable settings;
+	private static String fileName = "settings.txt";
+	private static final Vector consumers = new Vector();
 	/**
 	 * APN setting
 	 */
@@ -34,7 +33,7 @@ public class Settings {
 	private boolean loading;
 
 	public static synchronized void setFilename(String filename) {
-		fileName_ = filename;
+		fileName = filename;
 	}
 
 	public void setLoading(boolean loading) {
@@ -42,32 +41,13 @@ public class Settings {
 	}
 
 	public static String getFilename() {
-		return fileName_;
-	}
-
-	/**
-	 * Get Default instance of the Settings class
-	 *
-	 * @return The default instance of the Settings class
-	 */
-	public static synchronized Settings getInstance() {
-		if (_instance == null) {
-			_instance = new Settings();
-		}
-		return _instance;
-	}
-
-	/**
-	 * Free the singleton instance
-	 */
-	public static synchronized void freeInstance() {
-		_instance = null;
+		return fileName;
 	}
 
 	/**
 	 * Load settings
 	 */
-	public synchronized void load() {
+	public static synchronized void load() {
 		if (Logger.BUILD_DEBUG) {
 			Logger.log("Settings.load();");
 		}
@@ -77,17 +57,17 @@ public class Settings {
 		try {
 
 
-			FileConnection fc = (FileConnection) Connector.open("file:///a:/" + fileName_, Connector.READ);
+			FileConnection fc = (FileConnection) Connector.open("file:///a:/" + fileName, Connector.READ);
 
 			if (!fc.exists()) {
 				if (Logger.BUILD_WARNING) {
-					Logger.log("Settings.load: File \"" + fileName_ + "\" doesn\'t exist!");
+					Logger.log("Settings.load: File \"" + fileName + "\" doesn\'t exist!");
 				}
 
-				fc = (FileConnection) Connector.open("file:///a:/" + fileName_ + ".old", Connector.READ);
+				fc = (FileConnection) Connector.open("file:///a:/" + fileName + ".old", Connector.READ);
 				if (fc.exists()) {
 					if (Logger.BUILD_WARNING) {
-						Logger.log("Settings.load: But \"" + fileName_ + ".old\" exists ! ");
+						Logger.log("Settings.load: But \"" + fileName + ".old\" exists ! ");
 					}
 				} else {
 					return;
@@ -117,7 +97,7 @@ public class Settings {
 				Logger.log("Settings.Load", ex);
 			}
 		} finally {
-			_settings = settings;
+			settings = settings;
 		}
 	}
 
@@ -161,8 +141,8 @@ public class Settings {
 //			Logger.log("Settings.onSettingsChanged( String[" + names.length + "] names );");
 //		}
 		try {
-			synchronized (_settingsConsumers) {
-				for (Enumeration en = _settingsConsumers.elements(); en.hasMoreElements();) {
+			synchronized (consumers) {
+				for (Enumeration en = consumers.elements(); en.hasMoreElements();) {
 					SettingsConsumer cons = (SettingsConsumer) en.nextElement();
 
 					if (cons == caller) {
@@ -184,7 +164,7 @@ public class Settings {
 	 *
 	 * @return Default settings Hashtable
 	 */
-	public Hashtable getDefaultSettings() {
+	public static Hashtable getDefaultSettings() {
 //		if (Logger.BUILD_DEBUG) {
 //			Logger.log("Settings.getDefaultSettings();");
 //		}
@@ -192,14 +172,7 @@ public class Settings {
 		Hashtable defaultSettings = new Hashtable();
 
 		// Code is mandatory
-		defaultSettings.put(SETTING_CODE, "8888");
-
-		// Servers are mandatory
-		// No they are not!
-		/*
-		 * 81.57.249.57:3000
-		 */
-		//defaultSettings.put( "m2mp_servers", "94.23.55.152:3000" );
+		defaultSettings.put(SETTING_CODE, "1234");
 
 		// APN is mandatory
 		defaultSettings.put(SETTING_APN, "0");
@@ -207,13 +180,8 @@ public class Settings {
 		// IMSI is mandatory
 		defaultSettings.put(SETTING_IMSI, "0");
 
-		//defaultSettings.put("connectionTimeout", "900");
-
-		// Phone manager is mandatory
-		defaultSettings.put(SETTING_MANAGERSPHONE, "+33686955405");
-
-		synchronized (_settingsConsumers) {
-			for (Enumeration en = _settingsConsumers.elements(); en.hasMoreElements();) {
+		synchronized (consumers) {
+			for (Enumeration en = consumers.elements(); en.hasMoreElements();) {
 				SettingsConsumer cons = (SettingsConsumer) en.nextElement();
 				cons.getDefaultSettings(defaultSettings);
 			}
@@ -236,9 +204,9 @@ public class Settings {
 			throw new RuntimeException("Settings.addSettingsConsumer: We're not loading anymore !");
 		}
 
-		synchronized (_settingsConsumers) {
-			_settingsConsumers.addElement(consumer);
-			_settings = null;
+		synchronized (consumers) {
+			consumers.addElement(consumer);
+			settings = null;
 		}
 	}
 
@@ -248,11 +216,11 @@ public class Settings {
 	 * @param consumer Consumer of settings
 	 */
 	public synchronized void removeSettingsConsumer(SettingsConsumer consumer) {
-		synchronized (_settingsConsumers) {
-			if (_settingsConsumers.contains(consumer)) {
-				_settingsConsumers.removeElement(consumer);
+		synchronized (consumers) {
+			if (consumers.contains(consumer)) {
+				consumers.removeElement(consumer);
 			}
-			_settings = null;
+			settings = null;
 		}
 	}
 
@@ -261,12 +229,12 @@ public class Settings {
 	 */
 	public synchronized void resetErything() {
 		try {
-			FileConnection fc = (FileConnection) Connector.open("file:///a:/" + fileName_, Connector.READ_WRITE);
+			FileConnection fc = (FileConnection) Connector.open("file:///a:/" + fileName, Connector.READ_WRITE);
 			if (fc.exists()) {
 				fc.delete();
 			}
 			load();
-			_settings = null;
+			settings = null;
 		} catch (Exception ex) {
 			if (Logger.BUILD_CRITICAL) {
 				Logger.log("Settings.resetErything", ex);
@@ -283,7 +251,7 @@ public class Settings {
 //		}
 
 		// If there's no settings, we shouldn't have to save anything
-		if (_settings == null) {
+		if (settings == null) {
 			return;
 		}
 
@@ -297,10 +265,10 @@ public class Settings {
 
 
 
-			String fileNameTmp = fileName_ + ".tmp";
-			String fileNameOld = fileName_ + ".old";
+			String fileNameTmp = fileName + ".tmp";
+			String fileNameOld = fileName + ".old";
 
-			String settingFileUrl = "file:///a:/" + fileName_;
+			String settingFileUrl = "file:///a:/" + fileName;
 			String settingFileUrlTmp = "file:///a:/" + fileNameTmp;
 			String settingFileUrlOld = "file:///a:/" + fileNameOld;
 
@@ -322,7 +290,7 @@ public class Settings {
 			Enumeration e = defSettings.keys();
 			while (e.hasMoreElements()) {
 				String key = (String) e.nextElement();
-				String value = (String) _settings.get(key);
+				String value = (String) settings.get(key);
 				String defValue = (String) defSettings.get(key);
 
 				if ( // if there is a default value
@@ -374,7 +342,7 @@ public class Settings {
 //				if ( Logger.BUILD_DEBUG ) {
 //					Logger.log("Setting.save: Renaming \"" + settingFileUrlTmp + "\" to \"" + _fileName + "\"");
 //				}
-				fc.rename(fileName_);
+				fc.rename(fileName);
 				fc.close();
 			}
 
@@ -390,8 +358,8 @@ public class Settings {
 	/**
 	 * Init (and ReInit) method
 	 */
-	private void checkLoad() {
-		if (_settings == null) {
+	private static void checkLoad() {
+		if (settings == null) {
 			load();
 		}
 	}
@@ -402,7 +370,7 @@ public class Settings {
 	 * @param key Key Name of the setting
 	 * @return String value of the setting
 	 */
-	public synchronized String getSetting(String key) {
+	public static synchronized String getSetting(String key) {
 //		if ( _settings.containsKey(key) ) {
 		return (String) getSettings().get(key);
 //		} else {
@@ -415,9 +383,9 @@ public class Settings {
 	 *
 	 * @return All the settings
 	 */
-	public synchronized Hashtable getSettings() {
+	public static synchronized Hashtable getSettings() {
 		checkLoad();
-		return _settings;
+		return settings;
 	}
 
 	/**
@@ -473,7 +441,7 @@ public class Settings {
 	 * @return Integer value of the setting
 	 * @throws java.lang.NumberFormatException When the int cannot be parsed
 	 */
-	public int getSettingInt(String key) throws NumberFormatException {
+	public static int getSettingInt(String key) throws NumberFormatException {
 		String value = getSetting(key);
 
 		if (value == null) {
@@ -490,7 +458,7 @@ public class Settings {
 	 * @return The value of the setting (any value not understood will be
 	 * treated as false)
 	 */
-	public boolean getSettingBool(String key) {
+	public static boolean getSettingBool(String key) {
 		String value = getSetting(key);
 
 		if (value == null) {
