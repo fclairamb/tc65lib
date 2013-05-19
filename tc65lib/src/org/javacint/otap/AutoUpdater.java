@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.TimerTask;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
-import org.javacint.atwrap.ATCommandsWrapper;
+import org.javacint.at.ATExecution;
 import org.javacint.common.BufferedReader;
 import org.javacint.common.Strings;
 import org.javacint.logging.Logger;
@@ -22,7 +22,6 @@ import org.javacint.settings.Settings;
  * expired. If the fetched version is superior to the current version, the OTAP
  * process is triggered.
  *
- * @author Florent Clairambault / www.webingenia.com
  */
 public class AutoUpdater extends TimerTask {
 
@@ -93,14 +92,11 @@ public class AutoUpdater extends TimerTask {
 
 	public void run() {
 		try {
-//			if (Logger.BUILD_DEBUG) {
-//				Logger.log(this + ".run");
-//			}
 			if (needsUpdate()) {
 //				if (Logger.BUILD_DEBUG) {
 //					Logger.log("We need to perform an update !");
 //				}
-				// This requires the "jadurl" and "apn" settings to be defined
+				// At this stage, we need the "apn" and "jadurl" settings to be defined
 
 				if (before != null) {
 					try {
@@ -108,7 +104,7 @@ public class AutoUpdater extends TimerTask {
 					} catch (Throwable ex) {
 					}
 				}
-				ATCommandsWrapper.update(atc);
+				ATExecution.update(atc);
 			}
 		} catch (Exception ex) {
 			if (Logger.BUILD_CRITICAL) {
@@ -130,7 +126,7 @@ public class AutoUpdater extends TimerTask {
 		HttpConnection conn = (HttpConnection) Connector.open(url);
 		{
 //			try {
-			conn.setRequestProperty("user-agent", "tc65lib/" + ATCommandsWrapper.getImei(atc));
+			conn.setRequestProperty("user-agent", "tc65lib/" + ATExecution.getImei(atc));
 //			} catch (Exception ex) {
 //				if (Logger.BUILD_CRITICAL) {
 //					Logger.log(this + ".needsUpdate", ex, true);

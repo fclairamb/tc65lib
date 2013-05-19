@@ -2,9 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.javacint.utilities;
+package org.javacint.at;
 
 //#if sdkns == "siemens"
+import org.javacint.utilities.*;
+import org.javacint.io.ATDataConnection;
 import com.siemens.icm.io.*;
 //#elif sdkns == "cinterion"
 //# import com.cinterion.io.*;
@@ -14,7 +16,7 @@ import org.javacint.io.Connection;
 /**
  * AT wrapper class
  */
-public final class ATClass {
+public final class ATCommands {
 
 //#if DebugLevel=="debug"
 	private static final boolean DEBUG = true;
@@ -79,7 +81,7 @@ public final class ATClass {
 		return new ATDataConnection();
 	}
 
-	static ATCommand getDataATCommand() {
+	public static ATCommand getDataATCommand() {
 		return atCommandData;
 	}
 
@@ -108,7 +110,7 @@ public final class ATClass {
 				do {
 					Thread.sleep(3000 + i * 1000);
 					i++;
-					ok = ATClass.send("AT+CPMS=\"MT\",\"MT\",\"MT\"").indexOf("OK") >= 0;
+					ok = ATCommands.send("AT+CPMS=\"MT\",\"MT\",\"MT\"").indexOf("OK") >= 0;
 					if (DEBUG) {
 						Log.println("setting preferred SMS message storage to SIM + ME... " + ok);
 					}
@@ -118,7 +120,7 @@ public final class ATClass {
 				i = 0;
 				do {
 					Thread.sleep(i * 1000);
-					ok = ATClass.send("AT+CMGF=0").indexOf("OK") >= 0;
+					ok = ATCommands.send("AT+CMGF=0").indexOf("OK") >= 0;
 					if (DEBUG) {
 						Log.println("set mode to PDU Mode... " + ok);
 					}

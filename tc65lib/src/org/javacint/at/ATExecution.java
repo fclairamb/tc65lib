@@ -1,4 +1,4 @@
-package org.javacint.atwrap;
+package org.javacint.at;
 
 import com.siemens.icm.io.ATCommand;
 import org.javacint.common.Strings;
@@ -10,7 +10,7 @@ import org.javacint.settings.Settings;
  *
  * Most of the "dirty" AT commands handling code is put here.
  */
-public class ATCommandsWrapper {
+public class ATExecution {
 
 	private static final String THIS = "ATCW";
 

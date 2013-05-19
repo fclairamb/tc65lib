@@ -6,6 +6,7 @@ package org.javacint.utilities;
 
 import java.io.*;
 import java.util.Vector;
+import org.javacint.at.ATCommands;
 
 /**
  *
@@ -543,7 +544,7 @@ public class Utilities {
         }
         String mytime = "";
         try {
-            mytime = ATClass.send("AT+CCLK?");
+            mytime = ATCommands.send("AT+CCLK?");
         } catch (Exception ex) {
             return "2001-01-01 01:01:01";
         }

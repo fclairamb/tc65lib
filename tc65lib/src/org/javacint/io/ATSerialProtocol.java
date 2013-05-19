@@ -1,10 +1,10 @@
 package org.javacint.io;
 
-import org.javacint.utilities.Log;
-import org.javacint.utilities.ATClass;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import org.javacint.at.ATCommands;
 import org.javacint.utilities.Hex;
+import org.javacint.utilities.Log;
 
 public abstract class ATSerialProtocol extends Connection {
 
@@ -34,9 +34,9 @@ public abstract class ATSerialProtocol extends Connection {
 			return false;
 		}
 		try {
-			ATClass.send("AT^SCFG=\"MeOpMode/MipsMa\",\"off\"");
+			ATCommands.send("AT^SCFG=\"MeOpMode/MipsMa\",\"off\"");
 
-			this.atDataConnection = ATClass.getATDataConnection();
+			this.atDataConnection = ATCommands.getATDataConnection();
 			if (this.atDataConnection.open(this.atSerialProfile)) {
 				this.is = this.atDataConnection.getInputStream();
 				this.os = this.atDataConnection.getOutputStream();

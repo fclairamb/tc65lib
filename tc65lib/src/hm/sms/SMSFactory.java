@@ -13,12 +13,14 @@ import com.siemens.icm.io.*;
 //#elif sdkns == "cinterion"
 //# import com.cinterion.io.*;
 //#endif
-import org.javacint.utilities.ATClass;
-import org.javacint.utilities.Log;
-import org.javacint.utilities.Utilities;
+
+
 import java.util.Random;
+import org.javacint.at.ATCommands;
 import org.javacint.common.ExceptionHandler;
 import org.javacint.utilities.Hex;
+import org.javacint.utilities.Log;
+import org.javacint.utilities.Utilities;
 
 /**
  * Class that creates and sends an SMS
@@ -65,19 +67,19 @@ public class SMSFactory {
 		do {
 			try {
 				//setting SMS mode
-				ok = ATClass.send("AT+CSMS=1").indexOf("OK") >= 0;
+				ok = ATCommands.send("AT+CSMS=1").indexOf("OK") >= 0;
 				if (DEBUG) {
 					Log.println("setting SMS mode to new standart... " + ok);
 				}
 
 				//prefer CSD bearer when sending SMSs
-				ok &= ATClass.send("AT+CGSMS=3").indexOf("OK") >= 0;
+				ok &= ATCommands.send("AT+CGSMS=3").indexOf("OK") >= 0;
 				if (DEBUG) {
 					Log.println("prefer CSD bearer when sending SMSs... " + ok);
 				}
 
 				//return error when sending sms fail
-				ok &= ATClass.send("AT^SM20=1,0").indexOf("OK") >= 0;
+				ok &= ATCommands.send("AT^SM20=1,0").indexOf("OK") >= 0;
 				if (DEBUG) {
 					Log.println("enable error when sending sms fail... " + ok);
 				}
@@ -92,7 +94,7 @@ public class SMSFactory {
 					}
 				}
 
-				String smsFULL = ATClass.send("AT^SMGO?");
+				String smsFULL = ATCommands.send("AT^SMGO?");
 				int a = smsFULL.indexOf("^SMGO:");
 				if (a >= 0) {
 					a = smsFULL.indexOf(',', a);
@@ -103,7 +105,7 @@ public class SMSFactory {
 							Log.println("SMS storage is full - time to clean up!");
 						}
 						int i = 1;
-						while (ATClass.send("AT+CMGD=" + i).indexOf("OK") >= 0) {
+						while (ATCommands.send("AT+CMGD=" + i).indexOf("OK") >= 0) {
 							if (DEBUG) {
 								Log.println("Deleting SMS at index " + i);
 							}
@@ -127,9 +129,9 @@ public class SMSFactory {
 
 	private void setCodePage(boolean isUCS2) throws ATCommandFailedException {
 		if (isUCS2) {
-			ATClass.send("AT+CSCS=\"UCS2\"").indexOf("OK");
+			ATCommands.send("AT+CSCS=\"UCS2\"").indexOf("OK");
 		} else {
-			ATClass.send("AT+CSCS=\"GSM\"").indexOf("OK");
+			ATCommands.send("AT+CSCS=\"GSM\"").indexOf("OK");
 		}
 	}
 
@@ -147,9 +149,9 @@ public class SMSFactory {
 		//!!!!!!!!!WARNING!!!!!!!!!!WARNING!!!!!!!!!WARNING!!!!!!!!!WARNING!!!!!!!!!WARNING!!!!!!!!!WARNING!!!!!!!!!!
 		//All other calls anywhere else in the project to this atCommand should also be synchronized for this to work
 		///////////////Otherwise, there is probability of SMS not being sent or stuck in the process/////////////////
-		synchronized (ATClass.getSyncObject()) {
+		synchronized (ATCommands.getSyncObject()) {
 			setCodePage(isUCS2);
-			response = ATClass.send("AT+CMGS=" + (PDU.length() / 2 - 1));
+			response = ATCommands.send("AT+CMGS=" + (PDU.length() / 2 - 1));
 			if (DEBUG) {
 				Log.println(response);
 			}
@@ -161,7 +163,7 @@ public class SMSFactory {
 						ex.printStackTrace();
 					}
 				}
-				response = ATClass.send(PDU + "\032");
+				response = ATCommands.send(PDU + "\032");
 			}
 		}
 		/////////////////////////////////////////CRITICAL AREA ENDS//////////////////////////////////////////////////
@@ -283,9 +285,9 @@ public class SMSFactory {
 		do {
 			try {
 				String PDUData = MakePDUData(num, data);
-				ATClass.send("AT+CMGS=" + (PDUData.length() / 2 - 1));
+				ATCommands.send("AT+CMGS=" + (PDUData.length() / 2 - 1));
 				Thread.sleep(WAIT_TIME);
-				ATClass.send(PDUData + "\032");
+				ATCommands.send(PDUData + "\032");
 				Thread.sleep(WAIT_TIME);
 			} catch (Exception e) {
 				ok = false;
