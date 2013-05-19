@@ -6,8 +6,8 @@ import java.io.OutputStream;
 
 public class SPIConnection extends ATSerialProtocol {
 
-    private spiConnectionInputStream inputStream;
-    private spiConnectionOutputStream outputStream;
+    private SPIConnectionInputStream inputStream;
+    private SPIConnectionOutputStream outputStream;
     private byte[] inputBuffer;
     private int readMarker = 0;
 
@@ -28,7 +28,7 @@ public class SPIConnection extends ATSerialProtocol {
     public InputStream getInputStream() {
         if (this.inputStream == null) {
             this.inputBuffer = new byte[1];
-            this.inputStream = new spiConnectionInputStream(this);
+            this.inputStream = new SPIConnectionInputStream(this);
         }
         this.readMarker = this.atSerialProfile.INPUT_BUFFER_SIZE;
         return this.inputStream;
@@ -36,7 +36,7 @@ public class SPIConnection extends ATSerialProtocol {
 
     public OutputStream getOutputStream() {
         if (this.outputStream == null) {
-            this.outputStream = new spiConnectionOutputStream(this);
+            this.outputStream = new SPIConnectionOutputStream(this);
         }
         return this.outputStream;
     }

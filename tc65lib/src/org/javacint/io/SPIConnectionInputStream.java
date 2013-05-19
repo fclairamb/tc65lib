@@ -2,7 +2,7 @@ package org.javacint.io;
 
 import java.io.InputStream;
 
-final class spiConnectionInputStream extends InputStream {
+final class SPIConnectionInputStream extends InputStream {
 
     private final SPIConnection spiConnection;
 
@@ -14,7 +14,7 @@ final class spiConnectionInputStream extends InputStream {
         return this.spiConnection.atSerialProfile.INPUT_BUFFER_SIZE - SPIConnection.getReadMarker(this.spiConnection);
     }
 
-    spiConnectionInputStream(SPIConnection paramSPIConnection) {
+    SPIConnectionInputStream(SPIConnection paramSPIConnection) {
         this.spiConnection = paramSPIConnection;
     }
 }

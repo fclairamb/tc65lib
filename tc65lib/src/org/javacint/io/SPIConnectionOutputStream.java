@@ -3,7 +3,7 @@ package org.javacint.io;
 import java.io.IOException;
 import java.io.OutputStream;
 
-final class spiConnectionOutputStream extends OutputStream
+final class SPIConnectionOutputStream extends OutputStream
 {
   private final SPIConnection spiConnection;
 
@@ -19,7 +19,7 @@ final class spiConnectionOutputStream extends OutputStream
     SPIConnection.setReadMarker(this.spiConnection, 0);
   }
 
-  spiConnectionOutputStream(SPIConnection paramSPIConnection)
+  SPIConnectionOutputStream(SPIConnection paramSPIConnection)
   {
     this.spiConnection = paramSPIConnection;
   }
