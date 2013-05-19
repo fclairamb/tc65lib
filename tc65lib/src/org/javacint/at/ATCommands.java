@@ -12,6 +12,7 @@ import com.siemens.icm.io.*;
 //# import com.cinterion.io.*;
 //#endif
 import org.javacint.io.Connection;
+import org.javacint.logging.Logger;
 
 /**
  * AT wrapper class
@@ -53,13 +54,13 @@ public final class ATCommands {
 		String result = null;
 		try {
 			if (DEBUG) {
-				Log.println((atcmd == atCommand ? "atCommand" : (atcmd == atCommandURC ? "atCommandURC" : (atcmd == atCommandData ? "atCommandData" : "UnknownATCommand!"))) + " S: " + ATCmd);
+				Logger.log((atcmd == atCommand ? "atCommand" : (atcmd == atCommandURC ? "atCommandURC" : (atcmd == atCommandData ? "atCommandData" : "UnknownATCommand!"))) + " S: " + ATCmd);
 			}
 			synchronized (atcmd) {
 				result = atcmd.send(ATCmd);
 			}
 			if (DEBUG) {
-				Log.println((atcmd == atCommand ? "atCommand" : (atcmd == atCommandURC ? "atCommandURC" : (atcmd == atCommandData ? "atCommandData" : "UnknownATCommand!"))) + " R: " + result);
+				Logger.log((atcmd == atCommand ? "atCommand" : (atcmd == atCommandURC ? "atCommandURC" : (atcmd == atCommandData ? "atCommandData" : "UnknownATCommand!"))) + " R: " + result);
 			}
 		} catch (Exception ex) {
 			if (DEBUG) {
@@ -101,7 +102,7 @@ public final class ATCommands {
 					Thread.sleep(i * 1000);
 					ok = sendAll("AT+CMEE=2").indexOf("OK") >= 0;
 					if (DEBUG) {
-						Log.println("Enable verbose errors... " + ok);
+						Logger.log("Enable verbose errors... " + ok);
 					}
 				} while (!ok);
 
@@ -112,7 +113,7 @@ public final class ATCommands {
 					i++;
 					ok = ATCommands.send("AT+CPMS=\"MT\",\"MT\",\"MT\"").indexOf("OK") >= 0;
 					if (DEBUG) {
-						Log.println("setting preferred SMS message storage to SIM + ME... " + ok);
+						Logger.log("setting preferred SMS message storage to SIM + ME... " + ok);
 					}
 				} while (!ok);
 
@@ -122,7 +123,7 @@ public final class ATCommands {
 					Thread.sleep(i * 1000);
 					ok = ATCommands.send("AT+CMGF=0").indexOf("OK") >= 0;
 					if (DEBUG) {
-						Log.println("set mode to PDU Mode... " + ok);
+						Logger.log("set mode to PDU Mode... " + ok);
 					}
 				} while (!ok);
 			} catch (Exception ex) {

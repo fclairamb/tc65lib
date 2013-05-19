@@ -9,7 +9,7 @@ import com.siemens.icm.io.*;
 //#elif sdkns == "cinterion"
 //# import com.cinterion.io.*;
 //#endif
-import org.javacint.utilities.Log;
+import org.javacint.logging.Logger;
 import org.javacint.utilities.Utilities;
 
 /**
@@ -591,23 +591,23 @@ public class PDU {
 
             String cropUserData(String userDataHex, DataCodingScheme DCS, FirstOctet firstOctet, int udhLength, int UDL) {
                 if (DEBUG) {
-                    Log.println("Start cropUserData: userDataHex=" + userDataHex + ", DCS=" + DCS + ", UDL=" + UDL);
+                    Logger.log("Start cropUserData: userDataHex=" + userDataHex + ", DCS=" + DCS + ", UDL=" + UDL);
                 }
                 if (DCS.alphabet == DataCodingScheme.Alphabet.GSM) {
                     if (DEBUG) {
-                        Log.println("Alphabet is GSM");
+                        Logger.log("Alphabet is GSM");
                     }
                     int skipBits = 0;
                     if (firstOctet.TP_UDHI) {
                         skipBits = ((udhLength + 1) * 8) + ((7 - ((udhLength + 1) * 8) % 7) % 7); //Number of bits to skip from beginning
                     }
                     if (DEBUG) {
-                        Log.println("skipBits=" + skipBits);
+                        Logger.log("skipBits=" + skipBits);
                     }
                     return fromHexStringToAlphanumeric(userDataHex, UDL, skipBits);
                 } else if (DCS.alphabet == DataCodingScheme.Alphabet.UCS2) {
                     if (DEBUG) {
-                        Log.println("Alphabet is UCS2");
+                        Logger.log("Alphabet is UCS2");
                     }
                     if (firstOctet.TP_UDHI) {
                         return ATStringConverter.UCS2Hex2Java(userDataHex.substring((udhLength + 1) * 2));
@@ -616,7 +616,7 @@ public class PDU {
                     }
                 } else {
                     if (DEBUG) {
-                        Log.println("Alphabet is Unknown");
+                        Logger.log("Alphabet is Unknown");
                     }
                     if (firstOctet.TP_UDHI) {
                         return ATStringConverter.UCS2Hex2Java(userDataHex.substring((udhLength + 1) * 2));
@@ -644,11 +644,11 @@ public class PDU {
 
     private String hexInternalSwap(String hex) {
         if (DEBUG) {
-            Log.println("Starting hexInternalSwap: " + hex);
+            Logger.log("Starting hexInternalSwap: " + hex);
         }
         if (hex.length() % 2 == 1) {
             if (DEBUG) {
-                Log.println("ERROR: number of characters is odd");
+                Logger.log("ERROR: number of characters is odd");
             }
             return null;
         }
@@ -661,11 +661,11 @@ public class PDU {
 
     private String fromHexStringToAlphanumeric(String hexString, int numberOfUsefulSeptets, int skipBits) {
         if (DEBUG) {
-            Log.println("Starting fromHexStringToAlphanumeric: hexString=" + hexString + ", numberOfUsefulSeptets=" + numberOfUsefulSeptets + ", skipBits=" + skipBits);
+            Logger.log("Starting fromHexStringToAlphanumeric: hexString=" + hexString + ", numberOfUsefulSeptets=" + numberOfUsefulSeptets + ", skipBits=" + skipBits);
         }
         boolean[] udBool = new boolean[(hexString.length() / 2) * 8]; //User data presented in binary array
         if (DEBUG) {
-            Log.println("udBool.length=" + udBool.length);
+            Logger.log("udBool.length=" + udBool.length);
         }
         for (int i = 0; i < (hexString.length() / 2); i++) { //Convert all data to binary array
             boolean[] t = Utilities.intToBinaryArrayFixedWidth(Integer.parseInt(hexString.substring(i * 2, (i + 1) * 2), 16), 8);
@@ -673,7 +673,7 @@ public class PDU {
         }
         byte[] septets = new byte[numberOfUsefulSeptets - (skipBits / 7)];        //future array from which we'll make string
         if (DEBUG) {
-            Log.println("septets.length=" + septets.length);
+            Logger.log("septets.length=" + septets.length);
         }
         for (int i = skipBits / 7; i < numberOfUsefulSeptets; i++) { //Fill the septets array with portions of 7 bits from udBool, converted to byte
             boolean[] t = new boolean[7];
@@ -684,12 +684,12 @@ public class PDU {
                     boolArrToString += (t[j] == true ? '1' : '0');
                 }
                 if (DEBUG) {
-                    Log.println("t=" + boolArrToString);
+                    Logger.log("t=" + boolArrToString);
                 }
             }
             septets[i - (skipBits / 7)] = (byte) Utilities.binaryArrayToInt(t);
             if (DEBUG) {
-                Log.println("septets[" + (i - (skipBits / 7)) + "]=" + septets[i - (skipBits / 7)]);
+                Logger.log("septets[" + (i - (skipBits / 7)) + "]=" + septets[i - (skipBits / 7)]);
             }
         }
         return ATStringConverter.GSM2Java(new String(septets));
@@ -709,70 +709,70 @@ public class PDU {
      */
     private void parsePDU(String hexString) {
         if (DEBUG) {
-            Log.println("Starting to parse PDU: " + hexString);
+            Logger.log("Starting to parse PDU: " + hexString);
         }
         hexStringPDU = hexString;
         int index = 0;
         smscLength = Integer.parseInt(hexStringPDU.substring(index, index + 2), 16);
         if (DEBUG) {
-            Log.println("smscLength: " + smscLength);
+            Logger.log("smscLength: " + smscLength);
         }
         index += 2;
         if (smscLength > 0) {
             smscTypeOfAddress = new TypeOfAddress(hexStringPDU.substring(index, index + 2));
             if (DEBUG) {
-                Log.println("smscTypeOfAddress: " + smscTypeOfAddress);
+                Logger.log("smscTypeOfAddress: " + smscTypeOfAddress);
             }
             index += 2;
             smscNumber = parseNumberFromHexPDU(hexStringPDU.substring(index, (smscLength + 1) * 2), smscTypeOfAddress, ((smscLength - 1) * 8) / 7);
             if (DEBUG) {
-                Log.println("smscNumber: " + smscNumber);
+                Logger.log("smscNumber: " + smscNumber);
             }
             index = (smscLength + 1) * 2;
         }
         firstOctet = new FirstOctet(hexStringPDU.substring(index, index + 2));
         if (DEBUG) {
-            Log.println("firstOctet: " + firstOctet);
+            Logger.log("firstOctet: " + firstOctet);
         }
         index += 2;
         addressLength = Integer.parseInt(hexStringPDU.substring(index, index + 2), 16);
         if (DEBUG) {
-            Log.println("addressLength: " + addressLength);
+            Logger.log("addressLength: " + addressLength);
         }
         index += 2;
         senderTypeOfAddress = new TypeOfAddress(hexStringPDU.substring(index, index + 2));
         if (DEBUG) {
-            Log.println("senderTypeOfAddress: " + senderTypeOfAddress);
+            Logger.log("senderTypeOfAddress: " + senderTypeOfAddress);
         }
         index += 2;
         senderNumber = parseNumberFromHexPDU(hexStringPDU.substring(index, index + (addressLength % 2 == 0 ? addressLength : addressLength + 1)), senderTypeOfAddress, addressLength);
         if (DEBUG) {
-            Log.println("senderNumber: " + senderNumber);
+            Logger.log("senderNumber: " + senderNumber);
         }
         index += (addressLength % 2 == 0 ? addressLength : addressLength + 1);
         protocolIdentifier = hexStringPDU.substring(index, index + 2);
         if (DEBUG) {
-            Log.println("protocolIdentifier: " + protocolIdentifier);
+            Logger.log("protocolIdentifier: " + protocolIdentifier);
         }
         index += 2;
         dataCodingScheme = new DataCodingScheme(hexStringPDU.substring(index, index + 2));
         if (DEBUG) {
-            Log.println("dataCodingScheme: " + dataCodingScheme);
+            Logger.log("dataCodingScheme: " + dataCodingScheme);
         }
         index += 2;
         timeStamp = new TimeStamp(hexStringPDU.substring(index, index + (7 * 2)));
         if (DEBUG) {
-            Log.println("timeStamp: " + timeStamp);
+            Logger.log("timeStamp: " + timeStamp);
         }
         index += 7 * 2;
         userDataLength = Integer.parseInt(hexStringPDU.substring(index, index + 2), 16);
         if (DEBUG) {
-            Log.println("userDataLength: " + userDataLength);
+            Logger.log("userDataLength: " + userDataLength);
         }
         index += 2;
         userData = new UserData(hexStringPDU.substring(index), firstOctet, dataCodingScheme, userDataLength);
         if (DEBUG) {
-            Log.println("userData: " + userData);
+            Logger.log("userData: " + userData);
         }
     }
 

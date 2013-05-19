@@ -3,8 +3,8 @@ package org.javacint.io;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.javacint.at.ATCommands;
+import org.javacint.logging.Logger;
 import org.javacint.utilities.Hex;
-import org.javacint.utilities.Log;
 
 public abstract class ATSerialProtocol extends Connection {
 
@@ -44,7 +44,7 @@ public abstract class ATSerialProtocol extends Connection {
 			}
 		} catch (Exception e) {
 			close();
-			Log.add2Log(e.getMessage(), getClass());
+			Logger.log(e.getMessage(), getClass());
 		}
 		return false;
 	}
@@ -53,7 +53,7 @@ public abstract class ATSerialProtocol extends Connection {
 		try {
 			this.os.write("#".getBytes());
 		} catch (Exception localException2) {
-			Log.add2Log(localException2.getMessage(), getClass());
+			Logger.log(localException2.getMessage(), getClass());
 		}
 		super.close();
 		if (this.atDataConnection != null) {
@@ -65,21 +65,21 @@ public abstract class ATSerialProtocol extends Connection {
 	protected final byte[] readData() throws IOException {
 		while (((this.lastReadByte = this.is.read()) != 123) && (this.is.available() > 0)) {
 			if (DEBUG) {
-				Log.add2Log("Read before:" + ((char) lastReadByte), this.getClass());
+				Logger.log("Read before:" + ((char) lastReadByte), this.getClass());
 			}
 		}
 		if (DEBUG) {
-			Log.add2Log("Read:" + new String(new byte[]{(byte) lastReadByte}), this.getClass());
+			Logger.log("Read:" + new String(new byte[]{(byte) lastReadByte}), this.getClass());
 		}
 		while (this.is.available() > 0) {
 			this.lastReadByte = this.is.read();
 			if (DEBUG) {
-				Log.add2Log("Read:" + new String(new byte[]{(byte) lastReadByte}), this.getClass());
+				Logger.log("Read:" + new String(new byte[]{(byte) lastReadByte}), this.getClass());
 			}
 			if (this.lastReadByte == 125) {
 				String str = this.buffer.toString();
 				if (DEBUG) {
-					Log.add2Log("R." + str + ".", getClass());
+					Logger.log("R." + str + ".", getClass());
 				}
 				this.buffer.setLength(0);
 				return Hex.doHexBytesArray(str.substring(str.indexOf(TRANSMISSION_OK) + 1));
@@ -104,7 +104,7 @@ public abstract class ATSerialProtocol extends Connection {
 			baos.write(this.messageID + 65);
 			baos.write(Hex.doHexCharsArray(paramArrayOfByte).getBytes());
 			baos.write(STOP_TRANSFER_MESSAGE);
-			Log.add2Log("W." + baos.toString() + ".", getClass());
+			Logger.log("W." + baos.toString() + ".", getClass());
 		}
 		this.os.flush();
 	}

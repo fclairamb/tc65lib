@@ -18,8 +18,8 @@ import com.siemens.icm.io.*;
 import java.util.Random;
 import org.javacint.at.ATCommands;
 import org.javacint.common.ExceptionHandler;
+import org.javacint.logging.Logger;
 import org.javacint.utilities.Hex;
-import org.javacint.utilities.Log;
 import org.javacint.utilities.Utilities;
 
 /**
@@ -58,7 +58,7 @@ public class SMSFactory {
 
 	private SMSFactory() {
 		if (DEBUG) {
-			Log.println("\n\n\n<Constructing SMS>");
+			Logger.log("\n\n\n<Constructing SMS>");
 		}
 		smsSequenceNumber = new Random().nextInt(256);
 
@@ -69,28 +69,28 @@ public class SMSFactory {
 				//setting SMS mode
 				ok = ATCommands.send("AT+CSMS=1").indexOf("OK") >= 0;
 				if (DEBUG) {
-					Log.println("setting SMS mode to new standart... " + ok);
+					Logger.log("setting SMS mode to new standart... " + ok);
 				}
 
 				//prefer CSD bearer when sending SMSs
 				ok &= ATCommands.send("AT+CGSMS=3").indexOf("OK") >= 0;
 				if (DEBUG) {
-					Log.println("prefer CSD bearer when sending SMSs... " + ok);
+					Logger.log("prefer CSD bearer when sending SMSs... " + ok);
 				}
 
 				//return error when sending sms fail
 				ok &= ATCommands.send("AT^SM20=1,0").indexOf("OK") >= 0;
 				if (DEBUG) {
-					Log.println("enable error when sending sms fail... " + ok);
+					Logger.log("enable error when sending sms fail... " + ok);
 				}
 
 				if (DEBUG) {
 					// if initialization was successful
 					if (ok) {
-						Log.println("SMS Init done");
+						Logger.log("SMS Init done");
 						// if initialization was not successful
 					} else {
-						Log.println("Error");
+						Logger.log("Error");
 					}
 				}
 
@@ -102,19 +102,19 @@ public class SMSFactory {
 					smsFULL = smsFULL.substring(a, a + 1);
 					if (smsFULL.equals("1") || smsFULL.equals("2")) {
 						if (DEBUG) {
-							Log.println("SMS storage is full - time to clean up!");
+							Logger.log("SMS storage is full - time to clean up!");
 						}
 						int i = 1;
 						while (ATCommands.send("AT+CMGD=" + i).indexOf("OK") >= 0) {
 							if (DEBUG) {
-								Log.println("Deleting SMS at index " + i);
+								Logger.log("Deleting SMS at index " + i);
 							}
 							i++;
 						}
 					}
 				} else {
 					if (DEBUG) {
-						Log.println(FAIL_OPEN + "CANNOT CHECK IF SMS STORAGE IS FULL" + FAIL_CLOSE);
+						Logger.log(FAIL_OPEN + "CANNOT CHECK IF SMS STORAGE IS FULL" + FAIL_CLOSE);
 					}
 				}
 			} catch (Exception ex) {
@@ -123,7 +123,7 @@ public class SMSFactory {
 			}
 		} while (!ok);
 		if (DEBUG) {
-			Log.println("</Constructing SMS>\n\n\n");
+			Logger.log("</Constructing SMS>\n\n\n");
 		}
 	}
 
@@ -153,7 +153,7 @@ public class SMSFactory {
 			setCodePage(isUCS2);
 			response = ATCommands.send("AT+CMGS=" + (PDU.length() / 2 - 1));
 			if (DEBUG) {
-				Log.println(response);
+				Logger.log(response);
 			}
 			if (response.indexOf('>') >= 0) {
 				try {
@@ -195,7 +195,7 @@ public class SMSFactory {
 		boolean onesms = true;
 
 		if (DEBUG) {
-			Log.println("Trying to send SMS: ");
+			Logger.log("Trying to send SMS: ");
 		}
 
 		if (!isUCS2) {
@@ -208,7 +208,7 @@ public class SMSFactory {
 			} else {
 				result += WARNING_OPEN + "Too long text!" + WARNING_CLOSE;
 				if (DEBUG) {
-					Log.println(result);
+					Logger.log(result);
 				}
 				if (isUCS2) {
 					text_remains = text.substring(MAXIMUM_UCS2_SMS_LENGTH);
@@ -233,7 +233,7 @@ public class SMSFactory {
 				if (response.indexOf("OK") < 0) {
 					result += FAIL_OPEN + "Error during sending SMS: " + response + FAIL_CLOSE;
 					if (DEBUG) {
-						Log.println(result);
+						Logger.log(result);
 					}
 					return result;
 				}
@@ -250,7 +250,7 @@ public class SMSFactory {
 					if (response.indexOf("OK") <= 0) {
 						result += "<FAIL>Error during sending SMS: " + response + "</FAIL>";
 						if (DEBUG) {
-							Log.println(result);
+							Logger.log(result);
 						}
 						return result;
 					}
@@ -261,7 +261,7 @@ public class SMSFactory {
 			processException(e, 241);
 			result += FAIL_OPEN + "Exception while sending SMS! " + e.getMessage() + FAIL_CLOSE;
 			if (DEBUG) {
-				Log.println(result);
+				Logger.log(result);
 			}
 			return result;
 		}
@@ -271,12 +271,12 @@ public class SMSFactory {
 	public void SendData(String num, byte[] data) {
 
 		if (DEBUG) {
-			Log.println("Trying to send SMS: ");
+			Logger.log("Trying to send SMS: ");
 		}
 
 		if (data.length > MAXIMUM_DATA_SMS_LENGTH) {
 			if (DEBUG) {
-				Log.println("ERROR: too long data array");
+				Logger.log("ERROR: too long data array");
 			}
 			return;
 		}
@@ -343,11 +343,11 @@ public class SMSFactory {
 
 	private String javaToGSM(String text) {
 		if (DEBUG) {
-			Log.println("Trying to convert: " + text);
+			Logger.log("Trying to convert: " + text);
 		}
 		text = Utilities.fromRussianToTranslit(text);   //Could be deleted from here, 
 		if (DEBUG) {                                    //but I've decided to keep it 
-			Log.println("To translit: " + text);        //so that in future there could be 
+			Logger.log("To translit: " + text);        //so that in future there could be 
 		}                                               //implemented translits for other languages
 		StringBuffer gsmString = new StringBuffer();
 		for (int i = 0; i < text.length(); i++) {
@@ -356,20 +356,20 @@ public class SMSFactory {
 			} catch (IllegalArgumentException illegalArgumentException) {
 				String character = text.substring(i, i + 1);
 				if (DEBUG) {
-					Log.println("Cannot convert character: " + character);
+					Logger.log("Cannot convert character: " + character);
 				}
 				gsmString.append(character);
 			}
 		}
 		if (DEBUG) {
-			Log.println("text.length=" + text.length() + ", gsmString.length=" + gsmString.length());
+			Logger.log("text.length=" + text.length() + ", gsmString.length=" + gsmString.length());
 		}
 		return gsmString.toString();
 	}
 
 	private String gsmToSeptetsToHex(String gsmString, String UDH) {
 		if (DEBUG) {
-			Log.println("Trying to convert gsmToSeptetsToHex: gsmString=" + gsmString + ", UDH=" + UDH);
+			Logger.log("Trying to convert gsmToSeptetsToHex: gsmString=" + gsmString + ", UDH=" + UDH);
 		}
 		int skipBits = 0;
 		if (UDH != null) {
@@ -379,11 +379,11 @@ public class SMSFactory {
 			}
 		}
 		if (DEBUG) {
-			Log.println("skipBits=" + skipBits);
+			Logger.log("skipBits=" + skipBits);
 		}
 		boolean[] udBool = new boolean[skipBits + gsmString.length() * 7 + ((8 - ((skipBits + gsmString.length() * 7) % 8)) % 8)]; //Bits array of final data
 		if (DEBUG) {
-			Log.println("gsmString.length()=" + gsmString.length() + "; udBool[].length=" + udBool.length);
+			Logger.log("gsmString.length()=" + gsmString.length() + "; udBool[].length=" + udBool.length);
 		}
 		if (UDH != null) {
 			if (UDH.length() != 0) {
@@ -401,14 +401,14 @@ public class SMSFactory {
 				boolArrToString += (t[j] == true ? '1' : '0');
 			}
 			if (DEBUG) {
-				Log.println("t=" + boolArrToString);
+				Logger.log("t=" + boolArrToString);
 			}
 			//</DEBUG>
 			System.arraycopy(t, 0, udBool, skipBits + (i * 7), 7);
 		}
 		int length = udBool.length / 8; // length of UD in octets
 		if (DEBUG) {
-			Log.println("length=" + length);
+			Logger.log("length=" + length);
 		}
 		String hexResult = ""; //Hex string containing UD
 		for (int i = 0; i < length; i++) {
@@ -417,7 +417,7 @@ public class SMSFactory {
 			hexResult += Hex.intToHexFixedWidth(Utilities.binaryArrayToInt(t), 2);
 		}
 		if (DEBUG) {
-			Log.println("hexResult=" + hexResult);
+			Logger.log("hexResult=" + hexResult);
 		}
 		return hexResult;
 	}

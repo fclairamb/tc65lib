@@ -5,7 +5,7 @@
 
 package org.javacint.common;
 
-import org.javacint.utilities.Log;
+import org.javacint.logging.Logger;
 
 /**
  *
@@ -38,7 +38,7 @@ public class ExceptionHandler {
 
     public static void printException(Object from, Throwable ex, int line, String comment) {
         if (DEBUG) {
-            Log.println("EXCEPTION! " + from.getClass().getName() + " " + from + ": " + line + "\n" + (ex == null ? "" : ex.toString()) + (comment == null ? "" : "\n" + comment));
+            Logger.log("EXCEPTION! " + from.getClass().getName() + " " + from + ": " + line + "\n" + (ex == null ? "" : ex.toString()) + (comment == null ? "" : "\n" + comment));
             ex.printStackTrace();
         }
     }

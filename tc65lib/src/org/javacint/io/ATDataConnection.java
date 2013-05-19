@@ -1,7 +1,7 @@
 package org.javacint.io;
 
 import org.javacint.at.ATCommands;
-import org.javacint.utilities.Log;
+import org.javacint.logging.Logger;
 
 public final class ATDataConnection extends Connection {
 
@@ -14,7 +14,7 @@ public final class ATDataConnection extends Connection {
                 return true;
             }
         } catch (Exception e) {
-            Log.add2Log(paramConnectionProfile.getProfile() + e.getMessage(), getClass());
+            Logger.log(paramConnectionProfile.getProfile() + e.getMessage(), getClass());
         }
         return false;
     }

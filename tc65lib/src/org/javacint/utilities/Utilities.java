@@ -539,7 +539,7 @@ public class Utilities {
     private static String lastAlexTime = "2001-01-01 01:01:01";
     public static synchronized String getAlexTime() {
         if ((System.currentTimeMillis() - lastGetTimeMillis) < 1000) {
-//            Log.println("getAlexTime(): now " + System.currentTimeMillis() + ", last was " + lastGetTimeMillis + ", returning " + lastAlexTime);
+//            Logger.log("getAlexTime(): now " + System.currentTimeMillis() + ", last was " + lastGetTimeMillis + ", returning " + lastAlexTime);
             return lastAlexTime;
         }
         String mytime = "";
@@ -580,7 +580,7 @@ public class Utilities {
             //Delete all other objects equal this
             for (int j = i + 1; j < vector.size(); j++) {
                 if (obj.equals(vector.elementAt(j))) {
-                    //Log.println("cleanVector: Removing duplicate object: " + vector.elementAt(j));
+                    //Logger.log("cleanVector: Removing duplicate object: " + vector.elementAt(j));
                     vector.removeElementAt(j);
                     j--;
                 }
