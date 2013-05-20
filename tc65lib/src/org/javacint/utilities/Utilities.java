@@ -158,51 +158,6 @@ public class Utilities {
     }
 
     /**
-     * URL-encodes string
-     * @param s String to encode
-     * @return URL-encoded string
-     * @throws IOException when internal error occures
-     */
-    public static String encode(String s) throws IOException {
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        DataOutputStream dOut = new DataOutputStream(bOut);
-        StringBuffer ret = new StringBuffer(); //return value
-        dOut.writeUTF(s);
-        ByteArrayInputStream bIn = new ByteArrayInputStream(bOut.toByteArray());
-        bIn.read();
-        bIn.read();
-        int c = bIn.read();
-        while (c >= 0) {
-            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '.' || c == '-' || c == '*' || c == '_' || c == '|' || c == '{' || c == '}' || c == ':') {
-                ret.append((char) c);
-            } else if (c == ' ') {
-                ret.append('+');
-            } else {
-                if (c < 128) {
-                    appendHex(c, ret);
-                } else if (c < 224) {
-                    appendHex(c, ret);
-                    appendHex(bIn.read(), ret);
-                } else if (c < 240) {
-                    appendHex(c, ret);
-                    appendHex(bIn.read(), ret);
-                    appendHex(bIn.read(), ret);
-                }
-            }
-            c = bIn.read();
-        }
-        return ret.toString();
-    }
-
-    private static void appendHex(int arg0, StringBuffer buff) {
-        buff.append('%');
-        if (arg0 < 16) {
-            buff.append('0');
-        }
-        buff.append(Integer.toHexString(arg0));
-    }
-
-    /**
      * Natural Power function, using fast algorythm.
      * @param x integer base
      * @param y positive integer exponent. In case of negative y, returns 0
