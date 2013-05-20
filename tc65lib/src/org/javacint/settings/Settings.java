@@ -128,7 +128,7 @@ public class Settings {
 
     }
 
-    public void onSettingsChanged(String[] names) {
+    public static void onSettingsChanged(String[] names) {
         onSettingsChanged(names, null);
     }
 
@@ -137,7 +137,7 @@ public class Settings {
      *
      * @param names Names of the settings
      */
-    public void onSettingsChanged(String[] names, SettingsConsumer caller) {
+    public static void onSettingsChanged(String[] names, SettingsConsumer caller) {
 //		if (Logger.BUILD_DEBUG) {
 //			Logger.log("Settings.onSettingsChanged( String[" + names.length + "] names );");
 //		}
@@ -196,7 +196,7 @@ public class Settings {
      *
      * @param consumer Consumer of settings
      */
-    public synchronized void addSettingsConsumer(SettingsConsumer consumer) {
+    public static void addSettingsConsumer(SettingsConsumer consumer) {
 //		if (Logger.BUILD_DEBUG) {
 //			Logger.log("Settings.addSettingsConsumer( " + consumer + " );");
 //		}
@@ -216,7 +216,7 @@ public class Settings {
      *
      * @param consumer Consumer of settings
      */
-    public synchronized void removeSettingsConsumer(SettingsConsumer consumer) {
+    public static void removeSettingsConsumer(SettingsConsumer consumer) {
         synchronized (consumers) {
             if (consumers.contains(consumer)) {
                 consumers.removeElement(consumer);
