@@ -29,16 +29,16 @@ public class Settings {
      * JADUrl setting
      */
     public static final String SETTING_JADURL = "jadurl";
-    private boolean madeSomeChanges = false;
-    private boolean loading;
+    private static boolean madeSomeChanges = false;
+    private static boolean loading;
 
     public static synchronized void setFilename(String filename) {
         fileName = filename;
         settings = null;
     }
 
-    public void setLoading(boolean loading) {
-        this.loading = loading;
+    public static void loading(boolean l) {
+        loading = l;
     }
 
     public static String getFilename() {
