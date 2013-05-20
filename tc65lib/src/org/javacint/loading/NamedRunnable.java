@@ -12,9 +12,9 @@ public abstract class NamedRunnable {
 
     private final String name;
 
-    public NamedRunnable() {
-        this.name = "!!! DEFINE A NAME !!!";
-    }
+//    public NamedRunnable() {
+//        this.name = "!!! DEFINE A NAME !!!";
+//    }
 
     public NamedRunnable(String name) {
         this.name = name;
