@@ -14,16 +14,11 @@ import org.javacint.logging.Logger;
 public class WatchdogOnJavaGpio implements WatchdogActor {
 
 	/**
-	 * Last state of the GPIO
-	 */
-	//private boolean _state = true;
-	/**
 	 * Gpio used for the hardware watchdog
 	 */
-	private final int _gpioNb;
-	//private ATCommand _atc;
-	private final boolean _inverted;
-	private OutPort _port;
+	private final int gpio;
+	private final boolean inverted;
+	private OutPort port;
 
 	/**
 	 * Constructor for an instance without settings management
@@ -35,8 +30,8 @@ public class WatchdogOnJavaGpio implements WatchdogActor {
 	public WatchdogOnJavaGpio(int gpio, boolean inverted) {
 		//_atc = atc;
 
-		_gpioNb = gpio;
-		_inverted = inverted;
+		this.gpio = gpio;
+		this.inverted = inverted;
 		init();
 	}
 
@@ -48,9 +43,8 @@ public class WatchdogOnJavaGpio implements WatchdogActor {
 	 * @throws com.siemens.icm.io.ATCommandFailedException
 	 */
 	private void setState(boolean state) throws ATCommandFailedException, IOException {
-		//return _atc.send("AT^SSIO=" + (_gpioNb - 1) + "," + (state ? "1" : "0") + "\r");
-		if (_port != null) {
-			_port.setValue(state ? 1 : 0);
+		if (port != null) {
+			port.setValue(state ? 1 : 0);
 		}
 	}
 
@@ -63,9 +57,9 @@ public class WatchdogOnJavaGpio implements WatchdogActor {
 		try {
 
 			//_state = !_state;
-			setState(_inverted ? false : true);
+			setState(inverted ? false : true);
 			Thread.sleep(1000);
-			setState(_inverted ? true : false);
+			setState(inverted ? true : false);
 
 		} catch (Exception ex) {
 			if (Logger.BUILD_CRITICAL) {
@@ -80,14 +74,10 @@ public class WatchdogOnJavaGpio implements WatchdogActor {
 	 * Prepares watchdog
 	 */
 	private void init() {
-//		if ( Logger.BUILD_DEBUG ) {
-//			Logger.log("WatchdogOnGpio.init();");
-//		}
-
 		try {
-			_port = new OutPort(new Vector() {
+			port = new OutPort(new Vector() {
 				{
-					addElement("GPIO" + _gpioNb);
+					addElement("GPIO" + gpio);
 				}
 			}, new Vector() {
 				{
@@ -102,6 +92,6 @@ public class WatchdogOnJavaGpio implements WatchdogActor {
 	}
 
 	public String toString() {
-		return "WatchdogOnATGpio";
+		return "WatchdogOnJavaGpio";
 	}
 }
