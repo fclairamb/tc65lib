@@ -21,7 +21,7 @@ public class WatchdogEmbedded implements WatchdogActor {
     /**
      * Constructor with specified timeout time
      *
-     * @param time Timeout time
+     * @param time Watchdog timeout (in seconds [default: 300])
      */
     public WatchdogEmbedded(int time) {
         init(time);
@@ -30,7 +30,7 @@ public class WatchdogEmbedded implements WatchdogActor {
     /**
      * Initialization method
      *
-     * @param timeout Watchdog timeout
+     * @param timeout Watchdog timeout (in seconds)
      */
     private void init(int timeout) {
         Watchdog.start(timeout);
