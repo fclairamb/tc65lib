@@ -54,7 +54,7 @@ public class Settings {
         }
 
         StringBuffer buffer = new StringBuffer();
-        Hashtable settings = getDefaultSettings();
+        Hashtable newSettings = getDefaultSettings();
         try {
 
 
@@ -81,7 +81,7 @@ public class Settings {
                 int c = is.read();
 
                 if (c == '\n') {
-                    loadLine(settings, buffer.toString());
+                    loadLine(newSettings, buffer.toString());
                     buffer.setLength(0);
                 } else {
                     buffer.append((char) c);
@@ -98,7 +98,7 @@ public class Settings {
                 Logger.log("Settings.Load", ex);
             }
         } finally {
-            settings = settings;
+            settings = newSettings;
         }
     }
 
@@ -246,112 +246,114 @@ public class Settings {
     /**
      * Save setttings
      */
-    public synchronized void save() {
+    public static synchronized void save() {
+        synchronized (Settings.class) {
 //		if (Logger.BUILD_DEBUG) {
 //			Logger.log("Settings.save();", true);
 //		}
 
-        // If there's no settings, we shouldn't have to save anything
-        if (settings == null) {
-            return;
-        }
+            // If there's no settings, we shouldn't have to save anything
+            if (settings == null) {
+                return;
+            }
 
-        // If no changes were made, we shouldn't have to save anything
-        if (!madeSomeChanges) {
-            return;
-        }
+            // If no changes were made, we shouldn't have to save anything
+            if (!madeSomeChanges) {
+                return;
+            }
 
-        try {
-            Hashtable defSettings = getDefaultSettings();
+            try {
+                Hashtable defSettings = getDefaultSettings();
 
 
 
-            String fileNameTmp = fileName + ".tmp";
-            String fileNameOld = fileName + ".old";
+                String fileNameTmp = fileName + ".tmp";
+                String fileNameOld = fileName + ".old";
 
-            String settingFileUrl = "file:///a:/" + fileName;
-            String settingFileUrlTmp = "file:///a:/" + fileNameTmp;
-            String settingFileUrlOld = "file:///a:/" + fileNameOld;
+                String settingFileUrl = "file:///a:/" + fileName;
+                String settingFileUrlTmp = "file:///a:/" + fileNameTmp;
+                String settingFileUrlOld = "file:///a:/" + fileNameOld;
 
 //			if ( Logger.BUILD_DEBUG ) {
 //				Logger.log("Settings.save: Opening \"" + settingFileUrlTmp + "\"...");
 //			}
 
-            FileConnection fc = (FileConnection) Connector.open(settingFileUrlTmp, Connector.READ_WRITE);
+                FileConnection fc = (FileConnection) Connector.open(settingFileUrlTmp, Connector.READ_WRITE);
 
-            //fc = (FileConnection) Connector.open("file:///" + _fileName, Connector.READ_WRITE);
+                //fc = (FileConnection) Connector.open("file:///" + _fileName, Connector.READ_WRITE);
 
-            if (fc.exists()) {
-                fc.delete();
-            }
+                if (fc.exists()) {
+                    fc.delete();
+                }
 
-            fc.create();
-            OutputStream os = fc.openOutputStream();
+                fc.create();
+                OutputStream os = fc.openOutputStream();
 
-            Enumeration e = defSettings.keys();
-            while (e.hasMoreElements()) {
-                String key = (String) e.nextElement();
-                String value = (String) settings.get(key);
-                String defValue = (String) defSettings.get(key);
+                Enumeration e = defSettings.keys();
+                while (e.hasMoreElements()) {
+                    String key = (String) e.nextElement();
+                    String value = (String) settings.get(key);
+                    String defValue = (String) defSettings.get(key);
 
-                if ( // if there is a default value
-                        defValue != null && // and
-                        // the value isn't the same as the default value
-                        defValue.compareTo(value) != 0) {
-                    String line = key + "=" + value + '\n';
+                    if ( // if there is a default value
+                            defValue != null && // and
+                            // the value isn't the same as the default value
+                            defValue.compareTo(value) != 0) {
+                        String line = key + "=" + value + '\n';
 
 //					if ( Logger.BUILD_DEBUG ) {
 //						Logger.log("Settings.save.line: " + line);
 //					}
 
-                    os.write(line.getBytes());
+                        os.write(line.getBytes());
+                    }
+
                 }
-
-            }
-            os.flush();
-            os.close();
+                os.flush();
+                os.close();
 
 
-            { // We move the current setting file to the old one
-                FileConnection currentFile = (FileConnection) Connector.open(settingFileUrl, Connector.READ_WRITE);
+                { // We move the current setting file to the old one
+                    FileConnection currentFile = (FileConnection) Connector.open(settingFileUrl, Connector.READ_WRITE);
 
 //				if ( Logger.BUILD_DEBUG ) {
 //					Logger.log("Settings.save: Renaming \"" + settingFileUrl + "\" to \"" + fileNameOld + "\"");
 //				}
-                if (currentFile.exists()) {
+                    if (currentFile.exists()) {
 
-                    { // We delete the old setting file
+                        { // We delete the old setting file
 //				if ( Logger.BUILD_DEBUG ) {
 //					Logger.log("Settings.save: Deleting \"" + settingFileUrlOld + "\"");
 //				}
-                        FileConnection oldFile = (FileConnection) Connector.open(settingFileUrlOld, Connector.READ_WRITE);
+                            FileConnection oldFile = (FileConnection) Connector.open(settingFileUrlOld, Connector.READ_WRITE);
 
-                        if (oldFile.exists()) {
-                            oldFile.delete();
+                            if (oldFile.exists()) {
+                                oldFile.delete();
+                            }
                         }
+
+                        currentFile.rename(fileNameOld);
                     }
-
-                    currentFile.rename(fileNameOld);
                 }
-            }
 
 
 
 
 
-            { // We move the tmp file to the current setting file
+                { // We move the tmp file to the current setting file
 //				if ( Logger.BUILD_DEBUG ) {
 //					Logger.log("Setting.save: Renaming \"" + settingFileUrlTmp + "\" to \"" + _fileName + "\"");
 //				}
-                fc.rename(fileName);
-                fc.close();
-            }
+                    fc.rename(fileName);
+                    fc.close();
+                }
 
-            // If we savec the file, we can reset the madeSomeChanges information
-            madeSomeChanges = false;
-        } catch (Exception ex) {
-            if (Logger.BUILD_CRITICAL) {
-                Logger.log("Settings.Save", ex, true);
+                // If we savec the file, we can reset the madeSomeChanges information
+                madeSomeChanges = false;
+            } catch (Exception ex) {
+                if (Logger.BUILD_CRITICAL) {
+                    Logger.log("Settings.Save", ex, true);
+                }
             }
         }
     }
