@@ -25,7 +25,6 @@ import org.javacint.settings.Settings;
  */
 public class AutoUpdater extends TimerTask {
 
-	private final ATCommand atc;
 	private final String version;
 	private final String url;
 	private final int timeBetweenUpdates;
@@ -36,7 +35,6 @@ public class AutoUpdater extends TimerTask {
 	/**
 	 * Constructor.
 	 *
-	 * @param atc ATCommand instance used to launch the OTAP
 	 * @param version Current version of the program ("Midlet-Version" is
 	 * usually stored in Global.version)
 	 * @param url Url of the file containing the version number
@@ -52,8 +50,7 @@ public class AutoUpdater extends TimerTask {
 	 * [timeBetweenUpdates] period (in millisecond). If it fails, it will check
 	 * every hour until it has a response from the server.
 	 */
-	public AutoUpdater(ATCommand atc, String version, String url, int timeBetweenUpdates) {
-		this.atc = atc;
+	public AutoUpdater(String version, String url, int timeBetweenUpdates) {
 		this.version = version;
 		this.url = url;
 		this.timeBetweenUpdates = timeBetweenUpdates;
@@ -74,8 +71,8 @@ public class AutoUpdater extends TimerTask {
 	 * usually stored in Global.version)
 	 * @param url Url of the file containing the version number
 	 */
-	public AutoUpdater(ATCommand atc, String version, String url) {
-		this(atc, version, url, 24 * 3600 * 1000);
+	public AutoUpdater(String version, String url) {
+		this(version, url, 24 * 3600 * 1000);
 	}
 
 	/**
@@ -86,8 +83,8 @@ public class AutoUpdater extends TimerTask {
 	 * @param atc
 	 * @param version
 	 */
-	public AutoUpdater(ATCommand atc, String version) {
-		this(atc, version, Settings.getSetting(Settings.SETTING_JADURL));
+	public AutoUpdater(String version) {
+		this(version, Settings.get(Settings.SETTING_JADURL));
 	}
 
 	public void run() {
@@ -104,7 +101,7 @@ public class AutoUpdater extends TimerTask {
 					} catch (Throwable ex) {
 					}
 				}
-				ATExecution.update(atc);
+				ATExecution.update();
 			}
 		} catch (Exception ex) {
 			if (Logger.BUILD_CRITICAL) {
@@ -126,7 +123,7 @@ public class AutoUpdater extends TimerTask {
 		HttpConnection conn = (HttpConnection) Connector.open(url);
 		{
 //			try {
-			conn.setRequestProperty("user-agent", "tc65lib/" + ATExecution.getImei(atc));
+			conn.setRequestProperty("user-agent", "tc65lib/" + ATExecution.getImei());
 //			} catch (Exception ex) {
 //				if (Logger.BUILD_CRITICAL) {
 //					Logger.log(this + ".needsUpdate", ex, true);

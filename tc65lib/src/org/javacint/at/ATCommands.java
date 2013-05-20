@@ -5,12 +5,11 @@
 package org.javacint.at;
 
 //#if sdkns == "siemens"
-import org.javacint.utilities.*;
-import org.javacint.io.ATDataConnection;
 import com.siemens.icm.io.*;
 //#elif sdkns == "cinterion"
 //# import com.cinterion.io.*;
 //#endif
+import org.javacint.io.ATDataConnection;
 import org.javacint.io.Connection;
 import org.javacint.logging.Logger;
 
@@ -20,117 +19,91 @@ import org.javacint.logging.Logger;
 public final class ATCommands {
 
 //#if DebugLevel=="debug"
-	private static final boolean DEBUG = true;
+    private static final boolean DEBUG = true;
 //#elif DebugLevel=="warn" || DebugLevel=="fatal"
 //# private static final boolean DEBUG = false;
 //#endif
+    private static final ATCommand atCommand;
+    private static final ATCommand atCommandURC;
+    private static final ATCommand atCommandData;
 
-	static {
-		try {
-			atCommand = new ATCommand(false, false, false, false, false, false);
-			atCommandURC = new ATCommand(false, true, false, false, false, false);
-			atCommandData = new ATCommand(false, false, false, false, false, false);
-		} catch (Exception e) {
-			if (DEBUG) {
-				e.printStackTrace();
-			}
-		}
-	}
-	private static ATCommand atCommand;
-	private static ATCommand atCommandURC;
-	private static ATCommand atCommandData;
+    static {
+        // We enforce the static final
+        ATCommand a = null, b = null, c = null;
+        try {
+            a = new ATCommand(false, false, false, false, false, false);
+            b = new ATCommand(false, true, false, false, false, false);
+            c = new ATCommand(false, false, false, false, false, false);
+        } catch (Exception e) {
+            if (DEBUG) {
+                Logger.log("ATCommands:static", ATCommands.class);
+            }
+        }
+        atCommand = a;
+        atCommandURC = b;
+        atCommandData = c;
+    }
 
-	public static String send(String ATCmd) {
-		return sendRAW(atCommand, ATCmd + '\r');
-	}
+    public static String send(String cmd) {
+        try {
+            synchronized (atCommand) {
+                return atCommand.send(cmd);
+            }
+        } catch (Exception ex) {
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log("ATCommands.send", ex);
+            }
+            return null;
+        }
+    }
 
-	public static String sendAll(String ATCmd) {
-		sendRAW(atCommandURC, ATCmd + '\r');
-		sendRAW(atCommandData, ATCmd + '\r');
-		return sendRAW(atCommand, ATCmd + '\r');
-	}
+    public static String sendr(String cmd) {
+        return send(cmd+'\r');
+    }
 
-	private static String sendRAW(ATCommand atcmd, String ATCmd) {
-		String result = null;
-		try {
-			if (DEBUG) {
-				Logger.log((atcmd == atCommand ? "atCommand" : (atcmd == atCommandURC ? "atCommandURC" : (atcmd == atCommandData ? "atCommandData" : "UnknownATCommand!"))) + " S: " + ATCmd);
-			}
-			synchronized (atcmd) {
-				result = atcmd.send(ATCmd);
-			}
-			if (DEBUG) {
-				Logger.log((atcmd == atCommand ? "atCommand" : (atcmd == atCommandURC ? "atCommandURC" : (atcmd == atCommandData ? "atCommandData" : "UnknownATCommand!"))) + " R: " + result);
-			}
-		} catch (Exception ex) {
-			if (DEBUG) {
-				ex.printStackTrace();
-			}
-		}
-		return result;
-	}
+    public static String sendrAll(String ATCmd) {
+        send(atCommandURC, ATCmd + '\r');
+        send(atCommandData, ATCmd + '\r');
+        return send(atCommand, ATCmd + '\r');
+    }
 
-	public static void addListener(ATCommandListener listener) {
-		atCommandURC.addListener(listener);
-	}
+    private static String send(ATCommand atcmd, String ATCmd) {
+        String result = null;
+        try {
+            if (DEBUG) {
+                Logger.log((atcmd == atCommand ? "atCommand" : (atcmd == atCommandURC ? "atCommandURC" : (atcmd == atCommandData ? "atCommandData" : "UnknownATCommand!"))) + " S: " + ATCmd);
+            }
+            synchronized (atcmd) {
+                result = atcmd.send(ATCmd);
+            }
+            if (DEBUG) {
+                Logger.log((atcmd == atCommand ? "atCommand" : (atcmd == atCommandURC ? "atCommandURC" : (atcmd == atCommandData ? "atCommandData" : "UnknownATCommand!"))) + " R: " + result);
+            }
+        } catch (Exception ex) {
+            if (DEBUG) {
+                ex.printStackTrace();
+            }
+        }
+        return result;
+    }
 
-	public String sendURCToggleCommand(String ATCmd) {
-		return sendRAW(atCommandURC, ATCmd + '\r');
-	}
+    public static void addListener(ATCommandListener listener) {
+        atCommandURC.addListener(listener);
+    }
 
-	public static Connection getATDataConnection() {
-		return new ATDataConnection();
-	}
+    public String sendURCToggleCommand(String ATCmd) {
+        return send(atCommandURC, ATCmd + '\r');
+    }
 
-	public static ATCommand getDataATCommand() {
-		return atCommandData;
-	}
+    public static Connection getATDataConnection() {
+        return new ATDataConnection();
+    }
 
-	public static Object getSyncObject() {
-		return atCommand;
-	}
+    public static ATCommand getDataATCommand() {
+        return atCommandData;
+    }
 
-	static public class SetSettings {
-
-		public static void setSettings() {
-			try {
-				boolean ok = false;
-
-				//Enable verbose errors
-				int i = 0;
-				do {
-					Thread.sleep(i * 1000);
-					ok = sendAll("AT+CMEE=2").indexOf("OK") >= 0;
-					if (DEBUG) {
-						Logger.log("Enable verbose errors... " + ok);
-					}
-				} while (!ok);
-
-				//setting preferred SMS message storage to SIM
-				i = 0;
-				do {
-					Thread.sleep(3000 + i * 1000);
-					i++;
-					ok = ATCommands.send("AT+CPMS=\"MT\",\"MT\",\"MT\"").indexOf("OK") >= 0;
-					if (DEBUG) {
-						Logger.log("setting preferred SMS message storage to SIM + ME... " + ok);
-					}
-				} while (!ok);
-
-				//set mode to PDU Mode
-				i = 0;
-				do {
-					Thread.sleep(i * 1000);
-					ok = ATCommands.send("AT+CMGF=0").indexOf("OK") >= 0;
-					if (DEBUG) {
-						Logger.log("set mode to PDU Mode... " + ok);
-					}
-				} while (!ok);
-			} catch (Exception ex) {
-				if (DEBUG) {
-					ex.printStackTrace();
-				}
-			}
-		}
-	}
+    public static Object getSyncObject() {
+        return atCommand;
+    }
 }

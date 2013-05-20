@@ -12,6 +12,10 @@ import org.javacint.at.ATCommands;
  *
  * @author pyth0n
  */
+
+// TODO: We need to move each part to its corresponding class. Most of these
+// methods are related to byte manipulation, so we should move them 
+
 public class Utilities {
 
     /**
@@ -544,7 +548,7 @@ public class Utilities {
         }
         String mytime = "";
         try {
-            mytime = ATCommands.send("AT+CCLK?");
+            mytime = ATCommands.sendr("AT+CCLK?");
         } catch (Exception ex) {
             return "2001-01-01 01:01:01";
         }

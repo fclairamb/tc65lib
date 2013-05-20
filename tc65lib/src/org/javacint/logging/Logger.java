@@ -159,4 +159,12 @@ public class Logger {
         // the other threads
         Thread.yield();
     }
+
+    public static void log(Object from, Throwable ex, int line) {
+        log(from, ex, line, null);
+    }
+
+    public static void log(Object from, Throwable ex, int line, String comment) {
+        log(from + ":" + line + ":" + ex.getClass() + ":" + ex.getMessage() + (comment != null ? " / " + comment : ""));
+    }
 }
