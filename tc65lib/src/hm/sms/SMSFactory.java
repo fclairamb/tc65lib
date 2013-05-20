@@ -17,7 +17,6 @@ import com.siemens.icm.io.*;
 
 import java.util.Random;
 import org.javacint.at.ATCommands;
-import org.javacint.common.ExceptionHandler;
 import org.javacint.logging.Logger;
 import org.javacint.utilities.Hex;
 import org.javacint.utilities.Utilities;
@@ -119,7 +118,7 @@ public class SMSFactory {
 				}
 			} catch (Exception ex) {
 				ok = false;
-				processException(ex, 113);
+				Logger.log(this, ex, 122);
 			}
 		} while (!ok);
 		if (DEBUG) {
@@ -258,7 +257,7 @@ public class SMSFactory {
 			}
 			result += BLAH_OPEN + "SMS with text:\n\"" + text + (text_remains.length() > 0 ? '(' + text_remains + ')' : "") + "\"\nwas sent to the address " + address + BLAH_CLOSE;
 		} catch (Exception e) {
-			processException(e, 241);
+			Logger.log(this, e, 261);
 			result += FAIL_OPEN + "Exception while sending SMS! " + e.getMessage() + FAIL_CLOSE;
 			if (DEBUG) {
 				Logger.log(result);
@@ -291,7 +290,7 @@ public class SMSFactory {
 				Thread.sleep(WAIT_TIME);
 			} catch (Exception e) {
 				ok = false;
-				processException(e, 274);
+				Logger.log(this, e, 294);
 			}
 		} while (!ok);
 	}
@@ -448,9 +447,5 @@ public class SMSFactory {
 		smsSequenceNumber++;
 		smsSequenceNumber = smsSequenceNumber % 256;
 		return smsSequenceNumber;
-	}
-
-	private void processException(Exception ex, int line) {
-		ExceptionHandler.processException(this, ex, line, null);
 	}
 }
