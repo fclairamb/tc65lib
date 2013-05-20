@@ -1,15 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.task;
 
 import java.util.TimerTask;
 import org.javacint.logging.Logger;
 
 /**
+ * Timer task safety wrapper.
  *
- * @author florent
+ * This wrapper only guarantees a runnable task won't break the Timer.
+ *
  */
 public class SafetyWrapper extends TimerTask {
 

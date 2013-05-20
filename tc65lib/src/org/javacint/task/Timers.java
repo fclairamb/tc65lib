@@ -36,4 +36,12 @@ public class Timers {
             }
         }, 0);
     }
+
+    public static Timer getFast() {
+        return fast;
+    }
+
+    public static Timer getSlow() {
+        return slow;
+    }
 }
