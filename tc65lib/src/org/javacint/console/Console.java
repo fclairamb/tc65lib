@@ -25,7 +25,7 @@ import org.javacint.settings.SettingsConsumer;
  * This is only a draft of the console code, I need to somehow to support the
  * features of at least 3 implementation of a console.
  */
-public class Console implements Runnable, SettingsConsumer {
+public class Console implements Runnable {
 
     private Thread thread = new Thread(this, "con");
     private final StreamConnection stream;
@@ -50,7 +50,6 @@ public class Console implements Runnable, SettingsConsumer {
 
     public Console(StreamConnection stream) {
         this.stream = stream;
-        Settings.addConsumer(this);
     }
 
     public void setHeader(String header) {
@@ -310,48 +309,11 @@ public class Console implements Runnable, SettingsConsumer {
         }
     }
 
-    private void startThread() {
+    public void start() {
         thread.start();
     }
 
-    private void stopThread() {
-        portClose();
-    }
-    private static final String SETTING_CONSOLE_ENABLED = "console.enabled";
-
-    public void getDefaultSettings(Hashtable settings) {
-        settings.put(SETTING_CONSOLE_ENABLED, "1");
-    }
-
-    public void settingsChanged(String[] settings) {
-        for (int i = 0; i < settings.length; i++) {
-            parseSetting(settings[i]);
-        }
-    }
-
-    private void parseSetting(String setName) {
-        if (setName.equals(SETTING_CONSOLE_ENABLED)) {
-            setEnabled(Settings.getBool(SETTING_CONSOLE_ENABLED));
-        }
-    }
-    private boolean enabled;
-
-    private void setEnabled(boolean en) {
-        if (en != enabled) {
-            enabled = en;
-            if (enabled) {
-                startThread();
-            } else {
-                stopThread();
-            }
-        }
-    }
-
-    public void start() {
-        parseSetting(SETTING_CONSOLE_ENABLED);
-    }
-
     public void stop() {
-        stopThread();
+        portClose();
     }
 }
