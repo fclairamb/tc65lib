@@ -1,6 +1,8 @@
 package org.javacint.demo;
 
 import java.util.TimerTask;
+import org.javacint.console.ConsoleBySetting;
+import org.javacint.io.Streams;
 import org.javacint.loading.Loader;
 import org.javacint.loading.NamedRunnable;
 import org.javacint.logging.Logger;
@@ -50,10 +52,29 @@ public class StartupLoader extends TimerTask {
             }
         });
 
+        // All the settings consumers/providers must be added here (without being allowed to consume setting at this stage)
+
+        // We load the console
+        loader.addRunnable(new NamedRunnable("Console:loading") {
+            public void run() throws Exception {
+                Global.console = new ConsoleBySetting(Streams.serial(0, 115200));
+                // Nothing prevents us from loading other console (one on an other port, one on a socket listening handler, one on a client socket, etc.)
+            }
+        });
+
         // Once we reach that stage, we can use settings
         loader.addRunnable(new NamedRunnable("Settings:loaded") {
             public void run() throws Exception {
                 Settings.loading(false);
+            }
+        });
+
+        // After that, all the settings providers can provider and use settings
+
+        // We start the console
+        loader.addRunnable(new NamedRunnable("Console:starting") {
+            public void run() throws Exception {
+                Global.console.start();
             }
         });
 
