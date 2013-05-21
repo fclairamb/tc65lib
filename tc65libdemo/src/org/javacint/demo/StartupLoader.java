@@ -46,7 +46,7 @@ public class StartupLoader extends TimerTask {
         loader.addRunnable(new NamedRunnable("Settings:loading") {
             public void run() throws Exception {
                 Settings.loading(true);
-                Settings.addSettingsConsumer(new BaseSettingsProvider());
+                Settings.addConsumer(new BaseSettingsProvider());
             }
         });
 
@@ -60,7 +60,7 @@ public class StartupLoader extends TimerTask {
         loader.addRunnable(new NamedRunnable("AutoUpdater") {
             public void run() throws Exception {
                 // We will try to find an update every 15 minutes
-                AutoUpdater.schedule(version, Settings.get(Settings.SETTING_JADURL), 900 * 1000);
+                AutoUpdater.schedule(version, 900 * 1000);
             }
         });
 
