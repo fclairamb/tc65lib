@@ -8,6 +8,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 import javax.microedition.io.CommConnection;
 import javax.microedition.io.Connector;
+import javax.microedition.io.StreamConnection;
 import org.javacint.at.ATCommands;
 import org.javacint.at.ATExecution;
 import org.javacint.common.Strings;
@@ -27,11 +28,7 @@ import org.javacint.settings.SettingsConsumer;
 public class Console implements Runnable, SettingsConsumer {
 
     private Thread thread = new Thread(this, "con");
-    // Note: This class currently uses serial. But it could be used as remote
-    // telnet server or anything like this. I might add it in a near future.
-    private CommConnection conn;
-    private int portNb = 0;
-    private String portSpeed = "115200";
+    private final StreamConnection stream;
     private InputStream in;
     private PrintStream out;
     private String header = "Console";
@@ -51,7 +48,8 @@ public class Console implements Runnable, SettingsConsumer {
         }
     }
 
-    public Console() {
+    public Console(StreamConnection stream) {
+        this.stream = stream;
         Settings.addConsumer(this);
     }
 
@@ -123,8 +121,6 @@ public class Console implements Runnable, SettingsConsumer {
         } else if (line.equals("conf save")) {
             Settings.save();
         } else if (line.startsWith("conf ")) {
-//            Settings set = Settings.getInstance();
-
             String content = line.substring("conf ".length());
             int p = content.indexOf('=');
             if (p != -1) {
@@ -162,14 +158,7 @@ public class Console implements Runnable, SettingsConsumer {
     }
 
     private void portOpen() throws IOException {
-        portClose();
-        conn = (CommConnection) Connector.open("comm:com" + portNb + ";baudrate=" + portSpeed + ";blocking=on;autocts=off;autorts=off");
-        in = conn.openInputStream();
-        out = new PrintStream(conn.openOutputStream());
-    }
-
-    public void setPortNumber(int portNumber) {
-        portNb = portNumber;
+        out = new PrintStream(stream.openOutputStream());
     }
 
     private void portClose() {
@@ -189,13 +178,12 @@ public class Console implements Runnable, SettingsConsumer {
         }
         out = null;
 
-        if (conn != null) {
+        if (stream != null) {
             try {
-                conn.close();
+                stream.close();
             } catch (Exception ex) {
             }
         }
-        conn = null;
     }
     StringBuffer _buffer = new StringBuffer(64);
     Vector history = new Vector();
@@ -209,13 +197,8 @@ public class Console implements Runnable, SettingsConsumer {
 
     public String readLine() {
         try {
-//			int lineLength = 0;
             while (true) {
                 int c = in.read();
-
-
-//				_os.write( (" (" + c + ")").getBytes() );
-
                 if (c == '\n' || c == '\r') { // If we have an end of line
                     String str = _buffer.toString();
                     _buffer.setLength(0);
@@ -265,6 +248,7 @@ public class Console implements Runnable, SettingsConsumer {
         return esc;
     }
 
+    // TODO: test it
     private void writeErasePrompt() {
         out.write(27);
         out.write('[');
@@ -274,6 +258,7 @@ public class Console implements Runnable, SettingsConsumer {
         _buffer.setLength(0);
     }
 
+    // TODO: test it
     private void writeClearScreen() {
         out.write(27);
         out.write('[');
@@ -281,6 +266,7 @@ public class Console implements Runnable, SettingsConsumer {
         out.write('J');
     }
 
+    // TODO: test it
     private void handleEscape(int[] escapeSequence) {
         if (escapeSequence[0] == '[') {
             if (escapeSequence[2] == 'A') {
@@ -331,11 +317,6 @@ public class Console implements Runnable, SettingsConsumer {
     private void stopThread() {
         portClose();
     }
-//	private String parseEsc() throws IOException {
-//		int c = 
-//				
-//				return "";
-//	}
     private static final String SETTING_CONSOLE_ENABLED = "console.enabled";
 
     public void getDefaultSettings(Hashtable settings) {
