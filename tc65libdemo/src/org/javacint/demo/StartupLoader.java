@@ -90,5 +90,6 @@ public class StartupLoader extends TimerTask {
                 WatchdogManager.getInstance().removeStatusProvider(loader);
             }
         });
+        Timers.getSlow().schedule(loader, 0);
     }
 }
