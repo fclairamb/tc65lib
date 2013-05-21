@@ -26,7 +26,6 @@ import org.javacint.task.Timers;
 public class AutoUpdater extends TimerTask {
 
     private final String version;
-    private final String url;
     private final int timeBetweenUpdates;
     private static final String FIELD_VERSION = "MIDlet-Version:";
     private long lastDone;
@@ -50,15 +49,33 @@ public class AutoUpdater extends TimerTask {
      * [timeBetweenUpdates] period (in millisecond). If it fails, it will check
      * every hour until it has a response from the server.
      */
-    public AutoUpdater(String version, String url, int timeBetweenUpdates) {
+    public AutoUpdater(String version, int timeBetweenUpdates) {
         this.version = version;
-        this.url = url;
         this.timeBetweenUpdates = timeBetweenUpdates;
     }
 
-    public static AutoUpdater schedule(String version, String url, int timeBetweenUpdates) {
-        AutoUpdater au = new AutoUpdater(version, url, timeBetweenUpdates);
-        Timers.getSlow().schedule(au, timeBetweenUpdates / 3);
+    /**
+     * Schedule an auto update frequently.
+     *
+     * @param version Current version of the program
+     * @param timeBetweenUpdates Time between each update check
+     * @return AutoUpdater instance
+     */
+    public static AutoUpdater schedule(String version, int timeBetweenUpdates) {
+        AutoUpdater au = new AutoUpdater(version, timeBetweenUpdates);
+        Timers.getSlow().schedule(au, 0, timeBetweenUpdates / 3);
+        return au;
+    }
+
+    /**
+     * Schedule an auto-update attempt once.
+     *
+     * @param version Current version of the program
+     * @return AutoUpdater instance
+     */
+    public static AutoUpdater schedule(String version) {
+        AutoUpdater au = new AutoUpdater(version);
+        Timers.getSlow().schedule(au, 0);
         return au;
     }
 
@@ -78,20 +95,8 @@ public class AutoUpdater extends TimerTask {
      * usually stored in Global.version)
      * @param url Url of the file containing the version number
      */
-    public AutoUpdater(String version, String url) {
-        this(version, url, 24 * 3600 * 1000);
-    }
-
-    /**
-     * Constructor.
-     *
-     * Update the program to the default JADURL file.
-     *
-     * @param atc
-     * @param version
-     */
     public AutoUpdater(String version) {
-        this(version, Settings.get(Settings.SETTING_JADURL));
+        this(version, 24 * 3600 * 1000);
     }
 
     public void run() {
@@ -127,6 +132,9 @@ public class AutoUpdater extends TimerTask {
         if ((System.currentTimeMillis() - lastDone) < timeBetweenUpdates) {
             return false;
         }
+
+        // We get the URL at each run because it might change from one run to an other
+        final String url = Settings.get(Settings.SETTING_JADURL);
         HttpConnection conn = (HttpConnection) Connector.open(url);
         conn.setRequestProperty("user-agent", "tc65lib/" + ATExecution.getImei());
         int rc = conn.getResponseCode();

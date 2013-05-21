@@ -166,9 +166,6 @@ public class Settings {
      * @return Default settings Hashtable
      */
     public static Hashtable getDefaultSettings() {
-//		if (Logger.BUILD_DEBUG) {
-//			Logger.log("Settings.getDefaultSettings();");
-//		}
 
         Hashtable defaultSettings = new Hashtable();
 
@@ -196,7 +193,7 @@ public class Settings {
      *
      * @param consumer Consumer of settings
      */
-    public static void addSettingsConsumer(SettingsConsumer consumer) {
+    public static void addConsumer(SettingsConsumer consumer) {
 //		if (Logger.BUILD_DEBUG) {
 //			Logger.log("Settings.addSettingsConsumer( " + consumer + " );");
 //		}
@@ -393,7 +390,7 @@ public class Settings {
      * @param key Setting to set
      * @param value Value of the setting
      */
-    public synchronized void set(String key, String value) {
+    public static synchronized void set(String key, String value) {
         if (Logger.BUILD_DEBUG) {
             Logger.log("Settings.setSetting( \"" + key + "\", \"" + value + "\" );");
         }
@@ -414,10 +411,10 @@ public class Settings {
      * @param value Value of the setting
      * @return If setting was actually changed
      */
-    public synchronized boolean setWithoutEvent(String key, String value) {
-        Hashtable settings = getSettings();
-        if (settings.containsKey(key)) {
-            String previousValue = (String) settings.get(key);
+    public static synchronized boolean setWithoutEvent(String key, String value) {
+        Hashtable table = getSettings();
+        if (table.containsKey(key)) {
+            String previousValue = (String) table.get(key);
             if (previousValue.compareTo(value) == 0) {
                 return false;
             }
@@ -428,7 +425,7 @@ public class Settings {
         if (loading) {
             throw new RuntimeException("Settings.setSettingWithoutChangeEvent: You can't change a setting while loading !");
         }
-        settings.put(key, value);
+        table.put(key, value);
         madeSomeChanges = true;
         return true;
     }
