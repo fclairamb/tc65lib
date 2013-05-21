@@ -11,7 +11,7 @@ import java.util.Hashtable;
  *
  * @author Florent Clairambault / www.webingenia.com
  */
-public interface SettingsConsumer {
+public interface SettingsProvider {
 
 	/**
 	 * Define the settings (and their default value) the settings consumer class

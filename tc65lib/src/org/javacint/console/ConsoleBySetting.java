@@ -7,7 +7,7 @@ package org.javacint.console;
 import java.util.Hashtable;
 import javax.microedition.io.StreamConnection;
 import org.javacint.settings.Settings;
-import org.javacint.settings.SettingsConsumer;
+import org.javacint.settings.SettingsProvider;
 
 /**
  * Console by setting management.
@@ -21,11 +21,11 @@ import org.javacint.settings.SettingsConsumer;
  *
  * @author florent
  */
-public class ConsoleBySetting extends Console implements SettingsConsumer {
+public class ConsoleBySetting extends Console implements SettingsProvider {
 
     public ConsoleBySetting(StreamConnection conn) {
         super(conn);
-        Settings.addConsumer(this);
+        Settings.addProvider(this);
     }
     private static final String SETTING_CONSOLE_ENABLED = "console.enabled";
 

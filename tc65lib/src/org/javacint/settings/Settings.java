@@ -137,14 +137,14 @@ public class Settings {
      *
      * @param names Names of the settings
      */
-    public static void onSettingsChanged(String[] names, SettingsConsumer caller) {
+    public static void onSettingsChanged(String[] names, SettingsProvider caller) {
 //		if (Logger.BUILD_DEBUG) {
 //			Logger.log("Settings.onSettingsChanged( String[" + names.length + "] names );");
 //		}
         try {
             synchronized (consumers) {
                 for (Enumeration en = consumers.elements(); en.hasMoreElements();) {
-                    SettingsConsumer cons = (SettingsConsumer) en.nextElement();
+                    SettingsProvider cons = (SettingsProvider) en.nextElement();
 
                     if (cons == caller) {
                         continue;
@@ -180,7 +180,7 @@ public class Settings {
 
         synchronized (consumers) {
             for (Enumeration en = consumers.elements(); en.hasMoreElements();) {
-                SettingsConsumer cons = (SettingsConsumer) en.nextElement();
+                SettingsProvider cons = (SettingsProvider) en.nextElement();
                 cons.getDefaultSettings(defaultSettings);
             }
         }
@@ -193,7 +193,7 @@ public class Settings {
      *
      * @param consumer Consumer of settings
      */
-    public static void addConsumer(SettingsConsumer consumer) {
+    public static void addProvider(SettingsProvider consumer) {
 //		if (Logger.BUILD_DEBUG) {
 //			Logger.log("Settings.addSettingsConsumer( " + consumer + " );");
 //		}
@@ -213,7 +213,7 @@ public class Settings {
      *
      * @param consumer Consumer of settings
      */
-    public static void removeSettingsConsumer(SettingsConsumer consumer) {
+    public static void removeSettingsConsumer(SettingsProvider consumer) {
         synchronized (consumers) {
             if (consumers.contains(consumer)) {
                 consumers.removeElement(consumer);

@@ -15,7 +15,7 @@ import org.javacint.common.Strings;
 import org.javacint.common.sorting.Sorter;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
-import org.javacint.settings.SettingsConsumer;
+import org.javacint.settings.SettingsProvider;
 
 /**
  * Console management

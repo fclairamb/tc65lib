@@ -2,12 +2,12 @@ package org.javacint.demo;
 
 import java.util.Hashtable;
 import org.javacint.settings.Settings;
-import org.javacint.settings.SettingsConsumer;
+import org.javacint.settings.SettingsProvider;
 
 /**
  * Provides some default values for some commonly used settings.
  */
-public class BaseSettingsProvider implements SettingsConsumer {
+public class BaseSettingsProvider implements SettingsProvider {
 
     public void getDefaultSettings(Hashtable settings) {
 

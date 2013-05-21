@@ -48,7 +48,7 @@ public class StartupLoader extends TimerTask {
         loader.addRunnable(new NamedRunnable("Settings:loading") {
             public void run() throws Exception {
                 Settings.loading(true);
-                Settings.addConsumer(new BaseSettingsProvider());
+                Settings.addProvider(new BaseSettingsProvider());
             }
         });
 
