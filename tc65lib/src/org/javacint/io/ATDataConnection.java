@@ -8,9 +8,9 @@ public final class ATDataConnection extends Connection {
     public boolean open(ConnectionProfile paramConnectionProfile) {
         try {
             String connect;
-            if (((connect = ATCommands.getDataATCommand().send(paramConnectionProfile.getProfile() + '\r')).indexOf("OK") > 0) || (connect.indexOf("CONNECT") > 0)) {
-                this.is = ATCommands.getDataATCommand().getDataInputStream();
-                this.os = ATCommands.getDataATCommand().getDataOutputStream();
+            if (((connect = ATCommands.getATCommandData().send(paramConnectionProfile.getProfile() + '\r')).indexOf("OK") > 0) || (connect.indexOf("CONNECT") > 0)) {
+                this.is = ATCommands.getATCommandData().getDataInputStream();
+                this.os = ATCommands.getATCommandData().getDataOutputStream();
                 return true;
             }
         } catch (Exception e) {

@@ -128,9 +128,9 @@ public class SMSFactory {
 
 	private void setCodePage(boolean isUCS2) throws ATCommandFailedException {
 		if (isUCS2) {
-			ATCommands.sendr("AT+CSCS=\"UCS2\"").indexOf("OK");
+			ATCommands.sendr("AT+CSCS=\"UCS2\"");//.indexOf("OK");
 		} else {
-			ATCommands.sendr("AT+CSCS=\"GSM\"").indexOf("OK");
+			ATCommands.sendr("AT+CSCS=\"GSM\"");//.indexOf("OK");
 		}
 	}
 
@@ -148,7 +148,7 @@ public class SMSFactory {
 		//!!!!!!!!!WARNING!!!!!!!!!!WARNING!!!!!!!!!WARNING!!!!!!!!!WARNING!!!!!!!!!WARNING!!!!!!!!!WARNING!!!!!!!!!!
 		//All other calls anywhere else in the project to this atCommand should also be synchronized for this to work
 		///////////////Otherwise, there is probability of SMS not being sent or stuck in the process/////////////////
-		synchronized (ATCommands.getSyncObject()) {
+		synchronized (ATCommands.getATCommand()) {
 			setCodePage(isUCS2);
 			response = ATCommands.sendr("AT+CMGS=" + (PDU.length() / 2 - 1));
 			if (DEBUG) {

@@ -44,6 +44,18 @@ public final class ATCommands {
         atCommandData = c;
     }
 
+    public static ATCommand getATCommand() {
+        return atCommand;
+    }
+
+    public static ATCommand getATCommandData() {
+        return atCommandData;
+    }
+
+    public static ATCommand getATCommandURC() {
+        return atCommandURC;
+    }
+
     public static String send(String cmd) {
         try {
             synchronized (atCommand) {
@@ -58,7 +70,7 @@ public final class ATCommands {
     }
 
     public static String sendr(String cmd) {
-        return send(cmd+'\r');
+        return send(cmd + '\r');
     }
 
     public static String sendrAll(String ATCmd) {
@@ -98,12 +110,7 @@ public final class ATCommands {
     public static Connection getATDataConnection() {
         return new ATDataConnection();
     }
-
-    public static ATCommand getDataATCommand() {
-        return atCommandData;
-    }
-
-    public static Object getSyncObject() {
-        return atCommand;
-    }
+//    public static Object getSyncObject() {
+//        return atCommand;
+//    }
 }
