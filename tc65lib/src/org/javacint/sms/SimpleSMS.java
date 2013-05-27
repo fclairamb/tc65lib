@@ -8,8 +8,7 @@ import org.javacint.at.ATCommands;
 import org.javacint.logging.Logger;
 
 /**
- *
- * @author florent
+ * The most basic SMS handling class possible.
  */
 public class SimpleSMS {
 
@@ -20,9 +19,9 @@ public class SimpleSMS {
         try {
             String ret;
             synchronized (ATCommands.getATCommand()) {
-                ATCommands.sendNoR("at+cmgf=1\r");
-                ret = ATCommands.sendNoR("at+cmgs=" + dest + "\r");
-                ret += ATCommands.sendNoR(msg + CTRL_Z);
+                ATCommands.send("at+cmgf=1");
+                ret = ATCommands.send("at+cmgs=" + dest);
+                ret += ATCommands.sendRaw(msg + CTRL_Z);
             }
 
             if (Logger.BUILD_DEBUG && DEBUG) {
