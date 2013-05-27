@@ -123,8 +123,8 @@ public class ATExecution {
         if (Logger.BUILD_DEBUG) {
             Logger.log("ATCommandsWrapper.update( ATCommand, \"" + apn + "\", \"" + target + "\" );", true);
         }
-        // If we are on a TC65 and not a TC65i (I hope I could remove this code someday soon)
-        if (true) { // getChipName is broken, I need to fix it
+
+        {// If we are on a TC65 and not a TC65i (might be a good time to remove this code)
             String[] spl = Strings.split(",", apn);
             apn = "";
             for (int i = 0; i < spl.length && i < 4; i++) {
@@ -142,13 +142,11 @@ public class ATExecution {
             }
         }
 
-
-        String ret1, ret2;
-
+        // We setup, if possible the correct OTAP parameters
         if (apn != null && target != null) {
-            ret1 = ATCommands.send("AT^SJOTAP=," + target + ",a:,,," + apn);
+            String ret = ATCommands.send("AT^SJOTAP=," + target + ",a:,,," + apn);
             if (Logger.BUILD_DEBUG) {
-                Logger.log("ATCommandsWrapper.update: ret1=\"" + ret1.replace('\r', '.').
+                Logger.log("ATCommandsWrapper.update: ret1=\"" + ret.replace('\r', '.').
                         replace('\n', '.') + "\"", true);
             }
         } else {
@@ -156,10 +154,14 @@ public class ATExecution {
                 Logger.log("ATCommandsWrapper.update: No APN or no target !");
             }
         }
-        ret2 = ATCommands.send("AT^SJOTAP");
-        if (Logger.BUILD_DEBUG) {
-            Logger.log("ATCommandsWrapper.update: ret2=\"" + ret2.replace('\r', '.').
-                    replace('\n', '.') + "\"", true);
+
+        // If not, we just trigger the OTAP
+        {
+            String ret = ATCommands.send("AT^SJOTAP");
+            if (Logger.BUILD_DEBUG) {
+                Logger.log("ATCommandsWrapper.update: ret2=\"" + ret.replace('\r', '.').
+                        replace('\n', '.') + "\"", true);
+            }
         }
     }
 }
