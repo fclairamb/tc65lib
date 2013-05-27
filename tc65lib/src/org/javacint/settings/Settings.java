@@ -225,7 +225,7 @@ public class Settings {
     /**
      * Reset all settings
      */
-    public synchronized void resetErything() {
+    public synchronized static void reset() {
         try {
             FileConnection fc = (FileConnection) Connector.open("file:///a:/" + fileName, Connector.READ_WRITE);
             if (fc.exists()) {
