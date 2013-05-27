@@ -12,6 +12,7 @@ import com.siemens.icm.io.*;
 import org.javacint.io.ATDataConnection;
 import org.javacint.io.Connection;
 import org.javacint.logging.Logger;
+import org.javacint.sms.SMSReceiver;
 
 /**
  * AT wrapper class
@@ -29,19 +30,19 @@ public final class ATCommands {
 
     static {
         // We enforce the static final
-        ATCommand a = null, b = null, c = null;
+        ATCommand atc1 = null, aturc = null, atdata = null;
         try {
-            a = new ATCommand(false, false, false, false, false, false);
-            b = new ATCommand(false, true, false, false, false, false);
-            c = new ATCommand(false, false, false, false, false, false);
+            atc1 = new ATCommand(false);
+            aturc = new ATCommand(false);
+            atdata = new ATCommand(true);
         } catch (Exception e) {
             if (DEBUG) {
                 Logger.log("ATCommands:static", ATCommands.class);
             }
         }
-        atCommand = a;
-        atCommandURC = b;
-        atCommandData = c;
+        atCommand = atc1;
+        atCommandURC = aturc;
+        atCommandData = atdata;
     }
 
     public static ATCommand getATCommand() {
@@ -56,11 +57,58 @@ public final class ATCommands {
         return atCommandURC;
     }
 
+    public static String sendNoR(String cmd) {
+        return sendRaw(getATCommand(), cmd);
+    }
+
+    public static String sendUrcNoR(String cmd) {
+        return sendRaw(getATCommand(), cmd);
+    }
+
     public static String send(String cmd) {
+        return send(getATCommand(), cmd);
+    }
+
+    public static String sendUrc(String cmd) {
+        return send(getATCommandURC(), cmd);
+    }
+
+    public static String sendrAll(String ATCmd) {
+        sendRaw(atCommandURC, ATCmd + '\r');
+        sendRaw(atCommandData, ATCmd + '\r');
+        return sendRaw(atCommand, ATCmd + '\r');
+    }
+
+    private static String atcInstanceToString(ATCommand atc) {
+        if (atc == atCommand) {
+            return "AT1";
+        } else if (atc == atCommandURC) {
+            return "ATURC";
+        } else if (atc == atCommandData) {
+            return "ATData";
+        } else {
+            return "ATUnk";
+        }
+    }
+
+    private static String send(ATCommand atc, String cmd) {
+        return sendRaw(atc, cmd + '\r');
+    }
+
+    private static String sendRaw(ATCommand atc, String cmd) {
+
         try {
-            synchronized (atCommand) {
-                return atCommand.send(cmd);
+            String result;
+            if (DEBUG) {
+                Logger.log(atcInstanceToString(atc) + " <-- " + cmd);
             }
+            synchronized (atc) {
+                result = atc.send(cmd);
+            }
+            if (DEBUG) {
+                Logger.log(atcInstanceToString(atc) + " --> " + cmd);
+            }
+            return result;
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
                 Logger.log("ATCommands.send", ex);
@@ -69,48 +117,15 @@ public final class ATCommands {
         }
     }
 
-    public static String sendr(String cmd) {
-        return send(cmd + '\r');
-    }
-
-    public static String sendrAll(String ATCmd) {
-        send(atCommandURC, ATCmd + '\r');
-        send(atCommandData, ATCmd + '\r');
-        return send(atCommand, ATCmd + '\r');
-    }
-
-    private static String send(ATCommand atcmd, String ATCmd) {
-        String result = null;
-        try {
-            if (DEBUG) {
-                Logger.log((atcmd == atCommand ? "atCommand" : (atcmd == atCommandURC ? "atCommandURC" : (atcmd == atCommandData ? "atCommandData" : "UnknownATCommand!"))) + " S: " + ATCmd);
-            }
-            synchronized (atcmd) {
-                result = atcmd.send(ATCmd);
-            }
-            if (DEBUG) {
-                Logger.log((atcmd == atCommand ? "atCommand" : (atcmd == atCommandURC ? "atCommandURC" : (atcmd == atCommandData ? "atCommandData" : "UnknownATCommand!"))) + " R: " + result);
-            }
-        } catch (Exception ex) {
-            if (DEBUG) {
-                ex.printStackTrace();
-            }
-        }
-        return result;
-    }
-
     public static void addListener(ATCommandListener listener) {
         atCommandURC.addListener(listener);
     }
 
-    public String sendURCToggleCommand(String ATCmd) {
-        return send(atCommandURC, ATCmd + '\r');
+    public static void removeListener(ATCommandListener listener) {
+        atCommandURC.removeListener(listener);
     }
 
     public static Connection getATDataConnection() {
         return new ATDataConnection();
     }
-//    public static Object getSyncObject() {
-//        return atCommand;
-//    }
 }

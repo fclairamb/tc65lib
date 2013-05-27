@@ -20,9 +20,9 @@ public class SimpleSMS {
         try {
             String ret;
             synchronized (ATCommands.getATCommand()) {
-                ATCommands.send("at+cmgf=1\r");
-                ret = ATCommands.send("at+cmgs=" + dest + "\r");
-                ret += ATCommands.send(msg + CTRL_Z);
+                ATCommands.sendNoR("at+cmgf=1\r");
+                ret = ATCommands.sendNoR("at+cmgs=" + dest + "\r");
+                ret += ATCommands.sendNoR(msg + CTRL_Z);
             }
 
             if (Logger.BUILD_DEBUG && DEBUG) {

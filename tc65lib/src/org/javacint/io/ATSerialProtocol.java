@@ -34,7 +34,7 @@ public abstract class ATSerialProtocol extends Connection {
             return false;
         }
         try {
-            ATCommands.sendr("AT^SCFG=\"MeOpMode/MipsMa\",\"off\"");
+            ATCommands.send("AT^SCFG=\"MeOpMode/MipsMa\",\"off\"");
 
             this.atDataConnection = ATCommands.getATDataConnection();
             if (this.atDataConnection.open(this.atSerialProfile)) {

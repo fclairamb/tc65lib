@@ -66,19 +66,19 @@ public class SMSFactory {
 		do {
 			try {
 				//setting SMS mode
-				ok = ATCommands.sendr("AT+CSMS=1").indexOf("OK") >= 0;
+				ok = ATCommands.send("AT+CSMS=1").indexOf("OK") >= 0;
 				if (DEBUG) {
 					Logger.log("setting SMS mode to new standart... " + ok);
 				}
 
 				//prefer CSD bearer when sending SMSs
-				ok &= ATCommands.sendr("AT+CGSMS=3").indexOf("OK") >= 0;
+				ok &= ATCommands.send("AT+CGSMS=3").indexOf("OK") >= 0;
 				if (DEBUG) {
 					Logger.log("prefer CSD bearer when sending SMSs... " + ok);
 				}
 
 				//return error when sending sms fail
-				ok &= ATCommands.sendr("AT^SM20=1,0").indexOf("OK") >= 0;
+				ok &= ATCommands.send("AT^SM20=1,0").indexOf("OK") >= 0;
 				if (DEBUG) {
 					Logger.log("enable error when sending sms fail... " + ok);
 				}
@@ -93,7 +93,7 @@ public class SMSFactory {
 					}
 				}
 
-				String smsFULL = ATCommands.sendr("AT^SMGO?");
+				String smsFULL = ATCommands.send("AT^SMGO?");
 				int a = smsFULL.indexOf("^SMGO:");
 				if (a >= 0) {
 					a = smsFULL.indexOf(',', a);
@@ -104,7 +104,7 @@ public class SMSFactory {
 							Logger.log("SMS storage is full - time to clean up!");
 						}
 						int i = 1;
-						while (ATCommands.sendr("AT+CMGD=" + i).indexOf("OK") >= 0) {
+						while (ATCommands.send("AT+CMGD=" + i).indexOf("OK") >= 0) {
 							if (DEBUG) {
 								Logger.log("Deleting SMS at index " + i);
 							}
@@ -128,9 +128,9 @@ public class SMSFactory {
 
 	private void setCodePage(boolean isUCS2) throws ATCommandFailedException {
 		if (isUCS2) {
-			ATCommands.sendr("AT+CSCS=\"UCS2\"");//.indexOf("OK");
+			ATCommands.send("AT+CSCS=\"UCS2\"");//.indexOf("OK");
 		} else {
-			ATCommands.sendr("AT+CSCS=\"GSM\"");//.indexOf("OK");
+			ATCommands.send("AT+CSCS=\"GSM\"");//.indexOf("OK");
 		}
 	}
 
@@ -150,7 +150,7 @@ public class SMSFactory {
 		///////////////Otherwise, there is probability of SMS not being sent or stuck in the process/////////////////
 		synchronized (ATCommands.getATCommand()) {
 			setCodePage(isUCS2);
-			response = ATCommands.sendr("AT+CMGS=" + (PDU.length() / 2 - 1));
+			response = ATCommands.send("AT+CMGS=" + (PDU.length() / 2 - 1));
 			if (DEBUG) {
 				Logger.log(response);
 			}
@@ -162,7 +162,7 @@ public class SMSFactory {
 						ex.printStackTrace();
 					}
 				}
-				response = ATCommands.sendr(PDU + "\032");
+				response = ATCommands.send(PDU + "\032");
 			}
 		}
 		/////////////////////////////////////////CRITICAL AREA ENDS//////////////////////////////////////////////////
@@ -284,9 +284,9 @@ public class SMSFactory {
 		do {
 			try {
 				String PDUData = MakePDUData(num, data);
-				ATCommands.sendr("AT+CMGS=" + (PDUData.length() / 2 - 1));
+				ATCommands.send("AT+CMGS=" + (PDUData.length() / 2 - 1));
 				Thread.sleep(WAIT_TIME);
-				ATCommands.sendr(PDUData + "\032");
+				ATCommands.send(PDUData + "\032");
 				Thread.sleep(WAIT_TIME);
 			} catch (Exception e) {
 				ok = false;

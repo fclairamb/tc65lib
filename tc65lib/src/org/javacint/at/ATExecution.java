@@ -16,7 +16,7 @@ public class ATExecution {
 
     public static String[] getMONC() {
         try {
-            String ret = ATCommands.send("AT^SMONC\r");
+            String ret = ATCommands.sendNoR("AT^SMONC\r");
             String[] spl = Strings.split('\n', ret);
             spl = Strings.split(',', spl[1].substring(7).trim());
             return spl;
@@ -36,7 +36,7 @@ public class ATExecution {
      */
     public static String getImei() {
         try {
-            String tab[] = Strings.split('\n', ATCommands.sendr("AT+GSN"));
+            String tab[] = Strings.split('\n', ATCommands.send("AT+GSN"));
             return (tab[1]).trim();
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
@@ -54,7 +54,7 @@ public class ATExecution {
      */
     public static String getImsi(ATCommand atc) {
         try {
-            String tab[] = Strings.split('\n', ATCommands.send("AT+CIMI\r"));
+            String tab[] = Strings.split('\n', ATCommands.sendNoR("AT+CIMI\r"));
             String imsi = (tab[1]).trim();
 
             if (imsi.equals("ERROR")) {
@@ -76,7 +76,7 @@ public class ATExecution {
      */
     public static String getScid(ATCommand atc) {
         try {
-            String tab[] = Strings.split('\n', ATCommands.send("AT^SCID\r"));
+            String tab[] = Strings.split('\n', ATCommands.sendNoR("AT^SCID\r"));
             String scid = (tab[1]).trim().substring(7);
             if (Logger.BUILD_DEBUG) {
                 Logger.log("Common.getImsi: \"" + scid + "\"");
@@ -102,7 +102,7 @@ public class ATExecution {
         if (Logger.BUILD_DEBUG) {
             Logger.log(THIS + ".restart();");
         }
-        ATCommands.send("AT+CFUN=1,1\r");
+        ATCommands.sendNoR("AT+CFUN=1,1\r");
     }
 
     public static void update() {
@@ -146,7 +146,7 @@ public class ATExecution {
         String ret1, ret2;
 
         if (apn != null && target != null) {
-            ret1 = ATCommands.send("AT^SJOTAP=," + target + ",a:,,," + apn + "\r");
+            ret1 = ATCommands.sendNoR("AT^SJOTAP=," + target + ",a:,,," + apn + "\r");
             if (Logger.BUILD_DEBUG) {
                 Logger.log("ATCommandsWrapper.update: ret1=\"" + ret1.replace('\r', '.').
                         replace('\n', '.') + "\"", true);
@@ -156,7 +156,7 @@ public class ATExecution {
                 Logger.log("ATCommandsWrapper.update: No APN or no target !");
             }
         }
-        ret2 = ATCommands.send("AT^SJOTAP\r");
+        ret2 = ATCommands.sendNoR("AT^SJOTAP\r");
         if (Logger.BUILD_DEBUG) {
             Logger.log("ATCommandsWrapper.update: ret2=\"" + ret2.replace('\r', '.').
                     replace('\n', '.') + "\"", true);

@@ -503,7 +503,7 @@ public class Utilities {
         }
         String mytime = "";
         try {
-            mytime = ATCommands.sendr("AT+CCLK?");
+            mytime = ATCommands.send("AT+CCLK?");
         } catch (Exception ex) {
             return "2001-01-01 01:01:01";
         }

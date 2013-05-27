@@ -79,7 +79,7 @@ public class Console implements Runnable {
         }
 
         if (line.startsWith("AT")) {
-            String[] lines = Strings.split('\n', ATCommands.send(line + "\r"));
+            String[] lines = Strings.split('\n', ATCommands.sendNoR(line + "\r"));
             for (int i = 0; i < lines.length; ++i) {
                 writeLine("[AT] " + lines[i]);
             }
