@@ -12,7 +12,7 @@ import org.javacint.settings.Settings;
  */
 public class ATExecution {
 
-    private static final String THIS = "ATCW";
+    private static final String THIS = "ATExec";
 
     public static String[] getMONC() {
         try {
