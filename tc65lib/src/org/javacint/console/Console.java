@@ -6,8 +6,6 @@ import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-import javax.microedition.io.CommConnection;
-import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import org.javacint.at.ATCommands;
 import org.javacint.at.ATExecution;
@@ -15,7 +13,6 @@ import org.javacint.common.Strings;
 import org.javacint.common.sorting.Sorter;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
-import org.javacint.settings.SettingsProvider;
 
 /**
  * Console management
@@ -79,7 +76,7 @@ public class Console implements Runnable {
         }
 
         if (line.startsWith("AT")) {
-            String[] lines = Strings.split('\n', ATCommands.sendNoR(line + "\r"));
+            String[] lines = Strings.split('\n', ATCommands.send(line));
             for (int i = 0; i < lines.length; ++i) {
                 writeLine("[AT] " + lines[i]);
             }
