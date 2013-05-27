@@ -57,11 +57,11 @@ public final class ATCommands {
         return atCommandURC;
     }
 
-    public static String sendNoR(String cmd) {
+    public static String sendRaw(String cmd) {
         return sendRaw(getATCommand(), cmd);
     }
 
-    public static String sendUrcNoR(String cmd) {
+    public static String sendUrcRaw(String cmd) {
         return sendRaw(getATCommand(), cmd);
     }
 
