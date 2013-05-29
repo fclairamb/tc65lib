@@ -49,10 +49,9 @@ public class ATExecution {
     /**
      * Get the IMSI of the SIM card
      *
-     * @param atc ATCommand
      * @return SIM card IMSI
      */
-    public static String getImsi(ATCommand atc) {
+    public static String getImsi() {
         try {
             String tab[] = Strings.split('\n', ATCommands.send("AT+CIMI"));
             String imsi = (tab[1]).trim();
@@ -62,8 +61,9 @@ public class ATExecution {
             }
             return imsi;
         } catch (Exception ex) {
-            System.out.println(THIS + ".getIMSI.19 : ex : " + ex.getClass().
-                    toString() + " : " + ex.getMessage());
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log(THIS + ".getImsi", ex);
+            }
             return null;
         }
     }
@@ -71,10 +71,9 @@ public class ATExecution {
     /**
      * Display the SIM card identification number
      *
-     * @param atc ATCommand
      * @return SIM card identification number
      */
-    public static String getScid(ATCommand atc) {
+    public static String getScid() {
         try {
             String tab[] = Strings.split('\n', ATCommands.send("AT^SCID"));
             String scid = (tab[1]).trim().substring(7);
@@ -87,7 +86,7 @@ public class ATExecution {
             return scid;
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
-                Logger.log(THIS + ".getScid", ex, true);
+                Logger.log(THIS + ".getScid", ex);
             }
             return null;
         }
@@ -163,5 +162,34 @@ public class ATExecution {
                         replace('\n', '.') + "\"", true);
             }
         }
+    }
+
+    public static boolean applyAPN(String apn) {
+        try {
+            String ret = ATCommands.send("AT^SJNET=" + apn);
+            String[] spl = Strings.split('\n', ret);
+            ret = spl[1].trim();
+            return "OK".equals(ret);
+        } catch (Exception ex) {
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log(THIS + ".applyAPN", ex);
+            }
+        }
+        return false;
+    }
+
+    public static String getCopsOperator() {
+        try {
+            String ret = ATCommands.send("AT+COPS?");
+            String[] spl = Strings.split('\n', ret);
+            String line = spl[1].trim();
+            line = line.substring(line.indexOf('"') + 1, line.length() - 1);
+            return line;
+        } catch (Exception ex) {
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log(THIS + ".getCopsOperator", ex);
+            }
+        }
+        return null;
     }
 }
