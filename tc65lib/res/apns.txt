@@ -1,0 +1,52 @@
+#c a|u|p|d
+
+[all]
+internet
+
+[208]
+#i 208-sfr
+#i 208-orange
+#i 208-free
+
+[208-01]
+#i 208-15
+
+[208-15]
+#i 208-orange
+#i 208-free
+
+[208-10]
+#i 208-sfr
+
+[208-15]
+#i 208-free
+
+[208-sfr]
+m2minternet
+websfr
+slsfr
+sl2sfr
+
+[208-orange]
+orange|orange|orange
+orange.fr|orange|orange
+ofnew.fr|orange|orange
+
+[208-free]
+free
+
+[602-03]
+etisalat
+
+[270]
+icon.lu
+fastm2m.lu
+web.pt.lu
+
+[454]
+hkcsl
+
+[608]
+internet|internet
+
+#f android.txt
