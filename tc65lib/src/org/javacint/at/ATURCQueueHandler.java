@@ -4,7 +4,11 @@
  */
 package org.javacint.at;
 
-import com.siemens.icm.io.ATCommandListener;
+//#if sdkns == "siemens"
+import com.siemens.icm.io.*;
+//#elif sdkns == "cinterion"
+//# import com.cinterion.io.*;
+//#endif
 import java.util.Timer;
 import java.util.TimerTask;
 import org.javacint.task.Timers;

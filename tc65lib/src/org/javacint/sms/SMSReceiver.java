@@ -4,7 +4,11 @@
  */
 package org.javacint.sms;
 
-import com.siemens.icm.io.ATCommandListener;
+//#if sdkns == "siemens"
+import com.siemens.icm.io.*;
+//#elif sdkns == "cinterion"
+//# import com.cinterion.io.*;
+//#endif
 import java.util.Enumeration;
 import java.util.Vector;
 import org.javacint.at.ATCommands;

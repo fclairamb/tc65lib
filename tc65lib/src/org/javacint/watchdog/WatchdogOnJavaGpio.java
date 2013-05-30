@@ -1,7 +1,10 @@
 package org.javacint.watchdog;
 
-import com.siemens.icm.io.ATCommandFailedException;
-import com.siemens.icm.io.OutPort;
+//#if sdkns == "siemens"
+import com.siemens.icm.io.*;
+//#elif sdkns == "cinterion"
+//# import com.cinterion.io.*;
+//#endif
 import java.io.IOException;
 import java.util.Vector;
 import org.javacint.logging.Logger;

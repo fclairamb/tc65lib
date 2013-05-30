@@ -3,7 +3,7 @@ package org.javacint.watchdog;
 //#if sdkns == "siemens"
 import com.siemens.icm.misc.Watchdog;
 //#elif sdkns == "cinterion"
-//# //import com.cinterion.icm.misc.Watchdog;
+//# import com.cinterion.misc.Watchdog;
 //#endif
 
 /**

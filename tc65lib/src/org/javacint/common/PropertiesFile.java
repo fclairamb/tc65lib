@@ -1,6 +1,10 @@
 package org.javacint.common;
 
+//#if sdkns == "siemens"
 import com.siemens.icm.io.file.FileConnection;
+//#elif sdkns == "cinterion"
+//# import com.cinterion.io.file.FileConnection;
+//#endif
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Enumeration;

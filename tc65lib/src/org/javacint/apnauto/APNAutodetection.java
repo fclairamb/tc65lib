@@ -1,7 +1,10 @@
 package org.javacint.apnauto;
 
-import com.siemens.icm.io.ATCommand;
-import com.siemens.icm.io.ATCommandFailedException;
+//#if sdkns == "siemens"
+import com.siemens.icm.io.*;
+//#elif sdkns == "cinterion"
+//# import com.cinterion.io.*;
+//#endif
 import java.io.IOException;
 import java.util.Vector;
 import javax.microedition.io.Connector;

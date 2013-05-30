@@ -1,6 +1,10 @@
 package org.javacint.at;
 
-import com.siemens.icm.io.ATCommand;
+//#if sdkns == "siemens"
+import com.siemens.icm.io.*;
+//#elif sdkns == "cinterion"
+//# import com.cinterion.io.*;
+//#endif
 import org.javacint.common.Strings;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
