@@ -148,9 +148,10 @@ public class SMSFactory {
 		//!!!!!!!!!WARNING!!!!!!!!!!WARNING!!!!!!!!!WARNING!!!!!!!!!WARNING!!!!!!!!!WARNING!!!!!!!!!WARNING!!!!!!!!!!
 		//All other calls anywhere else in the project to this atCommand should also be synchronized for this to work
 		///////////////Otherwise, there is probability of SMS not being sent or stuck in the process/////////////////
-		synchronized (ATCommands.getATCommand()) {
+		ATCommand atc;
+        synchronized (atc = ATCommands.getATCommand()) {
 			setCodePage(isUCS2);
-			response = ATCommands.send("AT+CMGS=" + (PDU.length() / 2 - 1));
+			response = ATCommands.send(atc, "AT+CMGS=" + (PDU.length() / 2 - 1));
 			if (DEBUG) {
 				Logger.log(response);
 			}
@@ -162,7 +163,7 @@ public class SMSFactory {
 						ex.printStackTrace();
 					}
 				}
-				response = ATCommands.send(PDU + "\032");
+				response = ATCommands.send(atc, PDU + "\032");
 			}
 		}
 		/////////////////////////////////////////CRITICAL AREA ENDS//////////////////////////////////////////////////
