@@ -5,6 +5,7 @@
 package org.javacint.sms;
 
 import com.siemens.icm.io.ATCommand;
+import org.javacint.at.ATCommandPooled;
 import org.javacint.at.ATCommands;
 import org.javacint.logging.Logger;
 
@@ -19,11 +20,14 @@ public class SimpleSMS {
     public static boolean send(String dest, String msg) {
         try {
             String ret;
-            ATCommand atc;
-            synchronized (atc = ATCommands.getATCommand()) {
-                ATCommands.send(atc, "at+cmgf=1");
-                ret = ATCommands.send(atc, "at+cmgs=" + dest);
-                ret += ATCommands.sendRaw(atc, msg + CTRL_Z);
+            ATCommandPooled acp = null;
+            try {
+                acp = ATCommands.getATCommand();
+                acp.send("at+cmgf=1");
+                ret = acp.send("at+cmgs=" + dest);
+                ret += acp.send(msg + CTRL_Z);
+            } finally {
+                acp.release();
             }
 
             if (Logger.BUILD_DEBUG && DEBUG) {

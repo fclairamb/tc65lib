@@ -24,16 +24,17 @@ public final class ATCommands {
 //# private static final boolean DEBUG = false;
 //#endif
     private static byte atcPoolLock = 1 | 2;
-    private static final ATCommand atCommand1, atCommand2;
+    private static final ATCommandPooled atCommand1, atCommand2;
     private static final ATCommand atCommandURC;
     private static final ATCommand atCommandData;
 
     static {
         // We enforce the static final
-        ATCommand atc1 = null, atc2 = null, aturc = null, atdata = null;
+        ATCommandPooled atc1 = null, atc2 = null;
+        ATCommand aturc = null, atdata = null;
         try {
-            atc1 = new ATCommand(false);
-            atc2 = new ATCommand(false);
+            atc1 = new ATCommandPooled(new ATCommand(false), (byte) 1);
+            atc2 = new ATCommandPooled(new ATCommand(false), (byte) 2);
             aturc = new ATCommand(false);
             atdata = new ATCommand(true);
 
@@ -48,10 +49,6 @@ public final class ATCommands {
         atCommandData = atdata;
     }
 
-    public static ATCommand getATCommand() {
-        return atCommand1;
-    }
-
     public static ATCommand getATCommandData() {
         return atCommandData;
     }
@@ -59,60 +56,32 @@ public final class ATCommands {
     public static ATCommand getATCommandURC() {
         return atCommandURC;
     }
+    private static final int POOL_MAX_WAIT = 30000; // ms
 
-    public static String sendRaw(String cmd) {
-        return sendRawPool(cmd);
-    }
-    private static final int POOL_MAX_WAIT = 10000; // ms
-
-    /**
-     * Send a raw AT Command using a pool of ATCommands.
-     * 
-     * This code is useless if other parts of the program use the same ATCommand
-     * instance directly.
-     * 
-     * @param cmd
-     * @return 
-     */
-    private static String sendRawPool(String cmd) {
-        ATCommand atc = null;
-        byte bitInstance = 0;
-        try {
-            synchronized (ATCommands.class) {
-                if (atcPoolLock == 0) { // If we have no available instance, we wait for one
-                    try {
-                        ATCommands.class.wait(POOL_MAX_WAIT);
-                    } catch (InterruptedException ex) {
-                        if (Logger.BUILD_CRITICAL) {
-                            Logger.log("ATC.sendRawPool:78", ex);
-                        }
-                    }
-                }
-                for (byte i = 1; i <= 2; i *= 2) { // We are searching for defined bit values (thus *= 2)
-                    if ((atcPoolLock & i) != 0) {
-                        bitInstance = i; // We are defining a bit lock
-                        atcPoolLock &= ~bitInstance; // We remove this available instance from pool
-                        switch (bitInstance) { // We actually get the corresponding instance
-                            case 1:
-                                atc = atCommand1;
-                                break;
-                            case 2:
-                                atc = atCommand2;
-                                break;
-                        }
+    public static ATCommandPooled getATCommand() {
+        synchronized (ATCommands.class) {
+            if (atcPoolLock == 0) { // If we have no available instance, we wait for one
+                try {
+                    ATCommands.class.wait(POOL_MAX_WAIT);
+                } catch (InterruptedException ex) {
+                    if (Logger.BUILD_CRITICAL) {
+                        Logger.log("ATC.sendRawPool:78", ex);
                     }
                 }
             }
-            if (atc != null) { // If we found an instance
-                return sendRaw(atc, cmd); // We use it
-            }
-        } finally {
-            synchronized (ATCommands.class) {
-                atcPoolLock |= bitInstance; // We put back the bit instance in the pool
-                ATCommands.class.notify();
+            for (byte i = 1; i <= 2; i *= 2) { // We are searching for defined bit values (thus *= 2)
+                if ((atcPoolLock & i) != 0) {
+                    atcPoolLock &= ~i;
+                    switch (i) { // We actually get the corresponding instance
+                        case 1:
+                            return atCommand1;
+                        case 2:
+                            return atCommand2;
+                    }
+                }
             }
         }
-        throw new RuntimeException("Could not find a free ATCommand instance in the pool !");
+        throw new RuntimeException("Could not get a PooledATCommand");
     }
 
     public static String sendUrcRaw(String cmd) {
@@ -120,26 +89,47 @@ public final class ATCommands {
     }
 
     public static String send(String cmd) {
-        return send(getATCommand(), cmd);
+        return sendRaw(cmd + '\r');
+    }
+
+    public static String sendRaw(String cmd) {
+        ATCommandPooled atc = null;
+        try {
+            atc = getATCommand();
+            return atc.sendRaw(cmd);
+        } finally {
+            release(atc);
+        }
     }
 
     public static String sendUrc(String cmd) {
         return send(getATCommandURC(), cmd);
     }
 
-    public static String sendrAll(String ATCmd) {
-        sendRaw(atCommandURC, ATCmd + '\r');
-        sendRaw(atCommandData, ATCmd + '\r');
-        return sendRaw(atCommand1, ATCmd + '\r');
+    public static String sendAll(String ATCmd) {
+        send(atCommandURC, ATCmd);
+        send(atCommandData, ATCmd);
+        ATCommandPooled atc1 = null, atc2 = null;
+        try {
+            atc1 = getATCommand();
+            atc2 = getATCommand();
+            atc1.send(ATCmd);
+            return atc2.send(ATCmd);
+        } finally {
+            release(atc1);
+            release(atc2);
+        }
     }
 
     private static String atcInstanceToString(ATCommand atc) {
-        if (atc == atCommand1) {
-            return "AT1";
-        } else if (atc == atCommandURC) {
+        if (atc == atCommandURC) {
             return "ATURC";
         } else if (atc == atCommandData) {
             return "ATData";
+        } else if (atc == atCommand1.getATCommand()) {
+            return "AT1";
+        } else if (atc == atCommand2.getATCommand()) {
+            return "AT2";
         } else {
             return "ATUnk";
         }
@@ -150,7 +140,6 @@ public final class ATCommands {
     }
 
     public static String sendRaw(ATCommand atc, String cmd) {
-
         try {
             String result;
             if (DEBUG) {
@@ -160,12 +149,12 @@ public final class ATCommands {
                 result = atc.send(cmd);
             }
             if (DEBUG) {
-                Logger.log(atcInstanceToString(atc) + " --> " + cmd);
+                Logger.log(atcInstanceToString(atc) + " --> " + result);
             }
             return result;
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
-                Logger.log("ATCommands.send", ex);
+                Logger.log("ATCommands.sendRaw", ex, true);
             }
             return null;
         }
@@ -181,5 +170,15 @@ public final class ATCommands {
 
     public static Connection getATDataConnection() {
         return new ATDataConnection();
+
+
+    }
+
+    static void release(ATCommandPooled atcp) {
+        synchronized (ATCommands.class) {
+            atcPoolLock |= atcp.getBit(); // We put back the bit instance in the pool
+            ATCommands.class
+                    .notify();
+        }
     }
 }
