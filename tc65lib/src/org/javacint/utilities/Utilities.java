@@ -44,20 +44,6 @@ public class Utilities {
     }
 
     /**
-     * Returns reversed string <br>
-     * Функция, разворачивающая строку
-     * @param s The string to be reversed
-     * @return String <b>reversed string</b>,<br><b>NULL</b> if "s" is NULL
-     */
-    static public String reverseString(String s) {
-        String r = new String();
-        for (int i = s.length() - 1; i >= 0; i--) {
-            r += s.charAt(i);
-        }
-        return r;
-    }
-
-    /**
      * This function splits string "str" to 2 pieces delimited by the first occurence of "delimiter"
      * @param delimiter the delimiter of string
      * @param str the string to be split
