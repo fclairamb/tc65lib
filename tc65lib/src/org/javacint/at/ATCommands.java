@@ -14,7 +14,11 @@ import org.javacint.io.Connection;
 import org.javacint.logging.Logger;
 
 /**
- * AT wrapper class
+ * ATCommand wrapper class</br>
+ * </br>
+ * Generally use send() method with auto newline at the end, in special cases when you need exact ending use sendRaw()</br>
+ * If you have a non-interrupting block, you should use getATCommand(), then use that instance (it will be exclusively used by your thread), then run release() method on it.</br>
+ * Use sendUrc() to activate some URCs and addListener() to receive them.
  */
 public final class ATCommands {
 
@@ -23,7 +27,6 @@ public final class ATCommands {
 //#elif DebugLevel=="warn" || DebugLevel=="fatal"
 //# private static final boolean DEBUG = false;
 //#endif
-    private static byte atcPoolLock = 1 | 2;
     private static final ATCommandPooled atCommand1, atCommand2;
     private static final ATCommand atCommandURC;
     private static final ATCommand atCommandData;
@@ -40,8 +43,8 @@ public final class ATCommands {
              * 
              * That's why we use (false, false, ... false)
              */
-            atc1 = new ATCommandPooled(new ATCommand(false, false, false, false, false, false), (byte) 1);
-            atc2 = new ATCommandPooled(new ATCommand(false, false, false, false, false, false), (byte) 2);
+            atc1 = new ATCommandPooled(new ATCommand(false, false, false, false, false, false));
+            atc2 = new ATCommandPooled(new ATCommand(false, false, false, false, false, false));
             aturc = new ATCommand(false, true, false, false, false, false); //One "true" to monitor URC's
             atdata = new ATCommand(false, false, false, false, false, false);
         } catch (Exception e) {
@@ -61,28 +64,22 @@ public final class ATCommands {
 
     private static final int POOL_MAX_WAIT = 30000; // ms
 
-    public static ATCommandPooled getATCommand() {
-        synchronized (ATCommands.class) {
-            if (atcPoolLock == 0) { // If we have no available instance, we wait for one
-                try {
-                    ATCommands.class.wait(POOL_MAX_WAIT);
-                } catch (InterruptedException ex) {
-                    if (Logger.BUILD_CRITICAL) {
-                        Logger.log("ATC.sendRawPool:78", ex);
-                    }
+    public static synchronized ATCommandPooled getATCommand() {
+        if (atCommand1.getBlockingThread() != null && atCommand2.getBlockingThread() != null) { // If we have no available instance, we wait for one
+            try {
+                ATCommands.class.wait(POOL_MAX_WAIT);
+            } catch (InterruptedException ex) {
+                if (Logger.BUILD_CRITICAL) {
+                    Logger.log(ATCommands.class, ex, 69);
                 }
             }
-            for (byte i = 1; i <= 2; i *= 2) { // We are searching for defined bit values (thus *= 2)
-                if ((atcPoolLock & i) != 0) {
-                    atcPoolLock &= ~i;
-                    switch (i) { // We actually get the corresponding instance
-                        case 1:
-                            return atCommand1;
-                        case 2:
-                            return atCommand2;
-                    }
-                }
-            }
+        }
+        if (atCommand1.getBlockingThread() == null) {
+            atCommand1.setBlockingThread();
+            return atCommand1;
+        } else if (atCommand2.getBlockingThread() == null) {
+            atCommand2.setBlockingThread();
+            return atCommand2;
         }
         throw new RuntimeException("Could not get a PooledATCommand");
     }
@@ -111,28 +108,43 @@ public final class ATCommands {
         return false;
     }
 
+    public static String sendUrc(String cmd) {
+        return send(atCommandURC, cmd);
+    }
+
     public static String sendUrcRaw(String cmd) {
         return sendRaw(atCommandURC, cmd);
     }
 
+    /**
+     * Generally use this method, it will auto newline at the end, and it will get free ATCommand instance if one is occupied
+     * @param cmd the intended AT command
+     * @return result
+     */
     public static String send(String cmd) {
         return sendRaw(cmd + '\r');
     }
 
+    /**
+     * Use this when you need exact AT command ending, not newline, it will be sent 'as-is'
+     * @param cmd the intended AT command
+     * @return result
+     */
     public static String sendRaw(String cmd) {
         ATCommandPooled atc = null;
         try {
             atc = getATCommand();
             return atc.sendRaw(cmd);
         } finally {
-            release(atc);
+            atc.release();
         }
     }
 
-    public static String sendUrc(String cmd) {
-        return send(atCommandURC, cmd);
-    }
-
+    /**
+     * Use this to send AT command to all available parsers.
+     * @param ATCmd the intended AT command
+     * @return response of the last parser
+     */
     public static String sendAll(String ATCmd) {
         send(atCommandURC, ATCmd);
         send(atCommandData, ATCmd);
@@ -143,8 +155,8 @@ public final class ATCommands {
             atc1.send(ATCmd);
             return atc2.send(ATCmd);
         } finally {
-            release(atc1);
-            release(atc2);
+            atc1.release();
+            atc2.release();
         }
     }
 
@@ -198,12 +210,5 @@ public final class ATCommands {
 
     public static Connection getATDataConnection() {
         return new ATDataConnection();
-    }
-
-    static void release(ATCommandPooled atcp) {
-        synchronized (ATCommands.class) {
-            atcPoolLock |= atcp.getBit(); // We put back the bit instance in the pool
-            ATCommands.class.notify();
-        }
     }
 }
