@@ -13,6 +13,7 @@ import hm.sms.PDU;
 import java.util.Enumeration;
 import java.util.Vector;
 import org.javacint.at.ATCommands;
+import org.javacint.at.ATURCQueueHandler;
 import org.javacint.logging.Logger;
 
 /**
@@ -65,7 +66,7 @@ public class SMSReceiver implements ATCommandListener {
      * called.
      */
     public void start() {
-        ATCommands.addListener(this);
+        ATCommands.addListener(new ATURCQueueHandler(this)); // This indirection prevents the URC call from being blocked
         boolean ok;
 
         //setting preferred SMS message storage to SIM
