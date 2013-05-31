@@ -40,9 +40,4 @@ public class ATCommandPooled {
     public void release() {
         ATCommands.release(this);
     }
-
-    protected void finalize() {
-        // This is just in case you forget to actually use it
-        release();
-    }
 }
