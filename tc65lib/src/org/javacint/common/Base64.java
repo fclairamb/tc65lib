@@ -1,7 +1,5 @@
 package org.javacint.common;
 
-import org.javacint.logging.Logger;
-
 /**
  * Utility class for Base64 encoding/decoding
  *
@@ -25,7 +23,7 @@ public final class Base64 {
     }
 
     /**
-     * Do the encoding
+     * Encode a byte array.
      *
      * @param s unencoded data
      * @param off offset
@@ -56,7 +54,7 @@ public final class Base64 {
     }
 
     /**
-     * Do the encoding
+     * Encode a byte array.
      *
      * @param s unencoded data
      * @return base64-encoded data
@@ -83,7 +81,7 @@ public final class Base64 {
     }
 
     /**
-     * Do the decoding
+     * Decode a byte array.
      *
      * @param s base64-encoded data
      * @return decoded data
