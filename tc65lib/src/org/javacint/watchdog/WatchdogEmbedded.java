@@ -7,7 +7,10 @@ import com.siemens.icm.misc.Watchdog;
 //#endif
 
 /**
- * Embedded watchdog management class for the TC65 v3 / TC65i chips.
+ * Embedded watchdog management class.
+ * 
+ * This code can only be used on the TC65 v3, TC65i[-X] chips
+ * 
  */
 public class WatchdogEmbedded implements WatchdogActor {
 

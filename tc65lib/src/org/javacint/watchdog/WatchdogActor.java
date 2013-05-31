@@ -1,14 +1,16 @@
 package org.javacint.watchdog;
 
 /**
- * Watchdog acting interface
+ * Watchdog actor interface.
+ *
+ * Actual watchdog implementation should be done through this interface.
  */
 public interface WatchdogActor {
 
-	/**
-	 * Tell the watchdog to send its keep-alive signal.
-	 *
-	 * @return true if not error was encountered
-	 */
-	boolean kick();
+    /**
+     * Kick the watchdog.
+     *
+     * @return true if not an error was encountered
+     */
+    boolean kick();
 }

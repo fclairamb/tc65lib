@@ -10,7 +10,7 @@ import java.util.Vector;
 import org.javacint.logging.Logger;
 
 /**
- * Watchdog on GPIO based hardware management class.
+ * Watchdog actors on GPIO.
  *
  * This implementation uses Java API based GPIO control.
  */
@@ -31,8 +31,6 @@ public class WatchdogOnJavaGpio implements WatchdogActor {
 	 * of its time in low state
 	 */
 	public WatchdogOnJavaGpio(int gpio, boolean inverted) {
-		//_atc = atc;
-
 		this.gpio = gpio;
 		this.inverted = inverted;
 		init();
@@ -52,18 +50,15 @@ public class WatchdogOnJavaGpio implements WatchdogActor {
 	}
 
 	/**
-	 * Reverse the state of the GPIO
+	 * Reverse the state of the GPIO.
 	 *
 	 * @return TRUE if there wasn't any error
 	 */
 	public boolean kick() {
 		try {
-
-			//_state = !_state;
 			setState(inverted ? false : true);
 			Thread.sleep(1000);
 			setState(inverted ? true : false);
-
 		} catch (Exception ex) {
 			if (Logger.BUILD_CRITICAL) {
 				Logger.log("WatchdogOnGpio.kick", ex);
@@ -92,9 +87,5 @@ public class WatchdogOnJavaGpio implements WatchdogActor {
 				Logger.log("WatchdogOnGpio.init", ex);
 			}
 		}
-	}
-
-	public String toString() {
-		return "WatchdogOnJavaGpio";
 	}
 }

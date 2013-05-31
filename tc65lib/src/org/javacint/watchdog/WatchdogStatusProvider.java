@@ -6,7 +6,7 @@ package org.javacint.watchdog;
 public interface WatchdogStatusProvider {
 
     /**
-     * Check if the status of the instance.
+     * Check the status of the instance.
      *
      * @return null if everything is ok, an error message if not
      */
