@@ -14,35 +14,46 @@ import com.siemens.icm.io.*;
 public class ATCommandPooled {
 
     private final ATCommand atc;
-    private final byte bitInstance;
+    private Thread blockingThread = null;
 
-    ATCommandPooled(ATCommand atc, byte bitInstance) {
+    ATCommandPooled(ATCommand atc) {
         this.atc = atc;
-        this.bitInstance = bitInstance;
     }
 
     ATCommand getATCommand() {
         return atc;
     }
 
-    byte getBit() {
-        return bitInstance;
+    Thread getBlockingThread() {
+        return blockingThread;
+    }
+
+    void setBlockingThread() {
+        blockingThread = Thread.currentThread();
     }
 
     public String send(String cmd) {
-        return ATCommands.send(atc, cmd);
+        return send(cmd, false);
     }
 
     public String sendRaw(String cmd) {
-        return ATCommands.sendRaw(atc, cmd);
+        return send(cmd, true);
+    }
+    
+    private String send(String cmd, boolean isRaw) {
+        if (Thread.currentThread() == blockingThread) {
+            return isRaw ? ATCommands.sendRaw(atc, cmd) : ATCommands.send(atc, cmd);
+        } else {
+            return isRaw ? ATCommands.sendRaw(cmd) : ATCommands.send(cmd);
+        }
     }
 
     public void release() {
-        ATCommands.release(this);
-    }
-
-    protected void finalize() {
-        // This is just in case you forget to actually use it
-        release();
+        if (Thread.currentThread() == blockingThread) {
+            synchronized (ATCommands.class) {
+                blockingThread = null;
+                ATCommands.class.notify();
+            }
+        }
     }
 }
