@@ -1,13 +1,14 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.at;
 
-import com.siemens.icm.io.ATCommand;
+//#if sdkns == "siemens"
+import com.siemens.icm.io.*;
+//#elif sdkns == "cinterion"
+//# import com.cinterion.io.*;
+//#endif
 
 /**
- *
+ * Pooled ATCommand instance wrapper.
+ * 
  * @author florent
  */
 public class ATCommandPooled {

@@ -83,6 +83,30 @@ public final class ATCommands {
         }
         throw new RuntimeException("Could not get a PooledATCommand");
     }
+    private static final int MAXIMUM_NUMBER_OF_TRIES = 10;
+
+    /**
+     * Sends an AT command to default ATCommand, seeking "OK" in answer. If no
+     * "OK" in the answer, retries some times before returning false
+     *
+     * @param cmd the AT command to send
+     * @return true if success, false otherwise;
+     */
+    public static boolean sendWhileNotOk(String cmd) {
+        for (int i = 0; i < 10; i++) {
+            if (send(cmd).indexOf("OK") >= 0) {
+                return true;
+            }
+            try {
+                Thread.sleep(i * 1000); //wait before retry
+            } catch (InterruptedException ex) {
+                if (Logger.BUILD_WARNING) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+        return false;
+    }
 
     public static String sendUrcRaw(String cmd) {
         return sendRaw(getATCommandURC(), cmd);
