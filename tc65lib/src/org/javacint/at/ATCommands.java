@@ -48,8 +48,8 @@ public final class ATCommands {
             aturc = new ATCommand(false, true, false, false, false, false); //One "true" to monitor URC's
             atdata = new ATCommand(false, false, false, false, false, false);
         } catch (Exception e) {
-            if (DEBUG) {
-                Logger.log("ATCommands:static", ATCommands.class);
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log("ATCommands:static", e);
             }
         }
         atCommand1 = atc1;
