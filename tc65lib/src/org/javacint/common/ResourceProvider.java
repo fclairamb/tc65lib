@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.common;
 
 import java.io.DataInputStream;
@@ -10,25 +6,32 @@ import java.io.InputStream;
 import javax.microedition.io.InputConnection;
 
 /**
+ * Resource provider.
  *
- * @author florent
+ * This is an InputConnection from a class and a path.
  */
 public class ResourceProvider implements InputConnection {
 
+    /**
+     * Class
+     */
     private final Class type;
-    private final String name;
+    /**
+     * Resource path
+     */
+    private final String path;
 
-    public ResourceProvider(Class classType, String name) {
+    public ResourceProvider(Class classType, String path) {
         this.type = classType;
-        this.name = name;
+        this.path = path;
     }
 
     public String toString() {
-        return type.getName() + ":\"" + name + "\"";
+        return type.getName() + ":\"" + path + "\"";
     }
 
     public InputStream openInputStream() throws IOException {
-        return type.getResourceAsStream(name);
+        return type.getResourceAsStream(path);
     }
 
     public DataInputStream openDataInputStream() throws IOException {

@@ -3,8 +3,7 @@ package org.javacint.common;
 import java.util.Vector;
 
 /**
- * Vectors handling class.
- *
+ * Vectors handling methods.
  */
 public class Vectors {
 

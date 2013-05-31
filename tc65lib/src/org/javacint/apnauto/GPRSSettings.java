@@ -1,15 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.apnauto;
 
 import org.javacint.common.Strings;
 import org.javacint.logging.Logger;
 
 /**
- *
- * @author Florent Clairambault / www.webingenia.com
+ * GPRS Settings wrapper.
  */
 public final class GPRSSettings {
 
@@ -37,38 +32,75 @@ public final class GPRSSettings {
         }
     }
 
+    /**
+     * Get the carrier.
+     * "gprs" or "gsm"
+     * @return Carrier
+     */
     public String getCarrier() {
         return get(index_carrier);
     }
 
+    /**
+     * Get the APN.
+     * @return APN
+     */
     public String getApn() {
         return get(index_apn);
     }
 
+    /**
+     * Get the APN user.
+     * @return APN user
+     */
     public String getUser() {
         return get(index_user);
     }
 
+    /**
+     * Get the APN password.
+     * @return APN password
+     */
     public String getPass() {
         return get(index_pass);
     }
 
+    /**
+     * Get the DNS.
+     * @return DNS
+     */
     public String getDns() {
         return get(index_dns);
     }
 
+    /**
+     * Get Mobile Country Code.
+     * @return MCC
+     */
     public String getMCC() {
         return get(index_mcc);
     }
 
+    /**
+     * Get Mobile Network Code
+     * @return MNC
+     */
     public String getMNC() {
         return get(index_mnc);
     }
 
+    /**
+     * Get the target to test the APN on.
+     * @return Target
+     */
     public String getTarget() {
         return get(index_target, DEFAULT_TARGET);
     }
 
+    /**
+     * Parse a GPRS settings line.
+     * @param line To parse
+     */
     public void parse(String line) {
         if (line == null) {
             return;
@@ -76,9 +108,10 @@ public final class GPRSSettings {
         values = Strings.split('|', line);
     }
 
-    public GPRSSettings() {
-    }
-
+    /**
+     * Set columns parameters.
+     * @param cols Set the columns.
+     */
     public void setColumns(String cols) {
         String[] spl = Strings.split('|', cols);
         int l = spl.length;
@@ -109,9 +142,18 @@ public final class GPRSSettings {
     public String toString() {
         return getCarrier() + " --> " + getApn() + ", " + getUser() + ", " + getPass();
     }
+    
+    /** Parameter enclosing */
     private static final char QT = '"';
+    
+    /** Parameters separator */
     private static final char SE = ',';
 
+    /**
+     * Export the GPRS settings to string.
+     * Export the GPRS settings to an AT^SJNET
+     * @return 
+     */
     public String toSjnet() {
         return QT + "gprs" + QT + SE
                 + QT + getApn() + QT + SE

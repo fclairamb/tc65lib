@@ -12,8 +12,10 @@ import org.javacint.common.BufferedReader;
 import org.javacint.logging.Logger;
 
 /**
+ * GPRS Settings reader.
  *
- * @author Florent Clairambault / www.webingenia.com
+ * GPRS Settings reader
+ *
  */
 public final class GPRSSettingsReader {
 

@@ -18,12 +18,11 @@ import org.javacint.sms.SimpleSMS;
 /**
  * APN Autodetection class.
  *
- * This classe uses the Android APN list rewritten in an other (more compact)
+ * This class uses the Android APN list rewritten in an other (more compact)
  * format.
  *
  * The core method is autoLoadRightGPRSSettings
  *
- * @author Florent Clairambault / www.webingenia.com
  */
 public final class APNAutodetection {
 

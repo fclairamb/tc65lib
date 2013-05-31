@@ -7,6 +7,8 @@ import org.javacint.logging.Logger;
 
 /**
  * Buffered reader.
+ * 
+ * A simple implementation of the equivalent JSE's StreamReader.
  */
 public class BufferedReader {
 
@@ -29,7 +31,7 @@ public class BufferedReader {
 	}
 
 	/**
-	 * Read a line
+	 * Read a line.
 	 *
 	 * @return Line to read from a stream
 	 */

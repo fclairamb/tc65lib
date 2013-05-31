@@ -4,7 +4,6 @@ import java.util.Vector;
 
 /**
  * Strings handling methods.
- *
  */
 public class Strings {
 

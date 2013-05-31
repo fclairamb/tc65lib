@@ -1,10 +1,9 @@
 package org.javacint.common;
 
 /**
- *
- * @author Florent Clairambault / www.webingenia.com
+ * Buffer wrapper class
  */
-public class Data {
+public class BufferWrapper {
 
 	/**
 	 * Default offset.
@@ -15,6 +14,10 @@ public class Data {
 	 * It is very useful to wrap data inside a frame.
 	 */
 	private static final int MARGIN_BEFORE = 10;
+    
+    /**
+     * Default additional space at the end of the buffer.
+     */
 	private static final int MARGIN_AFTER = 10;
 	public byte[] buffer;
 	public int offset;
@@ -23,7 +26,7 @@ public class Data {
 	/**
 	 * Create a new empty data container.
 	 */
-	public Data() {
+	public BufferWrapper() {
 		free();
 	}
 
@@ -32,7 +35,7 @@ public class Data {
 	 *
 	 * @param buf Buffer to wrap it around
 	 */
-	public Data(byte[] buf) {
+	public BufferWrapper(byte[] buf) {
 		buffer = buf;
 		offset = 0;
 		length = buffer.length;
@@ -43,7 +46,7 @@ public class Data {
 	 *
 	 * @param size Size of the buffer
 	 */
-	public Data(int size) {
+	public BufferWrapper(int size) {
 		prepare(size);
 	}
 
@@ -54,7 +57,7 @@ public class Data {
 	 * @param o Offset
 	 * @param l Length
 	 */
-	public Data(byte[] b, int o, int l) {
+	public BufferWrapper(byte[] b, int o, int l) {
 		buffer = b;
 		offset = o;
 		length = l;
@@ -65,7 +68,7 @@ public class Data {
 	 *
 	 * @param str String
 	 */
-	public Data(String str) {
+	public BufferWrapper(String str) {
 		buffer = str.getBytes();
 		offset = 0;
 		length = buffer.length;
@@ -103,7 +106,7 @@ public class Data {
 	 * 
 	 * @param data Data to append to the offer buffer
 	 */
-	public void append(Data data) {
+	public void append(BufferWrapper data) {
 		append(data.buffer, data.offset, data.length);
 	}
 
@@ -120,7 +123,7 @@ public class Data {
 		length += addLen;
 	}
 
-	public void prepend(Data data) {
+	public void prepend(BufferWrapper data) {
 		prepend(data.buffer, data.offset, data.length);
 	}
 
@@ -141,23 +144,23 @@ public class Data {
 		}
 	}
 
-	public Data removeBefore(int len) {
+	public BufferWrapper removeBefore(int len) {
 		offset += len;
 		length -= len;
 		return this;
 	}
 
-	public Data removeAfter(int len) {
+	public BufferWrapper removeAfter(int len) {
 		length -= len;
 		return this;
 	}
 
-	public Data clone() {
-		return new Data(buffer, offset, length);
+	public BufferWrapper clone() {
+		return new BufferWrapper(buffer, offset, length);
 	}
 
-	public Data copy() {
-		Data ins = new Data(new byte[MARGIN_BEFORE + length + MARGIN_AFTER], MARGIN_BEFORE, 0);
+	public BufferWrapper copy() {
+		BufferWrapper ins = new BufferWrapper(new byte[MARGIN_BEFORE + length + MARGIN_AFTER], MARGIN_BEFORE, 0);
 		ins.append(this);
 		return ins;
 	}

@@ -13,13 +13,9 @@ import javax.microedition.io.Connector;
 import org.javacint.logging.Logger;
 
 /**
- * Parameters file.
+ * Properties file.
  *
- * This can be used for monitoring some parameters (not necessarily settings).
- *
- * This should be ported into the Settings class.
- *
- *
+ * This can be used for saving properties.
  */
 public class PropertiesFile {
 
