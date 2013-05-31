@@ -6,10 +6,10 @@ package org.javacint.sms;
 
 //#if sdkns == "siemens"
 import com.siemens.icm.io.*;
-import hm.sms.PDU;
 //#elif sdkns == "cinterion"
 //# import com.cinterion.io.*;
 //#endif
+import hm.sms.PDU;
 import java.util.Enumeration;
 import java.util.Vector;
 import org.javacint.at.ATCommands;
@@ -17,11 +17,8 @@ import org.javacint.at.ATURCQueueHandler;
 import org.javacint.logging.Logger;
 
 /**
- *
- * @author florent
+ * SMS Receiving class
  */
-// TODO: The actual SMS receiving code. I can't copy/paste my current code
-// for this part because it sucks a lot.
 public class SMSReceiver implements ATCommandListener {
 
     private final Vector consumers = new Vector();
@@ -30,17 +27,16 @@ public class SMSReceiver implements ATCommandListener {
     }
 
     public void addConsumer(SMSConsumer c) {
-        synchronized (consumers) {
-            consumers.addElement(c);
-        }
+        consumers.addElement(c);    //actually it IS synchronized, so we don't need additional synchronized block
     }
 
     public void removeConsumer(SMSConsumer c) {
-        synchronized (consumers) {
-            consumers.removeElement(c);
-        }
+        consumers.removeElement(c);    //actually it IS synchronized, so we don't need additional synchronized block
     }
 
+    /**
+     * Each consumer should return true once they consider it is of no other consumer's interest. It works the same with command receivers.
+     */
     private boolean handleSMS(String from, String content) {
         synchronized (consumers) {
             for (Enumeration e = consumers.elements(); e.hasMoreElements();) {
@@ -60,10 +56,17 @@ public class SMSReceiver implements ATCommandListener {
     }
 
     /**
-     * Start SMS reception.
-     *
-     * This methold should only be called once all SMS receivers have been
-     * called.
+     * Start SMS reception.</br>
+     * </br>
+     * This methold should only be called once all SMS receivers have been called.</br>
+     * </br>
+     * The idea is to choose when we will want to handle SMS. Because we need to:</br>
+     * <ul>
+     * <li>Start the ATCommands (this should be done on first ATCommands call, so not a big issue in current design)
+     * <li>Start the SMS consumers
+     * <li>Register them to the SMS Receiver
+     * <li>Start the SMS receiver (and only now)
+     * </ul>
      */
     public void start() {
         ATCommands.addListener(new ATURCQueueHandler(this)); // This indirection prevents the URC call from being blocked
@@ -88,6 +91,9 @@ public class SMSReceiver implements ATCommandListener {
         ATCommands.sendUrc("AT+CNMI=2,1,0,0,1");
     }
 
+    /**
+     * Stop SMS reception
+     */
     public void stop() {
         ATCommands.removeListener(this);
     }

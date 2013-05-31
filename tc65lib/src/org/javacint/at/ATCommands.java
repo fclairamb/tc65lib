@@ -33,11 +33,17 @@ public final class ATCommands {
         ATCommandPooled atc1 = null, atc2 = null;
         ATCommand aturc = null, atdata = null;
         try {
-            atc1 = new ATCommandPooled(new ATCommand(false), (byte) 1);
-            atc2 = new ATCommandPooled(new ATCommand(false), (byte) 2);
-            aturc = new ATCommand(false);
-            atdata = new ATCommand(true);
-
+            /*
+             * From docs:
+             * The available listeners monitor unsolicited AT-Events, changes of serial interface signals (RING, DCD and DSR) and changes of a data connection (CONN).
+             * Each started listener thread uses 5 kbytes of RAM.
+             * 
+             * That's why we use (false, false, ... false)
+             */
+            atc1 = new ATCommandPooled(new ATCommand(false, false, false, false, false, false), (byte) 1);
+            atc2 = new ATCommandPooled(new ATCommand(false, false, false, false, false, false), (byte) 2);
+            aturc = new ATCommand(false, true, false, false, false, false); //One "true" to monitor URC's
+            atdata = new ATCommand(false, false, false, false, false, false);
         } catch (Exception e) {
             if (DEBUG) {
                 Logger.log("ATCommands:static", ATCommands.class);
@@ -53,9 +59,6 @@ public final class ATCommands {
         return atCommandData;
     }
 
-    public static ATCommand getATCommandURC() {
-        return atCommandURC;
-    }
     private static final int POOL_MAX_WAIT = 30000; // ms
 
     public static ATCommandPooled getATCommand() {
@@ -93,7 +96,7 @@ public final class ATCommands {
      * @return true if success, false otherwise;
      */
     public static boolean sendWhileNotOk(String cmd) {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < MAXIMUM_NUMBER_OF_TRIES; i++) {
             if (send(cmd).indexOf("OK") >= 0) {
                 return true;
             }
@@ -109,7 +112,7 @@ public final class ATCommands {
     }
 
     public static String sendUrcRaw(String cmd) {
-        return sendRaw(getATCommandURC(), cmd);
+        return sendRaw(atCommandURC, cmd);
     }
 
     public static String send(String cmd) {
@@ -127,7 +130,7 @@ public final class ATCommands {
     }
 
     public static String sendUrc(String cmd) {
-        return send(getATCommandURC(), cmd);
+        return send(atCommandURC, cmd);
     }
 
     public static String sendAll(String ATCmd) {
@@ -159,11 +162,13 @@ public final class ATCommands {
         }
     }
 
-    public static String send(ATCommand atc, String cmd) {
+    //I don't see a reason making it public
+    static String send(ATCommand atc, String cmd) {
         return sendRaw(atc, cmd + '\r');
     }
 
-    public static String sendRaw(ATCommand atc, String cmd) {
+    //I don't see a reason making it public
+    static String sendRaw(ATCommand atc, String cmd) {
         try {
             String result;
             if (DEBUG) {
@@ -177,9 +182,8 @@ public final class ATCommands {
             }
             return result;
         } catch (Exception ex) {
-            if (Logger.BUILD_CRITICAL) {
-                Logger.log("ATCommands.sendRaw", ex, true);
-            }
+            //we want to report it, so compile it in any case
+            Logger.log("ATCommands.sendRaw(" + atc + "," + cmd + ")", ex, true);
             return null;
         }
     }
@@ -194,15 +198,12 @@ public final class ATCommands {
 
     public static Connection getATDataConnection() {
         return new ATDataConnection();
-
-
     }
 
     static void release(ATCommandPooled atcp) {
         synchronized (ATCommands.class) {
             atcPoolLock |= atcp.getBit(); // We put back the bit instance in the pool
-            ATCommands.class
-                    .notify();
+            ATCommands.class.notify();
         }
     }
 }
