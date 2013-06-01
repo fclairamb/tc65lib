@@ -56,7 +56,10 @@ public class SntpClient extends TimerTask {
 
 
             // Get response
-            System.out.println("NTP request sent, waiting for response...\n");
+            if (Logger.BUILD_DEBUG) {
+                Logger.log("NTP request sent, waiting for response...");
+            }
+            dtgm.reset();
             conn.receive(dtgm);
 
 
@@ -78,15 +81,17 @@ public class SntpClient extends TimerTask {
 
 
             // Display response
-            System.out.println("NTP server: " + server);
-            System.out.println(msg.toString());
+            if (Logger.BUILD_DEBUG) {
+                Logger.log("NTP server: " + server);
+                Logger.log(msg.toString());
 
-            System.out.println("Dest. timestamp:     "
-                    + NtpMessage.timestampToString(destinationTimestamp));
+                Logger.log("Dest. timestamp:     "
+                        + NtpMessage.timestampToString(destinationTimestamp));
 
-            System.out.println("Round-trip delay: " + (roundTripDelay * 1000) + " ms");
+                Logger.log("Round-trip delay: " + (roundTripDelay * 1000) + " ms");
 
-            System.out.println("Local clock offset: " + (localClockOffset * 1000) + " ms");
+                Logger.log("Local clock offset: " + (localClockOffset * 1000) + " ms");
+            }
 
             conn.close();
         } catch (IOException ex) {
