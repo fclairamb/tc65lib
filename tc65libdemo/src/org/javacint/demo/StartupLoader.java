@@ -1,13 +1,19 @@
 package org.javacint.demo;
 
 import java.util.TimerTask;
+import org.javacint.console.ConsiderUpdateCommand;
 import org.javacint.console.ConsoleBySetting;
+import org.javacint.console.DateCommand;
+import org.javacint.console.NTPTestCommand;
 import org.javacint.io.Streams;
 import org.javacint.loading.Loader;
 import org.javacint.loading.NamedRunnable;
 import org.javacint.logging.Logger;
 import org.javacint.otap.AutoUpdater;
 import org.javacint.settings.Settings;
+import org.javacint.sms.PingSMSConsumer;
+import org.javacint.sms.SMSConsumer;
+import org.javacint.sms.SMSReceiver;
 import org.javacint.task.Timers;
 import org.javacint.watchdog.WatchdogEmbedded;
 import org.javacint.watchdog.WatchdogManager;
@@ -58,7 +64,18 @@ public class StartupLoader extends TimerTask {
         loader.addRunnable(new NamedRunnable("Console:loading") {
             public void run() throws Exception {
                 Global.console = new ConsoleBySetting(Streams.serial(0, 115200));
+                Global.console.addCommandReceiver(new DateCommand());
+                Global.console.addCommandReceiver(new NTPTestCommand());
+                Global.console.addCommandReceiver(new ConsiderUpdateCommand(version));
                 // Nothing prevents us from loading other console (one on an other port, one on a socket listening handler, one on a client socket, etc.)
+            }
+        });
+
+        loader.addRunnable(new NamedRunnable("SMS:loading") {
+            public void run() throws Exception {
+                SMSReceiver smsr = SMSReceiver.getInstance();
+                smsr.addConsumer(new SMSHandler());
+                smsr.addConsumer(new PingSMSConsumer());
             }
         });
 
@@ -69,12 +86,21 @@ public class StartupLoader extends TimerTask {
             }
         });
 
-        // After that, all the settings providers can provider and use settings
+        // After that, all the settings consumers can receive settings changes 
+        // and use settings
 
         // We start the console
         loader.addRunnable(new NamedRunnable("Console:starting") {
             public void run() throws Exception {
                 Global.console.start();
+            }
+        });
+
+        // Here we are ready to handle SMS and we should read them already 
+        // present in the chip
+        loader.addRunnable(new NamedRunnable("SMS:starting") {
+            public void run() throws Exception {
+                SMSReceiver.getInstance().start();
             }
         });
 
