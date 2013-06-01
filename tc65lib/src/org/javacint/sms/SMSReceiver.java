@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.sms;
 
 //#if sdkns == "siemens"
@@ -22,6 +18,14 @@ import org.javacint.logging.Logger;
 public class SMSReceiver implements ATCommandListener {
 
     private final Vector consumers = new Vector();
+    private static SMSReceiver instance;
+
+    public static SMSReceiver getInstance() {
+        if (instance == null) {
+            instance = new SMSReceiver();
+        }
+        return instance;
+    }
 
     private SMSReceiver() {
     }
@@ -35,7 +39,8 @@ public class SMSReceiver implements ATCommandListener {
     }
 
     /**
-     * Each consumer should return true once they consider it is of no other consumer's interest. It works the same with command receivers.
+     * Each consumer should return true once they consider it is of no other
+     * consumer's interest. It works the same with command receivers.
      */
     private boolean handleSMS(String from, String content) {
         synchronized (consumers) {
@@ -56,17 +61,12 @@ public class SMSReceiver implements ATCommandListener {
     }
 
     /**
-     * Start SMS reception.</br>
-     * </br>
-     * This methold should only be called once all SMS receivers have been called.</br>
-     * </br>
-     * The idea is to choose when we will want to handle SMS. Because we need to:</br>
-     * <ul>
-     * <li>Start the ATCommands (this should be done on first ATCommands call, so not a big issue in current design)
-     * <li>Start the SMS consumers
-     * <li>Register them to the SMS Receiver
-     * <li>Start the SMS receiver (and only now)
-     * </ul>
+     * Start SMS reception.</br> </br> This methold should only be called once
+     * all SMS receivers have been called.</br> </br> The idea is to choose when
+     * we will want to handle SMS. Because we need to:</br> <ul> <li>Start the
+     * ATCommands (this should be done on first ATCommands call, so not a big
+     * issue in current design) <li>Start the SMS consumers <li>Register them to
+     * the SMS Receiver <li>Start the SMS receiver (and only now) </ul>
      */
     public void start() {
         ATCommands.addListener(new ATURCQueueHandler(this)); // This indirection prevents the URC call from being blocked
