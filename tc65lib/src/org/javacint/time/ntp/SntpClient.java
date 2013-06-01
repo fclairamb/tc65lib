@@ -6,6 +6,7 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.Datagram;
 import javax.microedition.io.DatagramConnection;
 import org.javacint.logging.Logger;
+import org.javacint.time.DateManagement;
 
 /**
  * NtpClient - an NTP client for Java. This program connects to an NTP server
@@ -92,6 +93,8 @@ public class SntpClient extends TimerTask {
 
                 Logger.log("Local clock offset: " + (localClockOffset * 1000) + " ms");
             }
+
+            DateManagement.setCurrentTime((long) msg.receiveTimestamp);
 
             conn.close();
         } catch (IOException ex) {
