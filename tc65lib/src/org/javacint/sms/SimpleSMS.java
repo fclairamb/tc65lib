@@ -1,6 +1,5 @@
 package org.javacint.sms;
 
-import com.siemens.icm.io.ATCommand;
 import org.javacint.at.ATCommandPooled;
 import org.javacint.at.ATCommands;
 import org.javacint.logging.Logger;

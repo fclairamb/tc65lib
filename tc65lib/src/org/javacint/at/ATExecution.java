@@ -77,7 +77,7 @@ public class ATExecution {
      *
      * @return SIM card identification number
      */
-    public static String getScid() {
+    public static String getIccid() {
         try {
             String tab[] = Strings.split('\n', ATCommands.send("AT^SCID"));
             String scid = (tab[1]).trim().substring(7);

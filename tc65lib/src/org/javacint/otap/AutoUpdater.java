@@ -27,6 +27,7 @@ public class AutoUpdater extends TimerTask {
 
     private final String version;
     private final int timeBetweenUpdates;
+    private final String userAgent;
     private static final String FIELD_VERSION = "MIDlet-Version:";
     private long lastDone;
     private Runnable before;
@@ -52,6 +53,7 @@ public class AutoUpdater extends TimerTask {
     public AutoUpdater(String version, int timeBetweenUpdates) {
         this.version = version;
         this.timeBetweenUpdates = timeBetweenUpdates;
+        this.userAgent = "tc65lib/" + ATExecution.getImei() + "/" + version + "/" + ATExecution.getIccid();
     }
 
     /**
@@ -136,7 +138,7 @@ public class AutoUpdater extends TimerTask {
         // We get the URL at each run because it might change from one run to an other
         final String url = Settings.get(Settings.SETTING_JADURL);
         HttpConnection conn = (HttpConnection) Connector.open(url);
-        conn.setRequestProperty("user-agent", "tc65lib/" + ATExecution.getImei());
+        conn.setRequestProperty("user-agent", userAgent);
         int rc = conn.getResponseCode();
 
         // If we get a wrong HTTP response code, we might as well just stop trying
