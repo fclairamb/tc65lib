@@ -12,7 +12,6 @@ import org.javacint.logging.Logger;
 import org.javacint.otap.AutoUpdater;
 import org.javacint.settings.Settings;
 import org.javacint.sms.PingSMSConsumer;
-import org.javacint.sms.SMSConsumer;
 import org.javacint.sms.SMSReceiver;
 import org.javacint.task.Timers;
 import org.javacint.watchdog.WatchdogEmbedded;
@@ -104,7 +103,7 @@ public class StartupLoader extends TimerTask {
             }
         });
 
-        loader.addRunnable(new NamedRunnable("AutoUpdater") {
+        loader.addRunnable(new NamedRunnable("AutoUpdater:scheduled") {
             public void run() throws Exception {
                 // We will try to find an update every 15 minutes
                 AutoUpdater.schedule(version, 900 * 1000);
@@ -113,6 +112,7 @@ public class StartupLoader extends TimerTask {
 
         loader.addRunnable(new NamedRunnable("Watchdog:started") {
             public void run() throws Exception {
+                // We have finished loading so we don't need to monitor this anymore
                 WatchdogManager.getInstance().removeStatusProvider(loader);
             }
         });

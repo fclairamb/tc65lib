@@ -7,8 +7,7 @@ import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
 
 /**
- *
- * @author florent
+ * Shutdown loader.
  */
 public class ShutdownLoader extends TimerTask {
 

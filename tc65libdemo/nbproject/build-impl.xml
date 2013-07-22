@@ -315,6 +315,12 @@
         <ant target="jar" inheritall="false" antfile="${project.tc65lib}/build.xml">
             <property name="config.active" value=""/>
         </ant>
+        <ant target="jar" inheritall="false" antfile="${project.tc65lib}/build.xml">
+            <property name="config.active" value="IMP_NG_ABC2"/>
+        </ant>
+        <ant target="jar" inheritall="false" antfile="${project.tc65lib}/build.xml">
+            <property name="config.active" value="IMP_NG_TC65I"/>
+        </ant>
     </target>
     <!--preprocess-->
     <target name="pre-preprocess"/>

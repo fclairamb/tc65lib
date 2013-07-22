@@ -18,6 +18,28 @@
                     <property name="config.active"/>
                 </properties>
             </reference>
+            <reference>
+                <foreign-project>tc65lib</foreign-project>
+                <artifact-type>jar</artifact-type>
+                <script>${project.tc65lib}/build.xml</script>
+                <target>jar</target>
+                <clean-target>clean</clean-target>
+                <id>jar.IMP_NG_ABC2</id>
+                <properties>
+                    <property name="config.active">IMP_NG_ABC2</property>
+                </properties>
+            </reference>
+            <reference>
+                <foreign-project>tc65lib</foreign-project>
+                <artifact-type>jar</artifact-type>
+                <script>${project.tc65lib}/build.xml</script>
+                <target>jar</target>
+                <clean-target>clean</clean-target>
+                <id>jar.IMP_NG_TC65I</id>
+                <properties>
+                    <property name="config.active">IMP_NG_TC65I</property>
+                </properties>
+            </reference>
         </references>
     </configuration>
 </project>
