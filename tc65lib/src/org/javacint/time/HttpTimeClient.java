@@ -4,22 +4,21 @@
  */
 package org.javacint.time;
 
-import java.util.TimerTask;
+import java.io.IOException;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import org.javacint.common.BufferedReader;
-import org.javacint.logging.Logger;
 
 /**
  * Simple HTTP time client.
- * 
+ *
  * On the server side, a simple timestamp must be returned.
- * 
- * For PHP:
- * <?= time ?>
- * 
+ *
+ * For PHP: <?= time ?>
+ * For Java: System.out.println( System.currentTimeMillis() / 1000 );
+ * For Python: print int( time.time() )
  */
-public class HttpTimeClient extends TimerTask {
+public class HttpTimeClient implements TimeClient {
 
     private final String url;
 
@@ -27,18 +26,14 @@ public class HttpTimeClient extends TimerTask {
         this.url = url;
     }
 
-    public void run() {
-        try {
-            HttpConnection conn = (HttpConnection) Connector.open(url);
-            if ( conn.getResponseCode() == 200 ) {
-                BufferedReader reader = new BufferedReader( conn.openInputStream() );
-                long time = Long.parseLong( reader.readLine() );
-                DateManagement.setCurrentTime(time);
-            }
-        } catch (Exception ex) {
-            if (Logger.BUILD_CRITICAL) {
-                Logger.log(this + ".run", ex, true);
-            }
+    public long getTime() throws IOException {
+        HttpConnection conn = (HttpConnection) Connector.open(url);
+        int rc = conn.getResponseCode();
+        if (rc == 200) {
+            BufferedReader reader = new BufferedReader(conn.openInputStream());
+            return Long.parseLong(reader.readLine());
+        } else {
+            throw new RuntimeException("Server returned " + rc);
         }
     }
 }

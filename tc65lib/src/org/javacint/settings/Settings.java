@@ -34,6 +34,7 @@ public class Settings {
      */
     public static final String SETTING_JADURL = "jadurl";
     private static boolean madeSomeChanges = false;
+    private static boolean firstStartup = false;
     private static boolean loading;
 
     public static synchronized void setFilename(String filename) {
@@ -47,6 +48,10 @@ public class Settings {
 
     public static String getFilename() {
         return fileName;
+    }
+
+    public static boolean firstStartup() {
+        return firstStartup;
     }
 
     /**
@@ -68,6 +73,7 @@ public class Settings {
                 if (Logger.BUILD_WARNING) {
                     Logger.log("Settings.load: File \"" + fileName + "\" doesn\'t exist!");
                 }
+                firstStartup = true;
 
                 fc = (FileConnection) Connector.open("file:///a:/" + fileName + ".old", Connector.READ);
                 if (fc.exists()) {
@@ -113,9 +119,6 @@ public class Settings {
      * @param line Line to parse
      */
     private static void loadLine(Hashtable settings, String line) {
-//		if (Logger.BUILD_VERBOSE) {
-//			Logger.log("loadTreatLine( [...], \"" + line + "\" );");
-//		}
         String[] spl = Strings.split('=', line);
         String key = spl[0];
         String value = spl[1];
@@ -125,10 +128,8 @@ public class Settings {
         if (settings.containsKey(key)) {
             settings.remove(key);
             settings.put(key, value);
-//			if (Logger.BUILD_DEBUG) {
-//				Logger.log("Settings.loadLine: " + key + "=" + value);
-//			}
         }
+        // If not, we just forget about it (no dirty settings)
 
     }
 
@@ -142,9 +143,6 @@ public class Settings {
      * @param names Names of the settings
      */
     public static void onSettingsChanged(String[] names, SettingsProvider caller) {
-//		if (Logger.BUILD_DEBUG) {
-//			Logger.log("Settings.onSettingsChanged( String[" + names.length + "] names );");
-//		}
         try {
             synchronized (consumers) {
                 for (Enumeration en = consumers.elements(); en.hasMoreElements();) {
@@ -249,9 +247,6 @@ public class Settings {
      */
     public static synchronized void save() {
         synchronized (Settings.class) {
-//		if (Logger.BUILD_DEBUG) {
-//			Logger.log("Settings.save();", true);
-//		}
 
             // If there's no settings, we shouldn't have to save anything
             if (settings == null) {
@@ -275,13 +270,7 @@ public class Settings {
                 String settingFileUrlTmp = "file:///a:/" + fileNameTmp;
                 String settingFileUrlOld = "file:///a:/" + fileNameOld;
 
-//			if ( Logger.BUILD_DEBUG ) {
-//				Logger.log("Settings.save: Opening \"" + settingFileUrlTmp + "\"...");
-//			}
-
                 FileConnection fc = (FileConnection) Connector.open(settingFileUrlTmp, Connector.READ_WRITE);
-
-                //fc = (FileConnection) Connector.open("file:///" + _fileName, Connector.READ_WRITE);
 
                 if (fc.exists()) {
                     fc.delete();

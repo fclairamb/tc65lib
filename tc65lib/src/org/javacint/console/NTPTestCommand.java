@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import java.util.Date;
 import org.javacint.task.Timers;
 import org.javacint.time.DateManagement;
+import org.javacint.time.TimeRetriever;
 import org.javacint.time.ntp.SntpClient;
 
 /**
@@ -22,7 +23,7 @@ public class NTPTestCommand implements ConsoleCommand {
     public boolean consoleCommand(String command, InputStream is, PrintStream out) {
         if (command.startsWith(COMMAND)) {
             String server = command.substring(COMMAND.length());
-            Timers.getSlow().schedule(new SntpClient(server), 0);
+            Timers.getSlow().schedule(new TimeRetriever(new SntpClient(server), 24 * 3600 * 1000 /* Every 24h for success */, 900 * 1000 /* Every 15 minutes for failure */ ), 0);
             return true;
         } else {
             return false;

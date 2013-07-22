@@ -18,7 +18,6 @@ import org.javacint.settings.SettingsProvider;
  * If you don't need to disable the console by settings, use directly the
  * Console instance.
  *
- *
  * @author florent
  */
 public class ConsoleBySetting extends Console implements SettingsProvider {

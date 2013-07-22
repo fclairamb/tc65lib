@@ -15,12 +15,11 @@ import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
 
 /**
- * Console management
+ * Console management.
  *
- * @author Florent Clairambault / www.webingenia.com
- *
- * This is only a draft of the console code, I need to somehow to support the
- * features of at least 3 implementation of a console.
+ * This class is not static because you could have as many console instances as
+ * you want. You can put them on each serial port, on a TCP or UDP server socket
+ * and on any StreamConnection implementation.
  */
 public class Console implements Runnable {
 
@@ -31,12 +30,22 @@ public class Console implements Runnable {
     private String header = "Console";
     private final Vector commandsReceiver = new Vector();
 
+    /**
+     * Add a command receiver to the console.
+     *
+     * @param receiver Command receiver to add
+     */
     public void addCommandReceiver(ConsoleCommand receiver) {
         synchronized (commandsReceiver) {
             commandsReceiver.addElement(receiver);
         }
     }
 
+    /**
+     * Remove a command receiver to the console.
+     *
+     * @param receiver Command receiver to remove
+     */
     public void removeCommandReceiver(ConsoleCommand receiver) {
         synchronized (commandsReceiver) {
             if (commandsReceiver.contains(receiver)) {
@@ -45,6 +54,10 @@ public class Console implements Runnable {
         }
     }
 
+    /**
+     * Console constructor
+     * @param stream StreamConnection used to receive and send humanly readable commands.
+     */
     public Console(StreamConnection stream) {
         this.stream = stream;
     }
