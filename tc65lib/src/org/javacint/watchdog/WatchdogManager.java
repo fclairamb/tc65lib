@@ -4,6 +4,7 @@ import java.util.Enumeration;
 import java.util.TimerTask;
 import java.util.Vector;
 import org.javacint.logging.Logger;
+import org.javacint.task.Timers;
 
 /**
  * Watchdog manager.
@@ -11,24 +12,16 @@ import org.javacint.logging.Logger;
  * Frequently checks that all the status providers are ok and kick the actors
  * (the actual watchdog).
  */
-public final class WatchdogManager extends TimerTask {
+public final class WatchdogManager {
 
-    private static volatile WatchdogManager instance = null;
-
-    public static WatchdogManager getInstance() {
-        if (instance == null) {
-            instance = new WatchdogManager();
-        }
-        return instance;
-    }
     /**
      * The watchdog actors
      */
-    private final Vector watchdogActors = new Vector();
+    private static final Vector watchdogActors = new Vector();
     /**
      * The watchdog status providers
      */
-    private final Vector statusProviders = new Vector();
+    private static final Vector statusProviders = new Vector();
     public static final boolean LOG = false;
 
     /**
@@ -36,7 +29,7 @@ public final class WatchdogManager extends TimerTask {
      *
      * @param provider Status provider
      */
-    public void addStatusProvider(WatchdogStatusProvider provider) {
+    public static void add(WatchdogStatusProvider provider) {
         statusProviders.addElement(provider);
     }
 
@@ -45,8 +38,22 @@ public final class WatchdogManager extends TimerTask {
      *
      * @param actor Watchdog actor
      */
-    public void addWatchdogActors(WatchdogActor actor) {
+    public static void add(WatchdogActor actor) {
         watchdogActors.addElement(actor);
+    }
+
+    /**
+     * Start the watchdog manager.
+     *
+     * @param offset Offset time.
+     * @param period Period.
+     */
+    public static void start(long offset, long period) {
+        Timers.getFast().schedule(new TimerTask() {
+            public void run() {
+                staticRun();
+            }
+        }, offset, period);
     }
 
     /**
@@ -54,7 +61,7 @@ public final class WatchdogManager extends TimerTask {
      *
      * @param provider Status provider
      */
-    public void removeStatusProvider(WatchdogStatusProvider provider) {
+    public static void remove(WatchdogStatusProvider provider) {
         synchronized (statusProviders) {
             if (statusProviders.contains(provider)) {
                 statusProviders.removeElement(provider);
@@ -67,9 +74,9 @@ public final class WatchdogManager extends TimerTask {
      *
      * @return TRUE if everything is OK
      */
-    private boolean check() {
+    private static boolean check() {
         if (Logger.BUILD_DEBUG && LOG) {
-            Logger.log(this + ".check();");
+            Logger.log(ME + ".check();");
         }
 
         try {
@@ -99,9 +106,9 @@ public final class WatchdogManager extends TimerTask {
     /**
      * Send all the watchdog actors the "keep-alive" signal
      */
-    public void kick() {
+    public static void kick() {
         if (Logger.BUILD_VERBOSE && LOG) {
-            Logger.log(this + ".kick();");
+            Logger.log(ME + ".kick();");
         }
         try {
             synchronized (watchdogActors) {
@@ -116,13 +123,11 @@ public final class WatchdogManager extends TimerTask {
             }
         }
     }
-    
+
     /**
-     * Stop the watchdogs.
-     * This stops the watchdog to let them
+     * Stop the watchdogs. This stops the watchdog to let them
      */
-    public void stop() {
-        
+    public static void stop() {
     }
 
     /**
@@ -131,9 +136,9 @@ public final class WatchdogManager extends TimerTask {
      * Watchdog doesn't have its own thread because it would be an overkill, it
      * just needs a (not so) frequent call.
      */
-    public void run() {
+    private static void staticRun() {
         if (Logger.BUILD_DEBUG && LOG) {
-            Logger.log(this + ".run();");
+            Logger.log(ME + ".run();");
         }
         if (check()) { // If check is ok
             kick(); // We kick the watchdogs
@@ -141,8 +146,5 @@ public final class WatchdogManager extends TimerTask {
             Logger.log("Watchdog check failed (this is not good) !", true);
         }
     }
-
-    public String toString() {
-        return "WatchdogManager";
-    }
+    private static final String ME = "WatchdogManager";
 }

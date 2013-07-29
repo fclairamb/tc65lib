@@ -47,6 +47,11 @@ public class Loader extends TimerTask implements WatchdogStatusProvider {
 		}
 	}
 
+        /**
+         * Get the working status of the loader.
+         * The loader will report a problem if it has been loading fore more than 10 minutes.
+         * @return null if it has been started less than 10 minutes ago, error message otherwise
+         */
 	public String getWorkingStatus() {
 		return (((System.currentTimeMillis() - startup) / 1000) > 600) ? "We've been loading for more than 10 minutes!" : null;
 	}

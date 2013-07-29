@@ -40,11 +40,10 @@ public class StartupLoader extends TimerTask {
         // to make sure the program actually load in reasonnable time.
         loader.addRunnable(new NamedRunnable("Watchdog:start") {
             public void run() throws Exception {
-                WatchdogManager wd = WatchdogManager.getInstance();
-                wd.addStatusProvider(loader);
-                wd.addWatchdogActors(new WatchdogEmbedded());
-                wd.addWatchdogActors(new WatchdogOnJavaGpio(8, false));
-                Timers.getFast().schedule(wd, 5000, 20000); // 20s is a reasonnable watchdog timer
+                WatchdogManager.add(loader);
+                WatchdogManager.add(new WatchdogEmbedded());
+                WatchdogManager.add(new WatchdogOnJavaGpio(8, false));
+                WatchdogManager.start( 5000, 20000); // 20s is a reasonnable watchdog timer
             }
         });
 
@@ -113,7 +112,7 @@ public class StartupLoader extends TimerTask {
         loader.addRunnable(new NamedRunnable("Watchdog:started") {
             public void run() throws Exception {
                 // We have finished loading so we don't need to monitor this anymore
-                WatchdogManager.getInstance().removeStatusProvider(loader);
+                WatchdogManager.remove(loader);
             }
         });
         Timers.getSlow().schedule(loader, 0);
