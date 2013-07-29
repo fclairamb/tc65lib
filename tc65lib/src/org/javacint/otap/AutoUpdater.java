@@ -37,7 +37,6 @@ public class AutoUpdater extends TimerTask {
      *
      * @param version Current version of the program ("Midlet-Version" is
      * usually stored in Global.version)
-     * @param url Url of the file containing the version number
      * @param timeBetweenUpdates Time in milliseconds between updates
      *
      * Note: the scheduling should be more frequent than the time between
@@ -92,10 +91,8 @@ public class AutoUpdater extends TimerTask {
      * The timeBeforeUpdate arg is set to a default value of 24h (24*3600*1000
      * milliseconds)
      *
-     * @param atc ATCommand instance used to launch the OTAP
      * @param version Current version of the program ("Midlet-Version" is
      * usually stored in Global.version)
-     * @param url Url of the file containing the version number
      */
     public AutoUpdater(String version) {
         this(version, 24 * 3600 * 1000);

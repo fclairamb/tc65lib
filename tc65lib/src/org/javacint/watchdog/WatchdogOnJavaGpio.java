@@ -88,4 +88,8 @@ public class WatchdogOnJavaGpio implements WatchdogActor {
 			}
 		}
 	}
+
+    public void stop() {
+        kick();
+    }
 }

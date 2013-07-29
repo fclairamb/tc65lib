@@ -35,7 +35,6 @@ public class ATExecution {
     /**
      * Get the IMEI number of the GSM chip
      *
-     * @param atc ATCommand used to get it
      * @return IMEI number
      */
     public static String getImei() {
@@ -97,9 +96,7 @@ public class ATExecution {
     }
 
     /**
-     * Restarts the chip
-     *
-     * @param atc ATCommand to use
+     * Restarts the chip.
      */
     public static void restart() {
         if (Logger.BUILD_DEBUG) {

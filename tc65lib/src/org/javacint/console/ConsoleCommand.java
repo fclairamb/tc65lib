@@ -4,8 +4,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 
 /**
- * Interface that defines how to write a console command receiver
- * @author Florent Clairambault / www.webingenia.com
+ * Interface that defines how to write a console command receiver.
  */
 public interface ConsoleCommand {
 	

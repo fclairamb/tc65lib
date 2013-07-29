@@ -6,8 +6,8 @@ import java.util.Date;
 import org.javacint.time.DateManagement;
 
 /**
- *
- * @author florent
+ * Date displaying command.
+ * This command displays the date from the chip's time + correcting offset.
  */
 public class DateCommand implements ConsoleCommand {
 

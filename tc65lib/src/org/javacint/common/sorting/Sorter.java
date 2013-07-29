@@ -9,10 +9,8 @@ import java.util.Vector;
 /**
  * Object sorter.
  *
- * This sorter use the Comparator interface to sort elements. It's first
- * implementation.
+ * This sorter use the Comparator interface to sort elements.
  *
- * @author Florent Clairambault / www.webingenia.com
  */
 public class Sorter {
 
@@ -54,6 +52,15 @@ public class Sorter {
         return array;
     }
 
+    /**
+     * Sort a vector.
+     *
+     * @param v Vector to sort
+     * @return Sorted vector
+     *
+     * This function converts the vector to an array, sorts it and converts it
+     * back to a vector.
+     */
     public Vector sort(Vector v) {
         Object[] array = new Object[v.size()];
         for (int i = 0; i < v.size(); i++) {

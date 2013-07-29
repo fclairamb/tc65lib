@@ -40,12 +40,19 @@ public class WatchdogEmbedded implements WatchdogActor {
     }
 
     /**
-     * Launch a signal to the watchdog
+     * Send a signal to the watchdog
      *
      * @return always true
      */
     public boolean kick() {
         Watchdog.kick();
         return true;
+    }
+
+    /**
+     * Stop the watchdog.
+     */
+    public void stop() {
+        Watchdog.start(0);
     }
 }

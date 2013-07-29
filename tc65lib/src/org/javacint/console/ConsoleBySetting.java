@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.console;
 
 import java.util.Hashtable;
@@ -17,8 +13,6 @@ import org.javacint.settings.SettingsProvider;
  *
  * If you don't need to disable the console by settings, use directly the
  * Console instance.
- *
- * @author florent
  */
 public class ConsoleBySetting extends Console implements SettingsProvider {
 

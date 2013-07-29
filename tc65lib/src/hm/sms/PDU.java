@@ -778,10 +778,10 @@ public class PDU {
 
     /**
      * Gets phone number from PDU's hex part, as a String
-     * @param hex
-     * @param toa
-     * @param addressLength
-     * @return 
+     * @param hex Hex representation of the PDU
+     * @param toa Type of address
+     * @param addressLength Address length
+     * @return Phone number
      */
     private String parseNumberFromHexPDU(String hex, PDU.TypeOfAddress toa, int addressLength) {
         String number;
@@ -801,23 +801,24 @@ public class PDU {
 
     /**
      * Gets sender number as a String, from the PDU
-     * @return 
+     * @return Sender's number
      */
     public String getSenderNumber() {
         return senderNumber;
     }
 
     /**
-     * Gets user data in decoded form, from the PDU
-     * @return 
+     * Gets user data in decoded form.
+     * It is retrieved from the PDU
+     * @return User data
      */
     public String getUserData() {
         return userData.decodedUserData;
     }
 
     /**
-     * Returns true if the PDU is part of a bigger concatenated SMS
-     * @return 
+     * Check if the PDU is part of a bigger concatenated SMS
+     * @return true if the PDU is part of a bigger concatenated SMS
      */
     public boolean isConcatenatedSMSPart() {
         return firstOctet.TP_UDHI;

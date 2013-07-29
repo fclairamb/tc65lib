@@ -5,14 +5,19 @@ import java.io.PrintStream;
 import org.javacint.otap.AutoUpdater;
 
 /**
- * Program update consideration command
- *
- * @author Florent Clairambault / www.webingenia.com
+ * Auto updater triggering command.
+ * Usage:<br />
+ * <q>update</q>
+ * 
  */
 public class ConsiderUpdateCommand implements ConsoleCommand {
 
     private final String version;
 
+    /**
+     * Constructor.
+     * @param version Current version of the program. 
+     */
     public ConsiderUpdateCommand(String version) {
         this.version = version;
     }
@@ -22,7 +27,6 @@ public class ConsiderUpdateCommand implements ConsoleCommand {
             AutoUpdater.schedule(version);
             return true;
         }
-
         return false;
     }
 }

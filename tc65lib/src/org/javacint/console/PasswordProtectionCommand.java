@@ -5,8 +5,9 @@ import java.io.PrintStream;
 import org.javacint.settings.Settings;
 
 /**
- *
- * @author florent
+ * Password protection command. This command prevents from using the console
+ * before we issue the code. It must be added as the first command to the
+ * console.
  */
 public class PasswordProtectionCommand implements ConsoleCommand {
 

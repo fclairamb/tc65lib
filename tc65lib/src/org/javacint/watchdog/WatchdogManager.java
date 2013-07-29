@@ -116,6 +116,14 @@ public final class WatchdogManager extends TimerTask {
             }
         }
     }
+    
+    /**
+     * Stop the watchdogs.
+     * This stops the watchdog to let them
+     */
+    public void stop() {
+        
+    }
 
     /**
      * TimerTask's run method.

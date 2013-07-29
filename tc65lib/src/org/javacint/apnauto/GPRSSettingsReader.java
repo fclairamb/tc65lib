@@ -61,7 +61,7 @@ public final class GPRSSettingsReader {
      * Search for a line
      *
      * @param searchedLine Line to search for
-     * @return
+     * @return If the line was found.
      */
     private boolean searchLine(String searchedLine) {
         if (Logger.BUILD_DEBUG && LOG) {

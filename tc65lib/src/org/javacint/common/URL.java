@@ -1,4 +1,4 @@
-package org.javacint.url;
+package org.javacint.common;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

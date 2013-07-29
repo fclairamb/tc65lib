@@ -6,8 +6,9 @@ import org.javacint.at.ATExecution;
 import org.javacint.common.Strings;
 
 /**
- *
- * @author florent
+ * Console command to trigger an update. Usage:<br /> <q>update &lt;apn&gt;
+ * &lt;jadurl&gt;</q><br />If "apn" and "jadurl" parameters are omitted, their
+ * value is fetched from the settings.
  */
 public class UpdateCommand implements ConsoleCommand {
 

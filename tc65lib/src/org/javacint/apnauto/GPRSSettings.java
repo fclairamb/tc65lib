@@ -152,7 +152,7 @@ public final class GPRSSettings {
     /**
      * Export the GPRS settings to string.
      * Export the GPRS settings to an AT^SJNET
-     * @return 
+     * @return String that can be applied as-is to AT^SJNET
      */
     public String toSjnet() {
         return QT + "gprs" + QT + SE

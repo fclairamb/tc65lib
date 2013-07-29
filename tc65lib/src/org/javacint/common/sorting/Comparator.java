@@ -6,7 +6,6 @@ package org.javacint.common.sorting;
 
 /**
  * Comparison interface.
- * @author Florent Clairambault / www.webingenia.com
  */
 public interface Comparator {
 	int compare( Object a, Object b );

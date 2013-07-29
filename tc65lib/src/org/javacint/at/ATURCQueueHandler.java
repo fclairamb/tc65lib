@@ -14,8 +14,8 @@ import java.util.TimerTask;
 import org.javacint.task.Timers;
 
 /**
- *
- * @author florent
+ * AT URC Queue handler.
+ * This class queues URC events and send them to an other ATCommandListener.
  */
 public class ATURCQueueHandler implements ATCommandListener {
 

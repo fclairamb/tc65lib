@@ -13,8 +13,7 @@ import org.javacint.at.ATCommands;
  * @author pyth0n
  */
 
-// TODO: We need to move each part to its corresponding class. Most of these
-// methods are related to byte manipulation, so we should move them 
+// TODO: We need to move each part to its corresponding class.
 
 public class Utilities {
 
@@ -334,7 +333,7 @@ public class Utilities {
      * @param n the number from which we'll generate new number
      * @param from bit position from which we'll start to calculate
      * @param till bit position on which we'll end to calculate (included)
-     * @return
+     * @return integer from subset of integer-to-boolean-array boolean array
      */
     public static int intFromIntegerSubset(int n, int from, int till) throws IllegalArgumentException {
         int result = 0;
