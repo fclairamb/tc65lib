@@ -101,10 +101,9 @@ public class AutoUpdater extends TimerTask {
     public void run() {
         try {
             if (needsUpdate()) {
-//				if (Logger.BUILD_DEBUG) {
-//					Logger.log("We need to perform an update !");
-//				}
-                // At this stage, we need the "apn" and "jadurl" settings to be defined
+                if (Logger.BUILD_NOTICE) {
+                    Logger.log("We need to perform an update !");
+                }
 
                 if (before != null) {
                     try {

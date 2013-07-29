@@ -8,6 +8,7 @@ import com.siemens.icm.io.*;
 import org.javacint.common.Strings;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
+import org.javacint.watchdog.WatchdogManager;
 
 /**
  * AT Commands wrapper.
@@ -155,8 +156,12 @@ public class ATExecution {
             }
         }
 
-        // If not, we just trigger the OTAP
+        // If not, we just trigger the OTAP. Because we could have some
+        // AT^SJOTAP pre-defined parameters.
         {
+            // We stop the watchdog code
+            WatchdogManager.stop();
+
             String ret = ATCommands.send("AT^SJOTAP");
             if (Logger.BUILD_DEBUG) {
                 Logger.log("ATCommandsWrapper.update: ret2=\"" + ret.replace('\r', '.').
