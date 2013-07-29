@@ -27,7 +27,8 @@ public class Settings {
     public static final String SETTING_APN = "apn";
     public static final String SETTING_CODE = "code";
     public static final String SETTING_MANAGERSPHONE = "phoneManager";
-    public static final String SETTING_IMSI = "imsi";
+    //public static final String SETTING_IMSI = "imsi";
+    public static final String SETTING_ICCID = "iccid";
     public static final String SETTING_PINCODE = "pincode";
     /**
      * JADUrl setting
@@ -175,10 +176,10 @@ public class Settings {
         defaultSettings.put(SETTING_CODE, "1234");
 
         // APN is mandatory
-        defaultSettings.put(SETTING_APN, "0");
+        defaultSettings.put(SETTING_APN, "");
 
         // IMSI is mandatory
-        defaultSettings.put(SETTING_IMSI, "0");
+        defaultSettings.put(SETTING_ICCID, "");
 
         synchronized (consumers) {
             for (Enumeration en = consumers.elements(); en.hasMoreElements();) {

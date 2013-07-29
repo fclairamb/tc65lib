@@ -89,17 +89,17 @@ public final class APNAutodetection {
     public String autoLoadRightGPRSSettings() {
         String apn = null;
         try { // Let's detect the IMSI
-            String imsiDetected, imsiSaved;
-            imsiDetected = ATExecution.getImsi();
-            imsiSaved = Settings.get(Settings.SETTING_IMSI);
+            String simDetected, simSaved;
+            simDetected = ATExecution.getIccid();
+            simSaved = Settings.get(Settings.SETTING_ICCID);
 
-            if (imsiDetected == null) {
+            if (simDetected == null) {
                 if (Logger.BUILD_CRITICAL) {
                     Logger.log("No sim card detected !");
                 }
-            } else if (!imsiDetected.equals(imsiSaved)) {
+            } else if (!simDetected.equals(simSaved)) {
                 if (Logger.BUILD_WARNING) {
-                    Logger.log("Sim card changed since last successful APN detection ! saved=" + imsiSaved + ", detected=" + imsiDetected);
+                    Logger.log("Sim card changed since last successful APN detection ! saved=" + simSaved + ", detected=" + simDetected);
                 }
 
                 synchronized (atc) {
@@ -144,13 +144,13 @@ public final class APNAutodetection {
                     // This renew APN detection until we have the right APN detected
                     // The main drawback is : We will detect APN at each startup
                     // even if network is working fine
-                    Settings.set(Settings.SETTING_IMSI, imsiDetected);
+                    Settings.set(Settings.SETTING_ICCID, simDetected);
                     Settings.set(Settings.SETTING_APN, apn);
                     Settings.save();
 
                     if (phoneManager != null) {
                         String imei = ATExecution.getImei();
-                        SimpleSMS.send(phoneManager, "New detection!\nIMEI:" + imei + "\nIMSI:" + imsiDetected + "\nAPN:" + apn + "\n");
+                        SimpleSMS.send(phoneManager, "New detection!\nIMEI:" + imei + "\nICCID:" + simDetected + "\nAPN:" + apn + "\n");
                     }
                 } else {
                     if (phoneManager != null) {
@@ -161,7 +161,7 @@ public final class APNAutodetection {
                             mnc = monc[1];
                         }
                         String imei = ATExecution.getImei();
-                        SimpleSMS.send(phoneManager, "APN NOT FOUND!\nIMEI:" + imei + "\nIMSI:" + imsiDetected + "\nOperator: " + ATExecution.getCopsOperator() + " (" + mcc + "-" + mnc + ")");
+                        SimpleSMS.send(phoneManager, "APN NOT FOUND!\nIMEI:" + imei + "\nICCID:" + simDetected + "\nOperator: " + ATExecution.getCopsOperator() + " (" + mcc + "-" + mnc + ")");
                     }
                 }
             } else {

@@ -8,8 +8,6 @@ import com.siemens.icm.io.*;
 
 /**
  * Pooled ATCommand instance wrapper.
- * 
- * @author florent
  */
 public class ATCommandPooled {
 
