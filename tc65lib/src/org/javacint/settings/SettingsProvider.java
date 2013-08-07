@@ -5,11 +5,7 @@ import java.util.Hashtable;
 /**
  * Settings consuming interface.
  *
- * Each settings consumer must implement this interface
- *
- * Note: This should be renamed to SettingsConsumer.
- *
- * @author Florent Clairambault / www.webingenia.com
+ * Each settings provider must implement this interface
  */
 public interface SettingsProvider {
 

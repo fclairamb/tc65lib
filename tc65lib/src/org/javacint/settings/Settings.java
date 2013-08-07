@@ -12,30 +12,53 @@ import org.javacint.common.Strings;
 import org.javacint.logging.Logger;
 
 /**
- * Settings management class
+ * Settings management class.
  *
- * @author Florent Clairambault / www.webingenia.com
+ * This class should take advantage of the PropertiesFile class.
  */
 public class Settings {
 
-    private static Hashtable settings;
-    private static String fileName = "settings.txt";
-    private static final Vector consumers = new Vector();
     /**
-     * APN setting
+     * Settings container. It has both the default and specific settings.
+     */
+    private static Hashtable settings;
+    /**
+     * Settings filename
+     */
+    private static String fileName = "settings.txt";
+    /**
+     * Settings providers. They provide some settings with some default values
+     * and they receive events when some settings are changed.
+     */
+    private static final Vector providers = new Vector();
+    private static final String PATH_PREFIX = "file:///a:/";
+    /**
+     * APN setting. In the AT^SJNET=... format
      */
     public static final String SETTING_APN = "apn";
+    /**
+     * Protection code
+     */
     public static final String SETTING_CODE = "code";
     public static final String SETTING_MANAGERSPHONE = "phoneManager";
-    //public static final String SETTING_IMSI = "imsi";
+    /**
+     * ICCID sim card setting. This is very useful to detect iccid card change
+     * (SIM card change detection not handled by the settings class itself).
+     */
     public static final String SETTING_ICCID = "iccid";
+    /**
+     * pincode setting name. Using pincode is NOT recommended.
+     */
     public static final String SETTING_PINCODE = "pincode";
     /**
-     * JADUrl setting
+     * jadurl setting
      */
     public static final String SETTING_JADURL = "jadurl";
     private static boolean madeSomeChanges = false;
     private static boolean firstStartup = false;
+    /**
+     * loading state
+     */
     private static boolean loading;
 
     public static synchronized void setFilename(String filename) {
@@ -43,20 +66,40 @@ public class Settings {
         settings = null;
     }
 
+    /**
+     * Define if we are loading the program. If we are loading, we can't
+     * get/set/load/save settings. We can only add and remove settings
+     * consumers.
+     *
+     * @param l Loading state
+     */
     public static void loading(boolean l) {
         loading = l;
     }
 
+    /**
+     * Get the settings filename.
+     *
+     * @return Filename without the "file:///a:/" path prefix
+     */
     public static String getFilename() {
         return fileName;
     }
 
+    /**
+     * If this is the first startup.
+     *
+     * The first statup flag is activated if we don't have any settings file.
+     *
+     * @return If this is the first startup
+     */
     public static boolean firstStartup() {
         return firstStartup;
     }
 
     /**
-     * Load settings
+     * Load settings. We should replace the line by line loading code by using
+     * the PropertiesFile class.
      */
     public static synchronized void load() {
         if (Logger.BUILD_DEBUG) {
@@ -68,7 +111,7 @@ public class Settings {
         try {
 
 
-            FileConnection fc = (FileConnection) Connector.open("file:///a:/" + fileName, Connector.READ);
+            FileConnection fc = (FileConnection) Connector.open(PATH_PREFIX + fileName, Connector.READ);
 
             if (!fc.exists()) {
                 if (Logger.BUILD_WARNING) {
@@ -76,7 +119,7 @@ public class Settings {
                 }
                 firstStartup = true;
 
-                fc = (FileConnection) Connector.open("file:///a:/" + fileName + ".old", Connector.READ);
+                fc = (FileConnection) Connector.open(PATH_PREFIX + fileName + ".old", Connector.READ);
                 if (fc.exists()) {
                     if (Logger.BUILD_WARNING) {
                         Logger.log("Settings.load: But \"" + fileName + ".old\" exists ! ");
@@ -106,7 +149,7 @@ public class Settings {
             // There shouldn't be any file to read from
 
             if (Logger.BUILD_CRITICAL) {
-                Logger.log("Settings.Load", ex);
+                Logger.log("Settings.load", ex);
             }
         } finally {
             settings = newSettings;
@@ -145,8 +188,8 @@ public class Settings {
      */
     public static void onSettingsChanged(String[] names, SettingsProvider caller) {
         try {
-            synchronized (consumers) {
-                for (Enumeration en = consumers.elements(); en.hasMoreElements();) {
+            synchronized (providers) {
+                for (Enumeration en = providers.elements(); en.hasMoreElements();) {
                     SettingsProvider cons = (SettingsProvider) en.nextElement();
 
                     if (cons == caller) {
@@ -171,18 +214,21 @@ public class Settings {
     public static Hashtable getDefaultSettings() {
 
         Hashtable defaultSettings = new Hashtable();
+        
+        // The following settings are mandatory but they
+        // are NOT handled by the Settings class.
 
-        // Code is mandatory
+        // Code is mandatory (SMS control protection)
         defaultSettings.put(SETTING_CODE, "1234");
 
-        // APN is mandatory
+        // APN is mandatory (GPRS setup)
         defaultSettings.put(SETTING_APN, "");
 
-        // IMSI is mandatory
+        // ICCID is mandatory (SIM card detection)
         defaultSettings.put(SETTING_ICCID, "");
 
-        synchronized (consumers) {
-            for (Enumeration en = consumers.elements(); en.hasMoreElements();) {
+        synchronized (providers) {
+            for (Enumeration en = providers.elements(); en.hasMoreElements();) {
                 SettingsProvider cons = (SettingsProvider) en.nextElement();
                 cons.getDefaultSettings(defaultSettings);
             }
@@ -192,9 +238,9 @@ public class Settings {
     }
 
     /**
-     * Add a settings consumer class
+     * Add a settings provier class
      *
-     * @param consumer Consumer of settings
+     * @param consumer Provider of settings and consumer of settings change
      */
     public static void addProvider(SettingsProvider consumer) {
 //		if (Logger.BUILD_DEBUG) {
@@ -202,11 +248,13 @@ public class Settings {
 //		}
 
         if (!loading) {
+            // We should never add or removed a settings provider when we have finished loading
             throw new RuntimeException("Settings.addSettingsConsumer: We're not loading anymore !");
         }
 
-        synchronized (consumers) {
-            consumers.addElement(consumer);
+        synchronized (providers) {
+            providers.addElement(consumer);
+            // Adding a provider voids the current state of the settings
             settings = null;
         }
     }
@@ -216,10 +264,10 @@ public class Settings {
      *
      * @param consumer Consumer of settings
      */
-    public static void removeSettingsConsumer(SettingsProvider consumer) {
-        synchronized (consumers) {
-            if (consumers.contains(consumer)) {
-                consumers.removeElement(consumer);
+    public static void removeProvider(SettingsProvider consumer) {
+        synchronized (providers) {
+            if (providers.contains(consumer)) {
+                providers.removeElement(consumer);
             }
             settings = null;
         }
@@ -230,7 +278,7 @@ public class Settings {
      */
     public synchronized static void reset() {
         try {
-            FileConnection fc = (FileConnection) Connector.open("file:///a:/" + fileName, Connector.READ_WRITE);
+            FileConnection fc = (FileConnection) Connector.open(PATH_PREFIX + fileName, Connector.READ_WRITE);
             if (fc.exists()) {
                 fc.delete();
             }
@@ -267,9 +315,9 @@ public class Settings {
                 String fileNameTmp = fileName + ".tmp";
                 String fileNameOld = fileName + ".old";
 
-                String settingFileUrl = "file:///a:/" + fileName;
-                String settingFileUrlTmp = "file:///a:/" + fileNameTmp;
-                String settingFileUrlOld = "file:///a:/" + fileNameOld;
+                String settingFileUrl = PATH_PREFIX + fileName;
+                String settingFileUrlTmp = PATH_PREFIX + fileNameTmp;
+                String settingFileUrlOld = PATH_PREFIX + fileNameOld;
 
                 FileConnection fc = (FileConnection) Connector.open(settingFileUrlTmp, Connector.READ_WRITE);
 
@@ -339,7 +387,7 @@ public class Settings {
                     fc.close();
                 }
 
-                // If we savec the file, we can reset the madeSomeChanges information
+                // We don't have anything to be written anymore
                 madeSomeChanges = false;
             } catch (Exception ex) {
                 if (Logger.BUILD_CRITICAL) {
@@ -398,6 +446,10 @@ public class Settings {
         set(key, "" + value);
     }
 
+    public void set(String key, boolean value) {
+        set(key, value ? "1" : "0");
+    }
+
     /**
      * Set a setting without launching the onSettingsChange method
      *
@@ -417,7 +469,7 @@ public class Settings {
         }
 
         if (loading) {
-            throw new RuntimeException("Settings.setSettingWithoutChangeEvent: You can't change a setting while loading !");
+            throw new RuntimeException("Settings.setWithoutEvent: You can't change a setting while loading !");
         }
         table.put(key, value);
         madeSomeChanges = true;
@@ -455,12 +507,6 @@ public class Settings {
             return false;
         }
 
-        if (value.compareTo("1") == 0
-                || value.compareTo("true") == 0
-                || value.compareTo("on") == 0
-                || value.compareTo("yes") == 0) {
-            return true;
-        }
-        return false;
+        return value.compareTo("1") == 0;
     }
 }
