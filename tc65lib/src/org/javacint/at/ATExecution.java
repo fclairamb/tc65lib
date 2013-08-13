@@ -97,6 +97,15 @@ public class ATExecution {
     }
 
     /**
+     * Set the GPRS attachment state.
+     * This can force GPRS attachment or force its dettachment.
+     * @param attach TRUE for GPRS attachment, FALSe for GPRS detachment
+     */
+    public static void setGprsAttach(boolean attach) {
+        ATCommands.send("AT+CGATT=" + (attach ? "1" : "0"));
+    }
+
+    /**
      * Restarts the chip.
      */
     public static void restart() {
