@@ -1,4 +1,4 @@
-package org.javacint.utilities;
+package org.javacint.common;
 
 import java.io.ByteArrayOutputStream;
 

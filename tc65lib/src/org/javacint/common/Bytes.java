@@ -1,5 +1,6 @@
 package org.javacint.common;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Vector;
 import org.javacint.logging.Logger;
 

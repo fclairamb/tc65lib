@@ -19,7 +19,7 @@ import java.util.Random;
 import org.javacint.at.ATCommandPooled;
 import org.javacint.at.ATCommands;
 import org.javacint.logging.Logger;
-import org.javacint.utilities.Hex;
+import org.javacint.common.Hex;
 import org.javacint.utilities.Utilities;
 
 /**

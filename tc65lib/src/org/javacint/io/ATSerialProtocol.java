@@ -3,8 +3,8 @@ package org.javacint.io;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.javacint.at.ATCommands;
+import org.javacint.common.Hex;
 import org.javacint.logging.Logger;
-import org.javacint.utilities.Hex;
 
 public abstract class ATSerialProtocol extends Connection {
 
