@@ -7,8 +7,6 @@ import org.javacint.settings.SettingsProvider;
 
 /**
  * GPS chip management.
- *
- * @author Florent Clairambault / www.webingenia.com
  */
 public class GpsManager implements Runnable, SettingsProvider {
 

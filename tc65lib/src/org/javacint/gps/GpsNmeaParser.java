@@ -8,9 +8,7 @@ import org.javacint.logging.Logger;
 /**
  * GPS NMEA parser.
  *
- * GPS NMEA protocol parsing
- *
- * @author Florent Clairambault / www.webingenia.com
+ * GPS NMEA protocol parsing.
  */
 public class GpsNmeaParser implements Runnable {
 

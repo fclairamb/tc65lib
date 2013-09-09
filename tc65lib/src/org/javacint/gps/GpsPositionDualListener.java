@@ -4,8 +4,6 @@ package org.javacint.gps;
  * GPS Position dual listener.
  *
  * Listener to redirect the reception of gps location to two other listeners.
- *
- * @author Florent Clairambault / www.webingenia.com
  */
 public class GpsPositionDualListener implements GpsPositionListener {
 

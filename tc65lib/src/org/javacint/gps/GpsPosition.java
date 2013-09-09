@@ -6,8 +6,6 @@ import org.javacint.time.DateManagement;
 
 /**
  * GPS Position.
- *
- * @author Florent Clairambault / www.webingenia.com
  */
 public class GpsPosition {
 

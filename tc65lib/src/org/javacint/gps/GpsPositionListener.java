@@ -2,7 +2,6 @@ package org.javacint.gps;
 
 /**
  * GPS Position listener
- * @author Florent Clairambault / www.webingenia.com
  */
 public interface GpsPositionListener {
 	
