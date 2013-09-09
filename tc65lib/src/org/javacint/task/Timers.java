@@ -10,8 +10,7 @@ import java.util.TimerTask;
 /**
  * Timers wrapping class.
  *
- * Fast tasks need and known to execute quickly. Slow tasks can be executed
- * slowly.
+ * Fast tasks need to execute quickly. Slow tasks can be executed slowly.
  *
  * <br />
  *

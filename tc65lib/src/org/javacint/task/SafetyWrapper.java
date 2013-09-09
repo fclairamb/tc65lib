@@ -21,7 +21,9 @@ public class SafetyWrapper extends TimerTask {
         try {
             runnable.run();
         } catch (Throwable ex) {
-            Logger.log("SafetyWrapper", ex, true);
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log("SafetyWrapper", ex, true);
+            }
         }
     }
 }
