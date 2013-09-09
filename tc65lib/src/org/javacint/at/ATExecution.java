@@ -34,6 +34,30 @@ public class ATExecution {
     }
 
     /**
+     * Get the current RSSI.
+     * @param atc AT Command instance
+     * @return 
+     */
+    public static int getRssi(ATCommand atc) {
+        try {
+            String ret = ATCommands.send("AT+CSQ");
+            String tab[] = Strings.split('\n', ret);
+            ret = tab[1];
+            if (ret.equals("ERROR")) {
+                return -1;
+            }
+            tab = Strings.split(',', ret.substring(6).trim());
+            String rssi = tab[0];
+            return Integer.parseInt(rssi);
+        } catch (Exception ex) {
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log(THIS + ".getRssi", ex, true);
+            }
+            return -1;
+        }
+    }
+
+    /**
      * Get the IMEI number of the GSM chip
      *
      * @return IMEI number
@@ -97,9 +121,10 @@ public class ATExecution {
     }
 
     /**
-     * Set the GPRS attachment state.
-     * This can force GPRS attachment or force its dettachment.
-     * @param attach TRUE for GPRS attachment, FALSe for GPRS detachment
+     * Set the GPRS attachment state. This can force GPRS attachment or force
+     * its dettachment.
+     *
+     * @param attach <strong>true</strong> for GPRS attachment, <strong>false</strong> for GPRS detachment
      */
     public static void setGprsAttach(boolean attach) {
         ATCommands.send("AT+CGATT=" + (attach ? "1" : "0"));
