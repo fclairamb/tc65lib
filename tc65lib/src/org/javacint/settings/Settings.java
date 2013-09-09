@@ -214,7 +214,7 @@ public class Settings {
     public static Hashtable getDefaultSettings() {
 
         Hashtable defaultSettings = new Hashtable();
-        
+
         // The following settings are mandatory but they
         // are NOT handled by the Settings class.
 
@@ -429,10 +429,10 @@ public class Settings {
     /**
      * Set a setting
      *
-     * @param key Setting to set
+     * @param key Name of the setting
      * @param value Value of the setting
      */
-    public static synchronized void set(String key, String value) {
+    public static void set(String key, String value) {
         if (Logger.BUILD_DEBUG) {
             Logger.log("Settings.setSetting( \"" + key + "\", \"" + value + "\" );");
         }
@@ -442,11 +442,23 @@ public class Settings {
         }
     }
 
-    public void set(String key, int value) {
-        set(key, "" + value);
+    /**
+     * Set a setting
+     *
+     * @param key Name of the setting
+     * @param value Value of the setting
+     */
+    public static void set(String key, int value) {
+        set(key, Integer.toString(value));
     }
 
-    public void set(String key, boolean value) {
+     /**
+     * Set a setting
+     *
+     * @param key Name of the setting
+     * @param value Value of the setting
+     */
+    public static void set(String key, boolean value) {
         set(key, value ? "1" : "0");
     }
 
