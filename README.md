@@ -1,3 +1,11 @@
+!!! WARNING: NONE OF THIS HAS EVEN BEEN TESTED ONCE !!!
+
+
+<br /><br /><br /><br />
+
+
+
+
 TC65Lib (javacint)
 =======
 
@@ -10,12 +18,12 @@ This library is actually intended as a framework. It is necessary to obfuscate y
 components of the library. 
 
 The features that will be provided in this library are:
-- Settings management (done)
-- Watchdog management (done)
-- Logging (done)
-- Console (done)
-- Time sync (done)
-- SMS receiving and sending (done)
+- Settings management (added code)
+- Watchdog management (added code)
+- Logging (added code)
+- Console (added code)
+- Time sync (added code)
+- SMS receiving and sending (added code)
 - Call receiving and making
-- Automatic OTAP management (done)
+- Automatic OTAP management (added code)
 - Communication with server: MQTT / M2MP / HTTP ? (NOT done)
