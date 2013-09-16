@@ -6,7 +6,8 @@ import org.javacint.settings.Settings;
 import org.javacint.settings.SettingsProvider;
 
 /**
- * GPS chip management.
+ * High level GPS chip management. This is mostly useful for GPS chip
+ * auto-detection.
  */
 public class GpsManager implements Runnable, SettingsProvider {
 
