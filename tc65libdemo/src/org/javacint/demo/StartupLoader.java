@@ -15,6 +15,7 @@ import org.javacint.otap.AutoUpdater;
 import org.javacint.settings.Settings;
 import org.javacint.sms.PingSMSConsumer;
 import org.javacint.sms.SMSReceiver;
+import org.javacint.sms.StandardFeaturesSMSConsumer;
 import org.javacint.task.Timers;
 import org.javacint.watchdog.WatchdogEmbedded;
 import org.javacint.watchdog.WatchdogManager;
@@ -22,6 +23,9 @@ import org.javacint.watchdog.WatchdogOnJavaGpio;
 
 /**
  * Loader wrapper.
+ *
+ * We add all the startup tasks to be able to monitor them and print it nicely.
+ *
  */
 public class StartupLoader extends TimerTask {
 
@@ -76,6 +80,7 @@ public class StartupLoader extends TimerTask {
         loader.addRunnable(new NamedRunnable("SMS:loading") {
             public void run() throws Exception {
                 SMSReceiver smsr = SMSReceiver.getInstance();
+                smsr.addConsumer(new StandardFeaturesSMSConsumer());
                 smsr.addConsumer(new SMSHandler());
                 smsr.addConsumer(new PingSMSConsumer());
             }
@@ -108,7 +113,8 @@ public class StartupLoader extends TimerTask {
 
         loader.addRunnable(new NamedRunnable("AutoUpdater:scheduled") {
             public void run() throws Exception {
-                // We will try to find an update every 15 minutes
+                // We will try to find an update every 15 minutes by comparing the version
+                // defined in the JAD file as the jadurl's address.
                 AutoUpdater.schedule(version, 900 * 1000);
             }
         });
@@ -119,6 +125,8 @@ public class StartupLoader extends TimerTask {
                 WatchdogManager.remove(loader);
             }
         });
+
+        // And we start the loading task right now.
         Timers.getSlow().schedule(loader, 0);
     }
 }

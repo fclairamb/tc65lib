@@ -5,7 +5,6 @@ import org.javacint.loading.Loader;
 import org.javacint.loading.NamedRunnable;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
-import org.javacint.watchdog.WatchdogManager;
 
 /**
  * Shutdown loader.

@@ -9,12 +9,14 @@ import org.javacint.sms.SMSConsumer;
 import org.javacint.sms.SimpleSMS;
 
 /**
- * SMS handler.
+ * Sample SMS handling code.
  */
 public class SMSHandler implements SMSConsumer {
 
     public boolean smsReceived(String from, String content) {
-        Logger.log("SMSHandler: " + from + ", " + content);
+        if (Logger.BUILD_NOTICE) {
+            Logger.log("SMSHandler: " + from + ", " + content);
+        }
 
         // If we have something that we are supposed to handle
         if (content.toLowerCase().trim().equals("hello")) {

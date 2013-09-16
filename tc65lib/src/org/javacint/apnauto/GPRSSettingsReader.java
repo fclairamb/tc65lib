@@ -14,17 +14,24 @@ import org.javacint.logging.Logger;
 /**
  * GPRS Settings reader.
  *
- * GPRS Settings reader
- *
  */
 public final class GPRSSettingsReader {
 
     private final Vector names;
     private BufferedReader reader;
+    // The GPRSSettings object will be kept through the complete parsing
     private final GPRSSettings settings = new GPRSSettings();
     private static final boolean LOG = false;
     private final InputConnection source;
 
+    /**
+     * GPRS settings reader.
+     *
+     * @param source Source file to read in
+     * @param names Names of the elements to search for in priority (usually
+     * MCC-MNC, MCC).
+     * @throws IOException
+     */
     public GPRSSettingsReader(InputConnection source, Vector names) throws IOException {
         if (source == null || names == null) {
             if (Logger.BUILD_DEBUG && LOG) {

@@ -23,6 +23,7 @@ public class ConsoleBySetting extends Console implements SettingsProvider {
     private static final String SETTING_CONSOLE_ENABLED = "console.enabled";
 
     public void getDefaultSettings(Hashtable settings) {
+        // By default, the console is enabled
         settings.put(SETTING_CONSOLE_ENABLED, "1");
     }
 

@@ -5,7 +5,9 @@ import org.javacint.settings.Settings;
 import org.javacint.settings.SettingsProvider;
 
 /**
- * Provides some default values for some commonly used settings.
+ * Base settings. It provides some default values for some commonly used
+ * settings.
+ *
  */
 public class BaseSettingsProvider implements SettingsProvider {
 

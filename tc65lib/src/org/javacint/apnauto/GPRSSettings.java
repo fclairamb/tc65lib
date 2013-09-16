@@ -4,7 +4,7 @@ import org.javacint.common.Strings;
 import org.javacint.logging.Logger;
 
 /**
- * GPRS Settings wrapper.
+ * GPRS Settings wrapper. This class is optimized for fast GPRS files parsing.
  */
 public final class GPRSSettings {
 
@@ -33,8 +33,8 @@ public final class GPRSSettings {
     }
 
     /**
-     * Get the carrier.
-     * "gprs" or "gsm"
+     * Get the carrier. "gprs" or "gsm"
+     *
      * @return Carrier
      */
     public String getCarrier() {
@@ -43,6 +43,7 @@ public final class GPRSSettings {
 
     /**
      * Get the APN.
+     *
      * @return APN
      */
     public String getApn() {
@@ -51,6 +52,7 @@ public final class GPRSSettings {
 
     /**
      * Get the APN user.
+     *
      * @return APN user
      */
     public String getUser() {
@@ -59,6 +61,7 @@ public final class GPRSSettings {
 
     /**
      * Get the APN password.
+     *
      * @return APN password
      */
     public String getPass() {
@@ -67,6 +70,7 @@ public final class GPRSSettings {
 
     /**
      * Get the DNS.
+     *
      * @return DNS
      */
     public String getDns() {
@@ -75,6 +79,7 @@ public final class GPRSSettings {
 
     /**
      * Get Mobile Country Code.
+     *
      * @return MCC
      */
     public String getMCC() {
@@ -83,6 +88,7 @@ public final class GPRSSettings {
 
     /**
      * Get Mobile Network Code
+     *
      * @return MNC
      */
     public String getMNC() {
@@ -91,6 +97,7 @@ public final class GPRSSettings {
 
     /**
      * Get the target to test the APN on.
+     *
      * @return Target
      */
     public String getTarget() {
@@ -99,6 +106,7 @@ public final class GPRSSettings {
 
     /**
      * Parse a GPRS settings line.
+     *
      * @param line To parse
      */
     public void parse(String line) {
@@ -110,6 +118,7 @@ public final class GPRSSettings {
 
     /**
      * Set columns parameters.
+     *
      * @param cols Set the columns.
      */
     public void setColumns(String cols) {
@@ -142,16 +151,19 @@ public final class GPRSSettings {
     public String toString() {
         return getCarrier() + " --> " + getApn() + ", " + getUser() + ", " + getPass();
     }
-    
-    /** Parameter enclosing */
+    /**
+     * Parameter enclosing
+     */
     private static final char QT = '"';
-    
-    /** Parameters separator */
+    /**
+     * Parameters separator
+     */
     private static final char SE = ',';
 
     /**
-     * Export the GPRS settings to string.
-     * Export the GPRS settings to an AT^SJNET
+     * Export the GPRS settings to string. Export the GPRS settings to an
+     * AT^SJNET
+     *
      * @return String that can be applied as-is to AT^SJNET
      */
     public String toSjnet() {

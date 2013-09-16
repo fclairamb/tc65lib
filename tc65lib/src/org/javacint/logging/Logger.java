@@ -1,7 +1,12 @@
 package org.javacint.logging;
 
 /**
- * Logging class
+ * Logging class.
+ *
+ * The logging level is controlled by the buildLoggingLevel variable. With a
+ * proper use of the
+ * <pre>Logger.BUILD_*</pre> in the program, only the necessary parts will be
+ * compiled in the final, proguarded, program.
  */
 public class Logger {
 
