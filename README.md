@@ -10,12 +10,12 @@ This library is actually intended as a framework. It is necessary to obfuscate y
 components of the library. 
 
 The features that will be provided in this library are:
-- Settings management
-- Watchdog management
-- Logging
-- Console
-- Time sync
-- SMS receiving and sending
+- Settings management (done)
+- Watchdog management (done)
+- Logging (done)
+- Console (done)
+- Time sync (done)
+- SMS receiving and sending (done)
 - Call receiving and making
-- Automatic OTAP management
-- Communication with server: MQTT / M2MP / HTTP ?
+- Automatic OTAP management (done)
+- Communication with server: MQTT / M2MP / HTTP ? (NOT done)
