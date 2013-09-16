@@ -4,6 +4,7 @@ import java.util.TimerTask;
 import org.javacint.console.ConsiderUpdateCommand;
 import org.javacint.console.ConsoleBySetting;
 import org.javacint.console.DateCommand;
+import org.javacint.console.GPSTestCommand;
 import org.javacint.console.IDCommand;
 import org.javacint.console.NTPTestCommand;
 import org.javacint.io.Streams;
@@ -44,7 +45,7 @@ public class StartupLoader extends TimerTask {
                 WatchdogManager.add(loader);
                 WatchdogManager.add(new WatchdogEmbedded());
                 WatchdogManager.add(new WatchdogOnJavaGpio(8, false));
-                WatchdogManager.start( 5000, 20000); // 20s is a reasonnable watchdog timer
+                WatchdogManager.start(5000, 20000); // 20s is a reasonnable watchdog timer
             }
         });
 
@@ -67,6 +68,7 @@ public class StartupLoader extends TimerTask {
                 Global.console.addCommandReceiver(new NTPTestCommand());
                 Global.console.addCommandReceiver(new ConsiderUpdateCommand(version));
                 Global.console.addCommandReceiver(new IDCommand());
+                Global.console.addCommandReceiver(new GPSTestCommand());
                 // Nothing prevents us from loading other console (one on an other port, one on a socket listening handler, one on a client socket, etc.)
             }
         });
