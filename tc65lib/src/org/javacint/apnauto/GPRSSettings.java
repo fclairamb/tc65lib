@@ -18,7 +18,7 @@ public final class GPRSSettings {
             index_dns = -1,
             index_mcc = -1,
             index_target = -1,
-            index_mnc = 1;
+            index_mnc = -1;
 
     private String get(int index) {
         return get(index, EMPTY);
@@ -119,6 +119,9 @@ public final class GPRSSettings {
     /**
      * Set columns parameters.
      *
+     * When the columns definition is loaded, each column gets a specific
+     * meaning.
+     *
      * @param cols Set the columns.
      */
     public void setColumns(String cols) {
@@ -127,21 +130,21 @@ public final class GPRSSettings {
         for (int i = 0; i < l; i++) {
             String col = spl[i];
             if (col.equals("c")) {
-                index_carrier = i;
+                index_carrier = i; // carrier: "gprs","gsm"
             } else if (col.equals("a")) {
-                index_apn = i;
+                index_apn = i; // apn: "internet"
             } else if (col.equals("u")) {
-                index_user = i;
+                index_user = i; // user: "default"
             } else if (col.equals("p")) {
-                index_pass = i;
+                index_pass = i; // pass: "default"
             } else if (col.equals("d")) {
-                index_dns = i;
+                index_dns = i; // dns: "8.8.8.8"
             } else if (col.equals("m")) {
-                index_mcc = i;
+                index_mcc = i; // mcc: Why would it be here ?
             } else if (col.equals("n")) {
-                index_mnc = i;
+                index_mnc = i; // mnc: Why would it be here ?
             } else if (col.equals("t")) {
-                index_target = i;
+                index_target = i; // target: "8.8.8.8:53" (host to try)
             } else if (Logger.BUILD_CRITICAL) {
                 Logger.log("APNS_FILE: Column \"" + col + "\" (" + i + ") is unknown!");
             }
