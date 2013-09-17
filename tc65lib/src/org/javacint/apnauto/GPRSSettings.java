@@ -16,9 +16,7 @@ public final class GPRSSettings {
             index_user = -1,
             index_pass = -1,
             index_dns = -1,
-            index_mcc = -1,
-            index_target = -1,
-            index_mnc = -1;
+            index_target = -1;
 
     private String get(int index) {
         return get(index, EMPTY);
@@ -78,24 +76,6 @@ public final class GPRSSettings {
     }
 
     /**
-     * Get Mobile Country Code.
-     *
-     * @return MCC
-     */
-    public String getMCC() {
-        return get(index_mcc);
-    }
-
-    /**
-     * Get Mobile Network Code
-     *
-     * @return MNC
-     */
-    public String getMNC() {
-        return get(index_mnc);
-    }
-
-    /**
      * Get the target to test the APN on.
      *
      * @return Target
@@ -139,10 +119,6 @@ public final class GPRSSettings {
                 index_pass = i; // pass: "default"
             } else if (col.equals("d")) {
                 index_dns = i; // dns: "8.8.8.8"
-            } else if (col.equals("m")) {
-                index_mcc = i; // mcc: Why would it be here ?
-            } else if (col.equals("n")) {
-                index_mnc = i; // mnc: Why would it be here ?
             } else if (col.equals("t")) {
                 index_target = i; // target: "8.8.8.8:53" (host to try)
             } else if (Logger.BUILD_CRITICAL) {
