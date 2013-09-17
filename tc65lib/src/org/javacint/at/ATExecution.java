@@ -35,8 +35,9 @@ public class ATExecution {
 
     /**
      * Get the current RSSI.
+     *
      * @param atc AT Command instance
-     * @return 
+     * @return
      */
     public static int getRssi(ATCommand atc) {
         try {
@@ -124,7 +125,8 @@ public class ATExecution {
      * Set the GPRS attachment state. This can force GPRS attachment or force
      * its dettachment.
      *
-     * @param attach <strong>true</strong> for GPRS attachment, <strong>false</strong> for GPRS detachment
+     * @param attach <strong>true</strong> for GPRS attachment,
+     * <strong>false</strong> for GPRS detachment
      */
     public static void setGprsAttach(boolean attach) {
         ATCommands.send("AT+CGATT=" + (attach ? "1" : "0"));
@@ -231,5 +233,105 @@ public class ATExecution {
             }
         }
         return null;
+    }
+
+    public static class PIN {
+
+        public static boolean pinLock(boolean lock, String code) {
+            try {
+//                synchronized (atc) {
+                String ret = ATCommands.send("AT+CLCK=\"SC\"," + (lock ? "1" : "0") + ",\"" + code + "\"");
+                String[] spl = Strings.split('\n', ret);
+                ret = spl[1].trim();
+                return "OK".equals(ret);
+//                }
+            } catch (Exception ex) {
+                if (Logger.BUILD_CRITICAL) {
+                    Logger.log(THIS + ".pinSet( atc, " + lock + ", \"" + code + "\" );");
+                }
+                return false;
+            }
+        }
+        public static int PINSTATUS_READY = 0;
+        public static int PINSTATUS_SIMPIN = 1;
+        public static int PINSTATUS_SIMPUK = 2;
+        public static int PINSTATUS_UNKNOWN = -1;
+
+        public static int pinStatus() {
+            try {
+//                synchronized (atc) {
+                String ret = ATCommands.send("AT+CPIN?");
+//				Logger.log("ret = " + ret);
+                String[] spl = Strings.split('\n', ret);
+                ret = spl[1].trim();
+                ret = ret.substring("+CPIN: ".length()).trim();
+//				Logger.log("status = " + ret);
+                if ("READY".equals(ret)) {
+                    return PINSTATUS_READY;
+                } else if ("SIM PIN".equals(ret)) {
+                    return PINSTATUS_SIMPIN;
+                } else if ("SIM PUK".equals(ret)) {
+                    return PINSTATUS_SIMPUK;
+                } else {
+                    return PINSTATUS_UNKNOWN;
+                }
+//                }
+            } catch (Exception ex) {
+                if (Logger.BUILD_CRITICAL) {
+                    Logger.log(THIS + ".pinStatus( atc )", ex);
+                }
+                return PINSTATUS_UNKNOWN;
+            }
+        }
+
+        public static boolean pinSend(String code) {
+            try {
+//                synchronized (atc) {
+                String ret = ATCommands.send("AT+CPIN=" + code);
+//				Logger.log(ret);
+                String[] spl = Strings.split('\n', ret);
+                ret = spl[1].trim();
+                return "OK".equals(ret);
+//                }
+            } catch (Exception ex) {
+                if (Logger.BUILD_CRITICAL) {
+                    Logger.log(THIS + ".pinSend( atc, \"" + code + "\" )", ex);
+                }
+                return false;
+            }
+        }
+
+        public static boolean pinChange(String oldPin, String newPin) {
+            try {
+//                synchronized (atc) {
+                String ret = ATCommands.send("AT+CPWD=\"SC\",\"" + oldPin + "\",\"" + newPin + "\"");
+                String[] spl = Strings.split('\n', ret);
+                ret = spl[1].trim();
+                return "OK".equals(ret);
+//                }
+            } catch (Exception ex) {
+                if (Logger.BUILD_CRITICAL) {
+                    Logger.log(THIS + ".pinChange( atc, \"" + oldPin + "\", \"" + newPin + "\" )", ex);
+                }
+                return false;
+            }
+        }
+
+        public static int pinNbTriesLeft() {
+            try {
+//                synchronized (atc) {
+                String ret = ATCommands.send("AT^SPIC");
+//				Logger.log(ret);
+                String[] spl = Strings.split('\n', ret);
+                ret = spl[1].trim().substring("^SPIC: ".length());
+                return Integer.parseInt(ret);
+//                }
+            } catch (Exception ex) {
+                if (Logger.BUILD_CRITICAL) {
+                    Logger.log(THIS + ".pinNbTriesLeft( atc )", ex);
+                }
+                return -1;
+            }
+        }
     }
 }
