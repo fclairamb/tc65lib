@@ -1,4 +1,7 @@
-!!! WARNING: NONE OF THIS HAS EVER BEEN TESTED ONCE !!!
+!!! WARNING: NONE OF THIS HAS EVER BEEN TESTED !!!
+
+The code was taken from previous libraries that worked fine so it can be considered as OK but hasn't been tested. 
+It's only here to allow people to take the parts they are interested in.
 
 
 <br /><br /><br /><br />
