@@ -521,4 +521,8 @@ public class Settings {
 
         return value.compareTo("1") == 0;
     }
+
+    public static Enumeration names() {
+        return getSettings().keys();
+    }
 }

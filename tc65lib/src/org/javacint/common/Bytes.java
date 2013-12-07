@@ -11,7 +11,7 @@ import org.javacint.logging.Logger;
  */
 public class Bytes {
 
-    public static void toHexString(StringBuffer sb, byte buf[]) {
+    public static void byteArrayToHexString(StringBuffer sb, byte buf[]) {
         byteArrayToHexString(sb, buf, 0, buf.length);
     }
 

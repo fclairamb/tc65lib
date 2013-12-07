@@ -39,7 +39,7 @@ public class ATExecution {
      * @param atc AT Command instance
      * @return
      */
-    public static int getRssi(ATCommand atc) {
+    public static int getRssi() {
         try {
             String ret = ATCommands.send("AT+CSQ");
             String tab[] = Strings.split('\n', ret);
@@ -130,6 +130,10 @@ public class ATExecution {
      */
     public static void setGprsAttach(boolean attach) {
         ATCommands.send("AT+CGATT=" + (attach ? "1" : "0"));
+    }
+
+    public static void setAirplaneMode(boolean mode) {
+        ATCommands.send("at^scfg=\"MEopMode/Airplane\",\"" + (mode ? "on" : "off") + "\"");
     }
 
     /**
@@ -235,16 +239,31 @@ public class ATExecution {
         return null;
     }
 
+    public static String getSimNum() {
+        try {
+            String ret = ATCommands.send("AT+CNUM");
+            String[] spl = Strings.split('\n', ret);
+            ret = spl[1].trim();
+            spl = Strings.split(',', ret);
+            ret = spl[1].trim();
+            ret = ret.substring(1, ret.length() - 2);
+            return ret;
+        } catch (Exception ex) {
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log(THIS + ".getSimNum", ex, true);
+            }
+            return ex.getClass() + ":" + ex.getMessage();
+        }
+    }
+
     public static class PIN {
 
         public static boolean pinLock(boolean lock, String code) {
             try {
-//                synchronized (atc) {
                 String ret = ATCommands.send("AT+CLCK=\"SC\"," + (lock ? "1" : "0") + ",\"" + code + "\"");
                 String[] spl = Strings.split('\n', ret);
                 ret = spl[1].trim();
                 return "OK".equals(ret);
-//                }
             } catch (Exception ex) {
                 if (Logger.BUILD_CRITICAL) {
                     Logger.log(THIS + ".pinSet( atc, " + lock + ", \"" + code + "\" );");

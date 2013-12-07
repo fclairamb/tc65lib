@@ -56,7 +56,9 @@ public class Console implements Runnable {
 
     /**
      * Console constructor
-     * @param stream StreamConnection used to receive and send humanly readable commands.
+     *
+     * @param stream StreamConnection used to receive and send humanly readable
+     * commands.
      */
     public Console(StreamConnection stream) {
         this.stream = stream;
@@ -70,7 +72,7 @@ public class Console implements Runnable {
         out.println(line);
     }
 
-    private void parseCommand(String line) throws Exception {
+    public void parseCommand(String line) throws Exception {
         addHistory(line);
         out.println();
         synchronized (commandsReceiver) {
@@ -194,7 +196,7 @@ public class Console implements Runnable {
             }
         }
     }
-    StringBuffer _buffer = new StringBuffer(64);
+    StringBuffer buffer = new StringBuffer(64);
     Vector history = new Vector();
 
     private void addHistory(String line) {
@@ -209,16 +211,16 @@ public class Console implements Runnable {
             while (true) {
                 int c = in.read();
                 if (c == '\n' || c == '\r') { // If we have an end of line
-                    String str = _buffer.toString();
-                    _buffer.setLength(0);
+                    String str = buffer.toString();
+                    buffer.setLength(0);
 
                     out.write(c);
 
                     return str;
                 } else if (c == 127) { // If we have backspace
-                    if (_buffer.length() > 0) { // If there's chars to remove
+                    if (buffer.length() > 0) { // If there's chars to remove
                         out.write(c);
-                        _buffer.setLength(_buffer.length() - 1);
+                        buffer.setLength(buffer.length() - 1);
                     }
                 } else if (c == 13) {
                     return "";
@@ -226,7 +228,7 @@ public class Console implements Runnable {
                     // I'm not really sure about this part
                     handleEscape(getEscapeSequence());
                 } else { // We add chars to the buffer
-                    _buffer.append((char) c);
+                    buffer.append((char) c);
                     out.write(c);
                 }
             }
@@ -264,7 +266,7 @@ public class Console implements Runnable {
         out.write('1');
         out.write('S');
         out.print(PROMPT);
-        _buffer.setLength(0);
+        buffer.setLength(0);
     }
 
     // TODO: test it

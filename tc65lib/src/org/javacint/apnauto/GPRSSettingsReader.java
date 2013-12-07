@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.apnauto;
 
 import java.io.IOException;
@@ -161,11 +157,11 @@ public final class GPRSSettingsReader {
                 } else { // if we're trying everything and we reached an other list name
                     continue; // We just go on
                 }
-            } else if (line.startsWith("#i ")) {
+            } else if (line.startsWith("#i ")) { // "i" like inclusion of something else
                 names.insertElementAt(line.substring(3), 0);
-            } else if (line.startsWith("#c ")) {
+            } else if (line.startsWith("#c ")) { // "c" like columns definition
                 settings.setColumns(line.substring(3));
-            } else if (line.startsWith("#f ")) {
+            } else if (line.startsWith("#f ")) { // "f" like file (to fetch)
                 reader = new BufferedReader(getClass().getResourceAsStream("/" + line.substring(3)));
             } else if (line.length() > 0) {
                 // If we got a setting,
