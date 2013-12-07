@@ -11,7 +11,7 @@ import org.javacint.logging.Logger;
  * GPRS Settings reader.
  *
  */
-public final class GPRSSettingsReader {
+public final class GPRSParametersResourceReader implements GPRSParametersProvider {
 
     private final Vector names;
     private BufferedReader reader;
@@ -28,7 +28,7 @@ public final class GPRSSettingsReader {
      * MCC-MNC, MCC).
      * @throws IOException
      */
-    public GPRSSettingsReader(InputConnection source, Vector names) throws IOException {
+    public GPRSParametersResourceReader(InputConnection source, Vector names) throws IOException {
         if (source == null || names == null) {
             if (Logger.BUILD_DEBUG && LOG) {
                 Logger.log("GPRSSettingsReader:28: is/names == null", true);

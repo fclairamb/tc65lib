@@ -27,23 +27,22 @@ import org.javacint.sms.SimpleSMS;
 public final class APNAutodetection {
 
     private final ATCommand atc;
-    private ResourceProvider prefered;
+    private final Vector sources = new Vector();
     public static final boolean LOG = false;
 
     public APNAutodetection(ATCommand atc) {
         this.atc = atc;
     }
 
-    public void setPreferedParameters(ResourceProvider source) {
-        prefered = source;
+    public void addParametersSource(ResourceProvider source) {
+        sources.addElement(source);
     }
 
-    private static ResourceProvider getDefaultFile() throws IOException {
-        return new ResourceProvider(GPRSSettingsReader.class, "/apns.txt");
-    }
-
-    public GPRSSettings completeDetection() throws ATCommandFailedException, IOException {
-        return completeDetection(getDefaultFile());
+    public void addDefaultParameters() throws IOException {
+        sources.addElement(
+                new GPRSParametersResourceReader(
+                new ResourceProvider(GPRSParametersResourceReader.class, "/apns.txt"),
+                getSettingsListNames()));
     }
 
     private Vector getSettingsListNames() {
@@ -70,20 +69,6 @@ public final class APNAutodetection {
         names.addElement(mcc + "-" + mnc); // This is the most important one
         names.addElement(mcc); // This is the per-country one
         return names;
-    }
-
-    public GPRSSettings completeDetection(ResourceProvider source) throws ATCommandFailedException {
-        if (Logger.BUILD_DEBUG && LOG) {
-            Logger.log(this + ".completeDetection( " + source + " );");
-        }
-        try {
-            return testGPRSSettingsReader(new GPRSSettingsReader(source, getSettingsListNames()));
-        } catch (Exception ex) {
-            if (Logger.BUILD_CRITICAL) {
-                Logger.log(this + ".completeDetection", ex);
-            }
-            return null;
-        }
     }
 
     public String autoLoadRightGPRSSettings() {
@@ -116,19 +101,15 @@ public final class APNAutodetection {
                                 }
                             }
                         }
-                        if (apn == null && prefered != null) {
-                            if (Logger.BUILD_DEBUG) {
-                                Logger.log(this + ".autoLoadRightGPRSSettings: Trying preferred APN settings...");
-                            }
-                            GPRSSettings set = completeDetection(prefered);
-                            apn = set != null ? set.toSjnet() : null;
-                        }
                     }
-                    if (apn == null) {
+
+                    int size = sources.size();
+                    for (int i = 0; i < size && apn == null; i++) {
+                        GPRSParametersProvider provider = (GPRSParametersProvider) sources.elementAt(i);
                         if (Logger.BUILD_DEBUG) {
-                            Logger.log(this + ".autoLoadRightGPRSSettings: Trying standard APN settings...");
+                            Logger.log(this + ".autoLoadRightGPRSSettings: Trying APN parameters provider " + provider + " (" + (i + 1) + "/" + size + ")");
                         }
-                        GPRSSettings set = completeDetection();
+                        GPRSSettings set = testGPRSParameters(provider);
                         apn = set != null ? set.toSjnet() : null;
                     }
                 }
@@ -182,7 +163,7 @@ public final class APNAutodetection {
         return apn;
     }
 
-    private GPRSSettings testGPRSSettingsReader(GPRSSettingsReader reader) throws ATCommandFailedException, IOException {
+    private GPRSSettings testGPRSParameters(GPRSParametersProvider reader) throws ATCommandFailedException, IOException {
         if (Logger.BUILD_DEBUG && LOG) {
             Logger.log(this + ".testGPRSSettingsReader:" + reader);
         }

@@ -18,6 +18,15 @@ public final class GPRSSettings {
             index_dns = -1,
             index_target = -1;
 
+    /**
+     * Direct access to parameters values.
+     *
+     * @param values
+     */
+    public void setValues(String[] values) {
+        this.values = values;
+    }
+
     private String get(int index) {
         return get(index, EMPTY);
     }
