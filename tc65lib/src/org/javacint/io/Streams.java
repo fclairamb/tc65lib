@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import javax.microedition.io.CommConnection;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
+import javax.microedition.io.DatagramConnection;
 
 /**
  *
@@ -20,10 +21,14 @@ import javax.microedition.io.StreamConnection;
 public class Streams {
 
     public static StreamConnection serial(int port, int speed) throws IOException {
-        return Streams.open(new SerialProfile(port, speed));
+        return (StreamConnection) Connector.open("comm:com" + port + ";baudrate=" + speed + ";blocking=on;autocts=off;autorts=off");
     }
 
-    public static StreamConnection open(ConnectionProfile conn) throws IOException {
-        return (StreamConnection) Connector.open(conn.getProfile());
+    public static StreamConnection tcp(String host, int port) throws IOException {
+        return (StreamConnection) Connector.open("socket://" + host + ":" + port);
+    }
+
+    public static DatagramConnection udp(String host, int port) throws IOException {
+        return (DatagramConnection) Connector.open("udp://" + host + ":" + port);
     }
 }

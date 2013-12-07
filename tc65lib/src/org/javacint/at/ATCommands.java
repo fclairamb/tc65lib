@@ -9,8 +9,6 @@ import com.siemens.icm.io.*;
 //#elif sdkns == "cinterion"
 //# import com.cinterion.io.*;
 //#endif
-import org.javacint.io.ATDataConnection;
-import org.javacint.io.Connection;
 import org.javacint.logging.Logger;
 
 /**
@@ -206,9 +204,5 @@ public final class ATCommands {
 
     public static void removeListener(ATCommandListener listener) {
         atCommandURC.removeListener(listener);
-    }
-
-    public static Connection getATDataConnection() {
-        return new ATDataConnection();
     }
 }
