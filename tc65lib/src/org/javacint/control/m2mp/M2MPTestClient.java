@@ -22,7 +22,7 @@ public class M2MPTestClient implements ConsoleCommand, SettingsProvider, IProtoc
 
 	public M2MPTestClient(final ATCommand atc, final Timer timer) throws Exception {
 //		this.atc = atc;
-		rtclient = new M2MPClientImpl(atc, timer);
+		rtclient = new M2MPClientImpl();
 		rtclient.setIdent("imei:" + ATExecution.getImei());
 		rtclient.setCapacities("echo,loc,sensor");
 		rtclient.setListener(this);

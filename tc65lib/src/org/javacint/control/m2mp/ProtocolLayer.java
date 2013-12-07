@@ -1,11 +1,11 @@
 package org.javacint.control.m2mp;
 
-import com.siemens.icm.io.ATCommand;
 import java.util.Hashtable;
 import java.util.TimerTask;
 import java.util.Vector;
 import org.javacint.common.Bytes;
 import org.javacint.logging.Logger;
+import org.javacint.task.Timers;
 import org.javacint.time.DateManagement;
 
 /**
@@ -17,15 +17,12 @@ import org.javacint.time.DateManagement;
  */
 public final class ProtocolLayer implements IProtocolLayer {
 
-    ATCommand _atc;
-
     /**
      * Constructor
      *
      * @param atc ATCommand instance
      */
-    ProtocolLayer(ATCommand atc) {
-        _atc = atc;
+    ProtocolLayer() {
         disconnected();
     }
 
@@ -35,7 +32,7 @@ public final class ProtocolLayer implements IProtocolLayer {
     void start() {
         try {
             if (net == null) {
-                net = new NetworkLayer(_atc);
+                net = new NetworkLayer();
                 net.setProtoLayer(this);
                 net.setIdent(clientId);
             }
@@ -305,9 +302,7 @@ public final class ProtocolLayer implements IProtocolLayer {
         }
 
         connChecker = new ConnectionChecker();
-        this.app.getTimer().schedule(connChecker, period, period);
-
-
+        Timers.getSlow().schedule(connChecker, period, period);
     }
 
     /**

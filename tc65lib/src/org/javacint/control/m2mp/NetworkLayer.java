@@ -1,6 +1,5 @@
 package org.javacint.control.m2mp;
 
-import com.siemens.icm.io.ATCommand;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -21,7 +20,6 @@ import org.javacint.time.DateManagement;
  */
 class NetworkLayer implements ISocketLayer {
 
-    private ATCommand atc;
     private String clientId;
     private SocketConnection _socket;
     private InputStream tcpIs;
@@ -248,9 +246,7 @@ class NetworkLayer implements ISocketLayer {
     /**
      * The constructor
      */
-    NetworkLayer(ATCommand atc) {
-        this.atc = atc;
-
+    NetworkLayer() {
         send = new NetworkSend();
         recv = new NetworkReceive();
     }

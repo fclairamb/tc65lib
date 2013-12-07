@@ -1,14 +1,12 @@
 package org.javacint.control.m2mp;
 
-import com.siemens.icm.io.ATCommand;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Timer;
 import java.util.Vector;
+import org.javacint.at.ATCommandPooled;
 import org.javacint.at.ATCommands;
 import org.javacint.at.ATExecution;
 import org.javacint.common.Bytes;
-import org.javacint.common.Strings;
 import org.javacint.common.Vectors;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
@@ -22,8 +20,6 @@ import org.javacint.sms.SimpleSMS;
  */
 public class M2MPClientImpl implements M2MPClient, SettingsProvider {
 
-    protected final ATCommand atc;
-    protected final Timer timer;
     protected final Hashtable statuses = new Hashtable();
     protected final ProtocolLayer protSend;
     protected IProtocolLayerReceive protRecv;
@@ -41,15 +37,12 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
      *
      * @param atc ATCommand instance to use
      */
-    public M2MPClientImpl(ATCommand atc, Timer timerSlow) {
+    public M2MPClientImpl() {
         if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
             Logger.log(this + ".ctor();");
         }
 
-        this.atc = atc;
-        this.timer = timerSlow;
-
-        protSend = new ProtocolLayer(atc);
+        protSend = new ProtocolLayer();
         protSend.setAppLayer(this);
 
         Settings.addProvider(this);
@@ -477,14 +470,11 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
                 ATExecution.restart();
             } else if ("atc".equals(argv[0])) {
                 if (argv.length > 1) {
-                    synchronized (atc) {
-                        String response = ATCommands.send(argv[1]);
-                        protSend.sendData("sen:atc", response);
-                    }
+                    protSend.sendData("sen:atc", ATCommands.send(argv[1]));
                 }
             } else if ("cellid".equals(argv[0])) {
                 StringBuffer sb = new StringBuffer();
-                
+
 //                CellInformation[] cells = new CellInformationRetriever(atc).getCells();
 //                for (int i = 0; i < cells.length; i++) {
 //                    if (i > 0) {
@@ -500,11 +490,14 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
                 treatMsgSettingGetAllSettings();
             } else if ("send_sms_pdu".equals(argv[0])) {
                 String pdu = argv[1].trim();
-                synchronized (atc) {
+                ATCommandPooled atc = ATCommands.getATCommand();
+                try {
                     atc.send("AT+CMGF=0\n");
                     atc.send("AT+CMGS=" + (pdu.length() / 2 - 1) + "\r");
                     String response = atc.send(pdu + "\032\r");
                     sendData("sen:atc", response);
+                } finally {
+                    atc.release();
                 }
             } else if ("send_sms".equals(argv[0])) {
                 SimpleSMS.send(argv[1], argv[2]);
@@ -541,9 +534,5 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
         }
 
         protSend.sendData(CHANNEL_SETTING, settingsMessage);
-    }
-
-    Timer getTimer() {
-        return timer;
     }
 }

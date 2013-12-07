@@ -1,9 +1,7 @@
 package org.javacint.control.m2mp;
 
-import com.siemens.icm.io.ATCommand;
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 import org.javacint.common.Base64;
@@ -11,6 +9,7 @@ import org.javacint.common.safequeue.SafeQueue;
 import org.javacint.common.safequeue.SafeQueueLineReader;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
+import org.javacint.task.Timers;
 
 /**
  *
@@ -232,11 +231,6 @@ public class M2MPClientWithQueue extends M2MPClientImpl {
 	}
 	// </editor-fold>
 
-	public M2MPClientWithQueue(ATCommand atc, Timer t) {
-		super(atc, t);
-//		this.timer = timer;
-	}
-
 	public void start() throws Exception {
 		parseSetting(SETTING_M2MP_LOGQUEUE);
 		super.start();
@@ -257,7 +251,7 @@ public class M2MPClientWithQueue extends M2MPClientImpl {
 	}
 
 	private void schedule() {
-		timer.schedule(new WorkState(), 0);
+		Timers.getSlow().schedule(new WorkState(), 0);
 	}
 
 	// If we got an ack from the server
