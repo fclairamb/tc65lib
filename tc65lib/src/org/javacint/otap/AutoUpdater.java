@@ -28,7 +28,7 @@ public class AutoUpdater extends TimerTask {
     private final String version;
     private final int timeBetweenUpdates;
     private final String userAgent;
-    private static final String FIELD_VERSION = "MIDlet-Version:";
+    protected static final String JAD_FIELD_VERSION = "MIDlet-Version:";
     private long lastDone;
     private Runnable before;
 
@@ -150,13 +150,7 @@ public class AutoUpdater extends TimerTask {
 
         // If it's a jad file, we search for the version property
         if (url.endsWith(".jad")) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith(FIELD_VERSION)) {
-                    remoteVersion = line.substring(FIELD_VERSION.length()).trim();
-                    break;
-                }
-            }
+            remoteVersion = jadFileGetVersion(reader);
         } else {// If it's not, we guess it's the 
             remoteVersion = reader.readLine();
         }
@@ -203,5 +197,15 @@ public class AutoUpdater extends TimerTask {
 
     public String toString() {
         return "AutoUpdater";
+    }
+
+    protected String jadFileGetVersion(BufferedReader reader) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.startsWith(JAD_FIELD_VERSION)) {
+                return line.substring(JAD_FIELD_VERSION.length()).trim();
+            }
+        }
+        return null;
     }
 }
