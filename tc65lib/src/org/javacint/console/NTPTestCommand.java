@@ -15,11 +15,12 @@ public class NTPTestCommand implements ConsoleCommand {
 
     public boolean consoleCommand(String command, InputStream is, PrintStream out) {
         if (command.startsWith(COMMAND)) {
-            String server = command.substring(COMMAND.length());
+            String server = command.substring(COMMAND.length()).trim();
             Timers.getSlow().schedule(new TimeRetriever(new SntpClient(server), 24 * 3600 * 1000 /* Every 24h for success */, 900 * 1000 /* Every 15 minutes for failure */), 0);
             return true;
-        } else {
-            return false;
+        } else if (command.equals("help")) {
+            out.println("[HELP] ntp <server> - Get time from a server");
         }
+        return false;
     }
 }
