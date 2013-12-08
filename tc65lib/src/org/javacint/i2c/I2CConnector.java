@@ -1,6 +1,10 @@
 package org.javacint.i2c;
 
-import com.siemens.icm.io.I2cBusConnection;
+//#if sdkns == "siemens"
+import com.siemens.icm.io.*;
+//#elif sdkns == "cinterion"
+//# import com.cinterion.io.*;
+//#endif
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

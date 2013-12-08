@@ -1,7 +1,10 @@
 package org.javacint.i2c.mma7660fc;
 
-import com.siemens.icm.io.InPort;
-import com.siemens.icm.io.InPortListener;
+//#if sdkns == "siemens"
+import com.siemens.icm.io.*;
+//#elif sdkns == "cinterion"
+//# import com.cinterion.io.*;
+//#endif
 import java.util.Timer;
 import java.util.Vector;
 import org.javacint.common.Bytes;

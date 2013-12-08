@@ -4,7 +4,11 @@
  */
 package org.javacint.i2c.mma7660fc;
 
-import com.siemens.icm.io.InPortListener;
+//#if sdkns == "siemens"
+import com.siemens.icm.io.*;
+//#elif sdkns == "cinterion"
+//# import com.cinterion.io.*;
+//#endif
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
