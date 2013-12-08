@@ -26,11 +26,12 @@ import org.javacint.task.Timers;
 public class AutoUpdater extends TimerTask {
 
     private final String version;
-    private final int timeBetweenUpdates;
-    private final String userAgent;
+    protected final int timeBetweenUpdates;
+    private String userAgent;
     protected static final String JAD_FIELD_VERSION = "MIDlet-Version:";
-    private long lastDone;
+    protected long lastDone;
     private Runnable before;
+    private static final boolean LOG = false;
 
     /**
      * Constructor.
@@ -52,7 +53,6 @@ public class AutoUpdater extends TimerTask {
     public AutoUpdater(String version, int timeBetweenUpdates) {
         this.version = version;
         this.timeBetweenUpdates = timeBetweenUpdates;
-        this.userAgent = "tc65lib/" + ATExecution.getImei() + "/" + version + "/" + ATExecution.getIccid();
     }
 
     /**
@@ -99,12 +99,14 @@ public class AutoUpdater extends TimerTask {
     }
 
     public void run() {
+        if (Logger.BUILD_NOTICE && LOG) {
+            Logger.log(this + ".run();");
+        }
         try {
+            if (userAgent == null) {
+                userAgent = "tc65lib/" + ATExecution.getImei() + "/" + version + "/" + ATExecution.getIccid();
+            }
             if (needsUpdate()) {
-                if (Logger.BUILD_NOTICE) {
-                    Logger.log("We need to perform an update !");
-                }
-
                 if (before != null) {
                     try {
                         before.run();
@@ -120,6 +122,10 @@ public class AutoUpdater extends TimerTask {
         }
     }
 
+    protected boolean needsChecking() {
+        return System.currentTimeMillis() - lastDone > timeBetweenUpdates;
+    }
+
     /**
      * Tests if the device needs an update.
      *
@@ -127,7 +133,10 @@ public class AutoUpdater extends TimerTask {
      * @throws IOException
      */
     private boolean needsUpdate() throws IOException {
-        if ((System.currentTimeMillis() - lastDone) < timeBetweenUpdates) {
+        if (!needsChecking()) {
+            if (Logger.BUILD_DEBUG && LOG) {
+                Logger.log(this + ".needsUpdate: Too short...");
+            }
             return false;
         }
 
@@ -140,12 +149,12 @@ public class AutoUpdater extends TimerTask {
         // If we get a wrong HTTP response code, we might as well just stop trying
         if (rc != HttpConnection.HTTP_OK) {
             if (Logger.BUILD_NOTICE) {
-                Logger.log("Could not fetch the version's file !", true);
+                Logger.log(this + ".needsUpdate: Could not fetch the version's file !", true);
             }
             cancel();
         }
 
-        String remoteVersion = null;
+        String remoteVersion;
         BufferedReader reader = new BufferedReader(conn.openInputStream());
 
         // If it's a jad file, we search for the version property
