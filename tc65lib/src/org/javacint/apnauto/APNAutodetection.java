@@ -26,23 +26,33 @@ import org.javacint.sms.SimpleSMS;
  */
 public final class APNAutodetection {
 
-    private final ATCommand atc;
     private final Vector sources = new Vector();
     public static final boolean LOG = false;
 
-    public APNAutodetection(ATCommand atc) {
-        this.atc = atc;
+    public APNAutodetection() {
     }
 
     public void addParametersSource(ResourceProvider source) {
         sources.addElement(source);
     }
 
-    public void addDefaultParameters() throws IOException {
-        sources.addElement(
-                new GPRSParametersResourceReader(
-                new ResourceProvider(GPRSParametersResourceReader.class, "/apns.txt"),
-                getSettingsListNames()));
+    public void addDefaultParameters() {
+        try {
+            Vector names = getSettingsListNames();
+            sources.addElement( // My list of APNS
+                    new GPRSParametersResourceReader(
+                    new ResourceProvider(GPRSParametersResourceReader.class, "/apns.txt"),
+                    names));
+
+            sources.addElement( // Android's list of APNS
+                    new GPRSParametersResourceReader(
+                    new ResourceProvider(GPRSParametersResourceReader.class, "/android.txt"),
+                    names));
+        } catch (IOException ex) {
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log(this + ".addDefaultParameters", ex, true);
+            }
+        }
     }
 
     private Vector getSettingsListNames() {
@@ -87,18 +97,16 @@ public final class APNAutodetection {
                     Logger.log("Sim card changed since last successful APN detection ! saved=" + simSaved + ", detected=" + simDetected);
                 }
 
-                synchronized (atc) {
-                    { // First we try if we have any chance with the current APN (maybe it was defined in the console or by SMS)
-                        String apnSetting = Settings.get(Settings.SETTING_APN);
-                        if (apnSetting != null) {
+                { // First we try if we have any chance with the current APN (maybe it was defined in the console or by SMS)
+                    String apnSetting = Settings.get(Settings.SETTING_APN);
+                    if (apnSetting != null) {
+                        if (Logger.BUILD_DEBUG) {
+                            Logger.log(this + ".autoLoadRightGPRSSettings: Trying current APN setting...");
+                        }
+                        if (testApn(apnSetting, GPRSSettings.DEFAULT_TARGET)) {
+                            apn = apnSetting;
                             if (Logger.BUILD_DEBUG) {
-                                Logger.log(this + ".autoLoadRightGPRSSettings: Trying current APN setting...");
-                            }
-                            if (testApn(apnSetting, GPRSSettings.DEFAULT_TARGET)) {
-                                apn = apnSetting;
-                                if (Logger.BUILD_DEBUG) {
-                                    Logger.log(this + ".autoLoadRightGPRSSettings: Current APN setting is ok!");
-                                }
+                                Logger.log(this + ".autoLoadRightGPRSSettings: Current APN setting is ok!");
                             }
                         }
                     }
