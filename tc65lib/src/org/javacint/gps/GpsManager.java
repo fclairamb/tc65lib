@@ -52,13 +52,11 @@ public class GpsManager implements Runnable, SettingsProvider {
             Logger.log(this + ".openGps( " + portId + ", " + portSpeed + " );", true);
         }
 
-        Logger.setStdoutLogging(false);
-
         parser = new GpsNmeaParser(listener, portId, portSpeed);
         parser.start();
 
         if (statesHandler != null) {
-            statesHandler.prepareGpsStart();
+            statesHandler.gpsStart();
         }
     }
 
@@ -71,15 +69,13 @@ public class GpsManager implements Runnable, SettingsProvider {
             parser = null;
         }
 
-        Logger.setStdoutLogging(true);
-
         if (statesHandler != null) {
-            statesHandler.prepareGpsStop();
+            statesHandler.gpsStop();
         }
     }
 
     /**
-     * The thread method
+     * The thread method.
      *
      * This method loads the the GPS NMEA parser and if the parser doesn't parse
      * anything it launches the autodetection.

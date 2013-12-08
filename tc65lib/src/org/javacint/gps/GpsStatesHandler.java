@@ -8,11 +8,11 @@ public interface GpsStatesHandler {
          * On startup.
          * This method is called before startup.
          */
-	void prepareGpsStart();
+	void gpsStart();
 	
         /**
          * On shutdown.
          * This method is called before shutdown.
          */
-	void prepareGpsStop();
+	void gpsStop();
 }

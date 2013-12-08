@@ -58,6 +58,7 @@ public class GpsNmeaParser implements Runnable {
      * Event listener
      */
     private final GpsPositionListener listener;
+    private final int NB_FRAMES_TO_SHOW = 5;
 
     /**
      * Get the number of correct NMEA sentences
@@ -318,7 +319,7 @@ public class GpsNmeaParser implements Runnable {
      */
     private boolean portClose() {
         if (Logger.BUILD_DEBUG) {
-            Logger.log("GpsNmeaParser.portClose();");
+            Logger.log(this + ".portClose();");
         }
 
         pos.status = GpsPosition.STATUS_NO_SIGNAL;
@@ -374,10 +375,8 @@ public class GpsNmeaParser implements Runnable {
                 if (buff.length() > 0) {
                     String temp = buff.toString();
                     buff.setLength(0);
-                    if (nbOkSentences < 3) {
-                        if (Logger.BUILD_DEBUG) {
-                            Logger.log(this + ".readLine: " + temp, true);
-                        }
+                    if (NB_FRAMES_TO_SHOW != 0 && nbOkSentences < NB_FRAMES_TO_SHOW) {
+                        Logger.log("NMEA[" + nbOkSentences + "] : " + temp);
                     }
                     return temp;
                 }
@@ -483,6 +482,9 @@ public class GpsNmeaParser implements Runnable {
      * Stop the NMEA parser.
      */
     public void stop() {
+        if (Logger.BUILD_DEBUG) {
+            Logger.log(this + ".portClose();");
+        }
         portClose();
 
         try {

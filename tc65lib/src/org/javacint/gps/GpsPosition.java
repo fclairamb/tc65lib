@@ -91,21 +91,21 @@ public class GpsPosition {
      */
     public String toString() {
 
-        return "Loc{sta:" + this.status + ",date:" + this.date + ",lat:" + this.lat + ",lon:" + this.lon + ",spd:" + this.speed + ",ang:" + this.angle + ",alt:" + this.altitude + ",sat:" + this.nbSatellites + ",dop:" + this.dop;
+        return "Loc{sta:" + this.status + ",date:" + this.date + ",lat:" + this.lat + ",lon:" + this.lon + ",spd:" + this.speed + ",ang:" + this.angle + ",alt:" + this.altitude + ",sat:" + this.nbSatellites + ",dop:" + this.dop + "}";
     }
 
     /**
      * Convert the position to a byte array.
-     * 
+     *
      * These are the possible sizes:
      * <ul>
-     *   <li>1 - No reception, we only have the number of satellites.</li>
-     *   <li>5 - No reception, we have the time and the number of satellites.</li>
-     *   <li>12 - Reception, but not moving.</li>
-     *   <li>14 - Reception and moving.</li>
+     * <li>1 - No reception, we only have the number of satellites.</li>
+     * <li>5 - No reception, we have the time and the number of satellites.</li>
+     * <li>12 - Reception, but not moving.</li>
+     * <li>14 - Reception and moving.</li>
      * </ul>
-     * 
-     * @return 
+     *
+     * @return
      */
     public byte[] toBytes() {
         if (status == STATUS_OK) {
@@ -124,12 +124,12 @@ public class GpsPosition {
         } else {
             // Maybe we could get the time from the GPS chip
             long time = DateManagement.stringDateToTimestamp(date) / 1000;
-            
+
             // If we couldn't, maybe we have it some other way
             if (time < DateManagement.THE_PAST) {
                 time = DateManagement.time();
             }
-            
+
             // If we don't have it, it's best to do not report it
             if (time < DateManagement.THE_PAST) {
                 byte[] bytes = new byte[1];
