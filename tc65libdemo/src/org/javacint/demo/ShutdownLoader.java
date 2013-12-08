@@ -24,7 +24,7 @@ public class ShutdownLoader extends TimerTask {
         Logger.log("Midlet.destroy( " + uncond + " );");
 
         loader.addRunnable(new NamedRunnable("Settings:save") {
-            public void run() throws Exception {
+            public void run() {
                 Settings.save();
             }
         });

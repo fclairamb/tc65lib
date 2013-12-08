@@ -9,8 +9,10 @@ import org.javacint.task.Timers;
 public class StartupMidlet extends MIDlet {
 
     public void startApp() {
+        String version = getAppProperty("MIDlet-Version");
+        System.out.println("demo v"+version);
         // The first task is to plan a loading task.
-        Timers.getSlow().schedule(new StartupLoader(getAppProperty("MIDlet-Version")), 0);
+        Timers.getSlow().schedule(new StartupLoader(version), 0);
     }
 
     public void pauseApp() {
