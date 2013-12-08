@@ -10,6 +10,7 @@ import org.javacint.console.FileNavigationCommandReceiver;
 import org.javacint.console.GPSTestCommand;
 import org.javacint.console.IDCommand;
 import org.javacint.console.NTPTestCommand;
+import org.javacint.console.SmsSenderCommand;
 import org.javacint.console.UptimeCommand;
 import org.javacint.console.VersionCommand;
 import org.javacint.io.Streams;
@@ -22,7 +23,9 @@ import org.javacint.sms.PingSMSConsumer;
 import org.javacint.sms.SMSReceiver;
 import org.javacint.sms.StandardFeaturesSMSConsumer;
 import org.javacint.task.Timers;
+import org.javacint.time.TimeClient;
 import org.javacint.time.TimeRetriever;
+import org.javacint.time.ntp.SntpClient;
 import org.javacint.watchdog.WatchdogEmbedded;
 import org.javacint.watchdog.WatchdogManager;
 import org.javacint.watchdog.WatchdogOnJavaGpio;
@@ -83,6 +86,7 @@ public class StartupLoader extends TimerTask {
                     Global.console.addCommandReceiver(new VersionCommand(version));
                     Global.console.addCommandReceiver(new UptimeCommand());
                     Global.console.addCommandReceiver(new FileNavigationCommandReceiver());
+                    Global.console.addCommandReceiver(new SmsSenderCommand());
                 } catch (Exception ex) {
                     if (Logger.BUILD_CRITICAL) {
                         Logger.log("Console:loading", ex, true);
@@ -132,19 +136,18 @@ public class StartupLoader extends TimerTask {
             }
         });
 
-        loader.addRunnable(new NamedRunnable("TimeUpdater:scheduled") {
-            public void run() {
-                // We will try to find an update every 15 minutes by comparing the version
-                // defined in the JAD file as the jadurl's address.
-                new TimeRetriever().schedule();
-            }
-        });
-
         loader.addRunnable(new NamedRunnable("AutoUpdater:scheduled") {
             public void run() {
                 // We will try to find an update every 15 minutes by comparing the version
                 // defined in the JAD file as the jadurl's address.
                 AutoUpdater.schedule(version, 60 * 1000);
+            }
+        });
+
+        loader.addRunnable(new NamedRunnable("TimeUpdater:scheduled") {
+            public void run() {
+                // This will get the time every 24h
+                new TimeRetriever(new SntpClient()).schedule();
             }
         });
 

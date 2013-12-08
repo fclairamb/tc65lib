@@ -2,7 +2,9 @@ package org.javacint.console;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Date;
 import org.javacint.task.Timers;
+import org.javacint.time.TimeClient;
 import org.javacint.time.TimeRetriever;
 import org.javacint.time.ntp.SntpClient;
 
@@ -13,10 +15,26 @@ public class NTPTestCommand implements ConsoleCommand {
 
     private static final String COMMAND = "ntp ";
 
-    public boolean consoleCommand(String command, InputStream is, PrintStream out) {
+    public boolean consoleCommand(String command, InputStream is, final PrintStream out) {
         if (command.startsWith(COMMAND)) {
-            String server = command.substring(COMMAND.length()).trim();
-            Timers.getSlow().schedule(new TimeRetriever(new SntpClient(server), 24 * 3600 * 1000 /* Every 24h for success */, 900 * 1000 /* Every 15 minutes for failure */), 0);
+            final String server = command.substring(COMMAND.length()).trim();
+            TimeRetriever timeRetriever = new TimeRetriever(new TimeClient() {
+                final TimeClient src = new SntpClient();
+
+                public long getTime() throws Exception {
+                    long time = src.getTime();
+
+                    if (time != 0) {
+                        out.println("[ NTP ] " + server + " - OK - " + new Date(time*1000).toString());
+                    } else {
+                        out.println("[ NTP ] " + server + " - ERROR");
+                    }
+
+                    return time;
+                }
+            });
+
+            Timers.getSlow().schedule(timeRetriever, 0);
             return true;
         } else if (command.equals("help")) {
             out.println("[HELP] ntp <server> - Get time from a server");

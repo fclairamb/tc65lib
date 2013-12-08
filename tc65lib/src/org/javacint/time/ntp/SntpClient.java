@@ -35,7 +35,11 @@ import org.javacint.time.TimeClient;
 public class SntpClient implements TimeClient {
 
     private final String server;
-    private static final boolean LOG = true;
+    private static final boolean LOG = false;
+
+    public SntpClient() {
+        this("pool.ntp.org");
+    }
 
     public SntpClient(String server) {
         this.server = server;
