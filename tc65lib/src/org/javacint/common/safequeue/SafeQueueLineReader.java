@@ -1,6 +1,10 @@
 package org.javacint.common.safequeue;
 
+//#if sdkns == "siemens"
 import com.siemens.icm.io.file.FileConnection;
+//#elif sdkns == "cinterion"
+//# import com.cinterion.io.file.FileConnection;
+//#endif
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Vector;
