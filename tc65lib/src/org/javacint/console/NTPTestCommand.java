@@ -19,13 +19,13 @@ public class NTPTestCommand implements ConsoleCommand {
         if (command.startsWith(COMMAND)) {
             final String server = command.substring(COMMAND.length()).trim();
             TimeRetriever timeRetriever = new TimeRetriever(new TimeClient() {
-                final TimeClient src = new SntpClient();
+                final TimeClient src = new SntpClient(server);
 
                 public long getTime() throws Exception {
                     long time = src.getTime();
 
                     if (time != 0) {
-                        out.println("[ NTP ] " + server + " - OK - " + new Date(time*1000).toString());
+                        out.println("[ NTP ] " + server + " - OK - " + new Date(time * 1000).toString());
                     } else {
                         out.println("[ NTP ] " + server + " - ERROR");
                     }
