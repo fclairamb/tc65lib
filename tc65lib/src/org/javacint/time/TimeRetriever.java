@@ -2,10 +2,12 @@ package org.javacint.time;
 
 import java.util.TimerTask;
 import org.javacint.logging.Logger;
+import org.javacint.task.Timers;
+import org.javacint.time.ntp.SntpClient;
 
 /**
  * Time retriever. It organizes the frequent retrieval of the time. It should be
- * scheduled with a timer having the time between failures.
+ * scheduled with a slow timer.
  */
 public class TimeRetriever extends TimerTask {
 
@@ -19,7 +21,26 @@ public class TimeRetriever extends TimerTask {
         this.timeBetweenFailures = timeBetweenFailures;
     }
 
+    public TimeRetriever(TimeClient client) {
+        this(client, 24 * 3600 * 1000, 1800 * 1000);
+    }
+
+    public TimeRetriever() {
+        this(new SntpClient("pool.ntp.org"));
+    }
+
+    public void schedule() {
+        long period = timeBetweenFailures / 3;
+        if (period < 30000) {
+            period = 30000;
+        }
+        Timers.getSlow().schedule(this, 0, period);
+    }
+
     public void run() {
+        if (Logger.BUILD_DEBUG) {
+            Logger.log("TimeRetriever.run();");
+        }
         long jvmTime = System.currentTimeMillis();
         try {
             if (nextTime < jvmTime) {
