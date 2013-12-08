@@ -266,7 +266,7 @@ public class NtpMessage {
                 + "Precision: " + precision + "\r\n"
                 + "Root delay: " + rootDelay * 1000 + " ms\r\n"
                 + "Root dispersion: " + rootDispersion * 1000 + " ms\r\n"
-                + "Reference identifier: " + referenceIdentifierToString(referenceIdentifier, stratum, version) + "\n"
+                + "Reference identifier: " + referenceIdentifierToString(referenceIdentifier, stratum, version) + "\r\n"
                 + "Reference timestamp: " + timestampToString(referenceTimestamp) + "\r\n"
                 + "Originate timestamp: " + timestampToString(originateTimestamp) + "\r\n"
                 + "Receive timestamp:   " + timestampToString(receiveTimestamp) + "\r\n"
@@ -335,8 +335,13 @@ public class NtpMessage {
      * formatted date/time string.
      */
     public static String timestampToString(double timestamp) {
+        long time = timestampToUnixMsTimestamp(timestamp);
+        return time != 0 ? new Date(time).toString() : null;
+    }
+
+    public static long timestampToUnixMsTimestamp(double timestamp) {
         if (timestamp == 0) {
-            return "0";
+            return 0;
         }
 
         // timestamp is relative to 1900, utc is used by Java and is relative
@@ -346,11 +351,11 @@ public class NtpMessage {
         // milliseconds
         long ms = (long) (utc * 1000.0);
 
-        // date/time
-        String date = new Date(ms).toString();
-
-        // return
-        return date;
+        return ms;
+    }
+    
+    public long getTime() {
+        return timestampToUnixMsTimestamp(receiveTimestamp);
     }
 
     /**

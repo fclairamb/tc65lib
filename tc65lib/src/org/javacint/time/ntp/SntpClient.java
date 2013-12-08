@@ -1,12 +1,9 @@
 package org.javacint.time.ntp;
 
-import java.io.IOException;
-import java.util.TimerTask;
-import javax.microedition.io.Connector;
 import javax.microedition.io.Datagram;
 import javax.microedition.io.DatagramConnection;
+import org.javacint.io.Streams;
 import org.javacint.logging.Logger;
-import org.javacint.time.DateManagement;
 import org.javacint.time.TimeClient;
 
 /**
@@ -38,66 +35,70 @@ import org.javacint.time.TimeClient;
 public class SntpClient implements TimeClient {
 
     private final String server;
-    
-    private static final boolean LOG = false;
+    private static final boolean LOG = true;
 
     public SntpClient(String server) {
         this.server = server;
     }
 
     public long getTime() throws Exception {
-        byte[] buf = new NtpMessage().toByteArray();
-        DatagramConnection conn = (DatagramConnection) Connector.open("udp://" + server + ":123");
-        Datagram dtgm = conn.newDatagram(buf, buf.length);
-
-        // Set the transmit timestamp *just* before sending the packet
-        // ToDo: Does this actually improve performance or not?
-        NtpMessage.encodeTimestamp(dtgm.getData(), 40,
-                (System.currentTimeMillis() / 1000.0) + 2208988800.0);
-
-        conn.send(dtgm);
-
-
-        // Get response
-        if (Logger.BUILD_DEBUG && LOG) {
-            Logger.log("NTP request sent, waiting for response...");
-        }
-        dtgm.reset();
-        conn.receive(dtgm);
-
-
-        // Immediately record the incoming timestamp
-        double destinationTimestamp =
-                (System.currentTimeMillis() / 1000.0) + 2208988800.0;
-
-
-        // Process response
-        NtpMessage msg = new NtpMessage(dtgm.getData());
-
-        // Corrected, according to RFC2030 errata
-        double roundTripDelay = (destinationTimestamp - msg.originateTimestamp)
-                - (msg.transmitTimestamp - msg.receiveTimestamp);
-
-        double localClockOffset =
-                ((msg.receiveTimestamp - msg.originateTimestamp)
-                + (msg.transmitTimestamp - destinationTimestamp)) / 2;
-
-
-        // Display response
         if (Logger.BUILD_DEBUG && LOG) {
             Logger.log("NTP server: " + server);
-            Logger.log(msg.toString());
-
-            Logger.log("Dest. timestamp:     "
-                    + NtpMessage.timestampToString(destinationTimestamp));
-
-            Logger.log("Round-trip delay: " + (roundTripDelay * 1000) + " ms");
-
-            Logger.log("Local clock offset: " + (localClockOffset * 1000) + " ms");
         }
+        byte[] buf = new NtpMessage().toByteArray();
+        DatagramConnection conn = Streams.udp(server, 123);
+        try {
+            Datagram dtgm = conn.newDatagram(buf, buf.length);
 
-        conn.close();
+            // Set the transmit timestamp *just* before sending the packet
+            // ToDo: Does this actually improve performance or not?
+            NtpMessage.encodeTimestamp(dtgm.getData(), 40,
+                    (System.currentTimeMillis() / 1000.0) + 2208988800.0);
 
-        return (long) msg.receiveTimestamp;
+            conn.send(dtgm);
+
+
+            // Get response
+            if (Logger.BUILD_DEBUG && LOG) {
+                Logger.log("NTP request sent (" + dtgm.getLength() + " bytes), waiting for response...");
+            }
+            //dtgm = conn.newDatagram(1024);
+            conn.receive(dtgm);
+            if (Logger.BUILD_DEBUG && LOG) {
+                Logger.log("NTP response received (" + dtgm.getLength() + " bytes)");
+            }
+
+            // Immediately record the incoming timestamp
+            double destinationTimestamp =
+                    (System.currentTimeMillis() / 1000.0) + 2208988800.0;
+
+
+            // Process response
+            NtpMessage msg = new NtpMessage(dtgm.getData());
+
+            // Corrected, according to RFC2030 errata
+            double roundTripDelay = (destinationTimestamp - msg.originateTimestamp)
+                    - (msg.transmitTimestamp - msg.receiveTimestamp);
+
+            double localClockOffset =
+                    ((msg.receiveTimestamp - msg.originateTimestamp)
+                    + (msg.transmitTimestamp - destinationTimestamp)) / 2;
+
+
+            // Display response
+            if (Logger.BUILD_DEBUG && LOG) {
+                Logger.log(msg.toString());
+
+                Logger.log("Dest. timestamp:     "
+                        + NtpMessage.timestampToString(destinationTimestamp));
+
+                Logger.log("Round-trip delay: " + (roundTripDelay * 1000) + " ms");
+
+                Logger.log("Local clock offset: " + (localClockOffset * 1000) + " ms");
+            }
+            return (long) msg.getTime() / 1000;
+        } finally {
+            conn.close();
+        }
     }
 }
