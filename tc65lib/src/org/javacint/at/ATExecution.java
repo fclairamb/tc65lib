@@ -106,16 +106,16 @@ public class ATExecution {
         try {
             String tab[] = Strings.split('\n', ATCommands.send("AT^SCID"));
             String scid = (tab[1]).trim().substring(7);
-            if (Logger.BUILD_DEBUG) {
-                Logger.log("Common.getImsi: \"" + scid + "\"");
-            }
+//            if (Logger.BUILD_DEBUG) {
+//                Logger.log("Common.getIccid: \"" + scid + "\"");
+//            }
             if (scid.equals("ERROR")) {
                 return null;
             }
             return scid;
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
-                Logger.log(THIS + ".getScid", ex);
+                Logger.log(THIS + ".getIccid", ex);
             }
             return null;
         }

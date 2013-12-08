@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.at;
 
 //#if sdkns == "siemens"
@@ -14,20 +10,24 @@ import org.javacint.logging.Logger;
 /**
  * ATCommand wrapper class</br>
  * </br>
- * Generally use send() method with auto newline at the end, in special cases when you need exact ending use sendRaw()</br>
- * If you have a non-interrupting block, you should use getATCommand(), then use that instance (it will be exclusively used by your thread), then run release() method on it.</br>
+ * Generally use send() method with auto newline at the end, in special cases
+ * when you need exact ending use sendRaw()</br>
+ * If you have a non-interrupting block, you should use getATCommand(), then use
+ * that instance (it will be exclusively used by your thread), then run
+ * release() method on it.</br>
  * Use sendUrc() to activate some URCs and addListener() to receive them.
  */
 public final class ATCommands {
 
 //#if DebugLevel=="debug"
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG_LEVEL = true;
 //#elif DebugLevel=="warn" || DebugLevel=="fatal"
-//# private static final boolean DEBUG = false;
+//# private static final boolean DEBUG_LEVEL = false;
 //#endif
+    private static final boolean DEBUG = DEBUG_LEVEL && false; // We don't want to log everything just because we're in debug
     private static final ATCommandPooled atCommand1, atCommand2;
     private static final ATCommand atCommandURC;
-    private static final ATCommand atCommandData;
+    //private static final ATCommand atCommandData;
 
     static {
         // We enforce the static final
@@ -44,22 +44,17 @@ public final class ATCommands {
             atc1 = new ATCommandPooled(new ATCommand(false, false, false, false, false, false));
             atc2 = new ATCommandPooled(new ATCommand(false, false, false, false, false, false));
             aturc = new ATCommand(false, true, false, false, false, false); //One "true" to monitor URC's
-            atdata = new ATCommand(false, false, false, false, false, false);
+            //atdata = new ATCommand(false, false, false, false, false, false);
         } catch (Exception e) {
             if (Logger.BUILD_CRITICAL) {
-                Logger.log("ATCommands:static", e);
+                Logger.log("ATCommands:static " + atc1 + "," + atc2 + "," + aturc + "," + atdata, e);
             }
         }
         atCommand1 = atc1;
         atCommand2 = atc2;
         atCommandURC = aturc;
-        atCommandData = atdata;
+        //atCommandData = atdata;
     }
-
-    public static ATCommand getATCommandData() {
-        return atCommandData;
-    }
-
     private static final int POOL_MAX_WAIT = 30000; // ms
 
     public static synchronized ATCommandPooled getATCommand() {
@@ -115,7 +110,9 @@ public final class ATCommands {
     }
 
     /**
-     * Generally use this method, it will auto newline at the end, and it will get free ATCommand instance if one is occupied
+     * Generally use this method, it will auto newline at the end, and it will
+     * get free ATCommand instance if one is occupied
+     *
      * @param cmd the intended AT command
      * @return result
      */
@@ -124,7 +121,9 @@ public final class ATCommands {
     }
 
     /**
-     * Use this when you need exact AT command ending, not newline, it will be sent 'as-is'
+     * Use this when you need exact AT command ending, not newline, it will be
+     * sent 'as-is'
+     *
      * @param cmd the intended AT command
      * @return result
      */
@@ -140,12 +139,13 @@ public final class ATCommands {
 
     /**
      * Use this to send AT command to all available parsers.
+     *
      * @param ATCmd the intended AT command
      * @return response of the last parser
      */
     public static String sendAll(String ATCmd) {
         send(atCommandURC, ATCmd);
-        send(atCommandData, ATCmd);
+//        send(atCommandData, ATCmd);
         ATCommandPooled atc1 = null, atc2 = null;
         try {
             atc1 = getATCommand();
@@ -161,9 +161,9 @@ public final class ATCommands {
     private static String atcInstanceToString(ATCommand atc) {
         if (atc == atCommandURC) {
             return "ATURC";
-        } else if (atc == atCommandData) {
-            return "ATData";
-        } else if (atc == atCommand1.getATCommand()) {
+        } /*else if (atc == atCommandData) {
+         return "ATData";
+         }*/ else if (atc == atCommand1.getATCommand()) {
             return "AT1";
         } else if (atc == atCommand2.getATCommand()) {
             return "AT2";
