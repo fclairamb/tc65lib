@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.console;
 
 import java.io.InputStream;
@@ -11,8 +7,9 @@ import org.javacint.gps.GpsPosition;
 import org.javacint.gps.GpsPositionListener;
 
 /**
+ * GPS Testing command.
  *
- * @author florent
+ * This command is only intended for testing.
  */
 public class GPSTestCommand implements ConsoleCommand, GpsPositionListener {
 
@@ -28,9 +25,16 @@ public class GPSTestCommand implements ConsoleCommand, GpsPositionListener {
             command = command.substring(4);
             if ("start".equals(command)) {
                 gps.start();
+                this.out = out;
+                return true;
             } else if ("stop".equals(command)) {
                 gps.stop();
+                return true;
+            } else {
+                out.println("[HELP] gps [start|stop]");
             }
+        } else if (command.equals("help")) {
+            out.println("[HELP] gps [start|stop]");
         }
         return false;
     }
