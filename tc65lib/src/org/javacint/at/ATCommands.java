@@ -140,18 +140,18 @@ public final class ATCommands {
     /**
      * Use this to send AT command to all available parsers.
      *
-     * @param ATCmd the intended AT command
+     * @param cmd the intended AT command
      * @return response of the last parser
      */
-    public static String sendAll(String ATCmd) {
-        send(atCommandURC, ATCmd);
+    public static String sendAll(String cmd) {
+        send(atCommandURC, cmd);
 //        send(atCommandData, ATCmd);
         ATCommandPooled atc1 = null, atc2 = null;
         try {
             atc1 = getATCommand();
             atc2 = getATCommand();
-            atc1.send(ATCmd);
-            return atc2.send(ATCmd);
+            atc1.send(cmd);
+            return atc2.send(cmd);
         } finally {
             atc1.release();
             atc2.release();
@@ -192,10 +192,37 @@ public final class ATCommands {
             }
             return result;
         } catch (Exception ex) {
-            //we want to report it, so compile it in any case
-            Logger.log("ATCommands.sendRaw(" + atc + "," + cmd + ")", ex, true);
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log("ATCommands.sendRaw(" + atc + "," + cmd + ")", ex, true);
+            }
             return null;
         }
+    }
+
+    static String sendLong(ATCommand atc, String cmd) {
+        return sendRawLong(atc, cmd + '\r');
+    }
+
+    static String sendRawLong(final ATCommand atc, final String cmd) {
+        final StringBuffer str = new StringBuffer(); // We use this as as string reference
+        try {
+            synchronized (atc) {
+                atc.send(cmd, new ATCommandResponseListener() {
+                    public void ATResponse(String result) {
+                        str.append(result);
+                        synchronized (atc) {
+                            atc.notify();
+                        }
+                    }
+                });
+                atc.wait();
+            }
+        } catch (Exception ex) {
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log("ATCommands.sendRawLong(" + atc + "," + cmd + ")", ex, true);
+            }
+        }
+        return str.length() != 0 ? str.toString() : null;
     }
 
     public static void addListener(ATCommandListener listener) {
