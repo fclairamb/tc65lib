@@ -5,11 +5,12 @@ import com.siemens.icm.io.*;
 //#elif sdkns == "cinterion"
 //# import com.cinterion.io.*;
 //#endif
-import hm.sms.PDU;
 import java.util.Enumeration;
 import java.util.Vector;
+import org.javacint.at.ATCommandPooled;
 import org.javacint.at.ATCommands;
 import org.javacint.at.ATURCQueueHandler;
+import org.javacint.common.Strings;
 import org.javacint.logging.Logger;
 
 /**
@@ -17,26 +18,20 @@ import org.javacint.logging.Logger;
  */
 public class SMSReceiver implements ATCommandListener {
 
-    private final Vector consumers = new Vector();
-    private static SMSReceiver instance;
-
-    public static SMSReceiver getInstance() {
-        if (instance == null) {
-            instance = new SMSReceiver();
-        }
-        return instance;
-    }
+    private static final Vector consumers = new Vector();
+    private static SMSReceiver instance = new SMSReceiver();
 
     private SMSReceiver() {
     }
 
-    public void addConsumer(SMSConsumer c) {
+    public static void addConsumer(SMSConsumer c) {
         consumers.addElement(c);    //actually it IS synchronized, so we don't need additional synchronized block
     }
 
-    public void removeConsumer(SMSConsumer c) {
+    public static void removeConsumer(SMSConsumer c) {
         consumers.removeElement(c);    //actually it IS synchronized, so we don't need additional synchronized block
     }
+    private static final boolean LOG_SMS_HANDLING = true;
 
     /**
      * Each consumer should return true once they consider it is of no other
@@ -47,6 +42,9 @@ public class SMSReceiver implements ATCommandListener {
             for (Enumeration e = consumers.elements(); e.hasMoreElements();) {
                 SMSConsumer cons = (SMSConsumer) e.nextElement();
                 try {
+                    if (LOG_SMS_HANDLING) {
+                        Logger.log(cons + ".smsReceived(\"" + from + "\", \"" + content + "\");");
+                    }
                     if (cons.smsReceived(from, content)) {
                         return true;
                     }
@@ -68,109 +66,42 @@ public class SMSReceiver implements ATCommandListener {
      * issue in current design) <li>Start the SMS consumers <li>Register them to
      * the SMS Receiver <li>Start the SMS receiver (and only now) </ul>
      */
-    public void start() {
-        ATCommands.addListener(new ATURCQueueHandler(this)); // This indirection prevents the URC call from being blocked
-        boolean ok;
+    public static void start() {
+        ATCommands.addListener(new ATURCQueueHandler(instance)); // This indirection prevents the URC call from being blocked
 
-        //setting preferred SMS message storage to SIM
-        try {
-            Thread.sleep(3000); //need 3 seconds from SIM initialization according to docs
-        } catch (Exception ex) {
-        }
-        ok = ATCommands.sendWhileNotOk("AT+CPMS=\"MT\",\"MT\",\"MT\"");
-        if (Logger.BUILD_DEBUG) {
-            Logger.log("setting preferred SMS message storage to SIM + ME... " + ok);
-        }
+        // text mode (PDU mode is too complex for now)
+        ATCommands.sendAll("AT+CMGF=1");
 
-        //set mode to PDU Mode
-        ok = ATCommands.sendWhileNotOk("AT+CMGF=0");
-        if (Logger.BUILD_DEBUG) {
-            Logger.log("set mode to PDU Mode... " + ok);
+        // URC on SMS reception
+        ATCommands.sendUrc("AT+CNMI=1,1");
+
+        // We will read up to 20 messages stored
+        for (int i = 1; i <= 20; i++) {
+            if (!instance.readSms(i)) { // netbeans doesn't like empty for
+                break;
+            }
         }
-        //enable receiving of new SMS URCs
-        ATCommands.sendUrc("AT+CNMI=2,1,0,0,1");
     }
 
     /**
      * Stop SMS reception
      */
-    public void stop() {
-        ATCommands.removeListener(this);
+    public static void stop() {
+        ATCommands.removeListener(instance);
     }
 
-    public void ATEvent(String ate) {
-        if (Logger.BUILD_DEBUG) {
-            Logger.log(this + ".ATEvent( \"" + ate + "\" )");
+    public void ATEvent(String urc) {
+        if (Logger.BUILD_DEBUG && LOG_SMS_RECEPTION) {
+            Logger.log(this + ".ATEvent( \"" + urc + "\" )");
         }
-        if (ate.indexOf("+CMTI:") >= 0) {                //if it is SMS
-            String index = null;
+        if (urc.indexOf("+CMTI:") > 0) {                //if it is SMS
+            String sIndex;
             try {
-                index = new String(ate.substring(ate.lastIndexOf(',') + 1));
-            } catch (Exception e) {
-                if (Logger.BUILD_CRITICAL) {
-                    Logger.log(this, e, 102, "Event=" + ate + ",index=" + index);
-                }
-                return;
-            }
-            //hint: you can add here some code to indicate somewhere (LED, LCD, ...) about received SMS
-            try {
-                String incomingSMS = ATCommands.send("AT+CMGR=" + index);
-                if (Logger.BUILD_DEBUG) {
-                    Logger.log("New SMS:\n" + incomingSMS);
-                }
-                if (incomingSMS.indexOf("0,,0") >= 0) {
-                    if (Logger.BUILD_DEBUG) {
-                        Logger.log("Empty record during reading SMS at index " + index);
-                    }
-                    // possibly due to mem1 != mem3. Sending an AT+CPMS="MT","MT","MT" command is advised.
-                    ATCommands.sendWhileNotOk("AT+CPMS=\"MT\",\"MT\",\"MT\"");
-                    return;
-                }
-                if (incomingSMS.indexOf("ERROR") >= 0) {
-                    if (Logger.BUILD_DEBUG) {
-                        Logger.log("ERROR during reading SMS at index " + index);
-                    }
-                } else if (incomingSMS.indexOf('\n') >= 0) {
-                    String pduString = null;
-                    try {
-                        pduString = new String(incomingSMS.substring(incomingSMS.indexOf('\n') + 1));
-                        pduString = pduString.substring(pduString.indexOf('\n') + 1);
-                        pduString = pduString.substring(0, pduString.indexOf('\n'));
-                    } catch (Exception ex) {
-                        if (Logger.BUILD_CRITICAL) {
-                            Logger.log(this, ex, 134, "incomingSMS=" + incomingSMS + ",message=" + pduString);
-                        }
-                        return;
-                    }
-                    pduString = pduString.trim();
-                    PDU pdu = new PDU(pduString);
-                    String returnAddress = null;
-                    try {
-                        returnAddress = pdu.getSenderNumber();
-                    } catch (Exception e) {
-                        if (Logger.BUILD_CRITICAL) {
-                            Logger.log(this, e, 145, "message=" + pduString + ",returnAddress=" + returnAddress);
-                        }
-                    }
-                    //hint: here I suggest you can check if you allow SMSs from this address
-                    String message;
-                    try {
-                        message = pdu.getUserData();
-                    } catch (Exception e) {
-                        if (Logger.BUILD_CRITICAL) {
-                            Logger.log(this, e, 153, "message=" + pduString);
-                        }
-                        return;
-                    }
-                    handleSMS(returnAddress, message);
-                } else {
-                    if (Logger.BUILD_DEBUG) {
-                        Logger.log("UNKNOWN ERROR during reading SMS");
-                    }
-                }
+                sIndex = urc.substring(urc.lastIndexOf(',') + 1);
+                readSms(Integer.parseInt(sIndex));
             } catch (Exception ex) {
                 if (Logger.BUILD_CRITICAL) {
-                    Logger.log(this, ex, 167);
+                    Logger.log(this + ".ATEvent( " + urc + " )", ex, true);
                 }
             }
         }
@@ -190,5 +121,63 @@ public class SMSReceiver implements ATCommandListener {
 
     public String toString() {
         return "SMSR";
+    }
+    private static final boolean LOG_SMS_RECEPTION = true;
+
+    private void deleteSms(int index) {
+        ATCommands.send("AT+CMGD=" + index);
+    }
+
+    private boolean readSms(int index) {
+        if (Logger.BUILD_DEBUG && LOG_SMS_RECEPTION) {
+            Logger.log(this + ".readSms( " + index + " );");
+        }
+        try {
+            String cmd = "AT+CMGR=" + index;
+            String rawSms = ATCommands.send(cmd);
+            if (Logger.BUILD_DEBUG && LOG_SMS_RECEPTION) {
+                Logger.log("Raw: " + rawSms.replace('\r', '%').replace('\n', '$'));
+            }
+            // We remove the echo
+            rawSms = rawSms.substring(cmd.length() + 8);
+            if (Logger.BUILD_DEBUG && LOG_SMS_RECEPTION) {
+                Logger.log("Raw: " + rawSms.replace('\r', '%').replace('\n', '$'));
+            }
+            int pHeader = rawSms.indexOf('\r');
+            if (Logger.BUILD_DEBUG && LOG_SMS_RECEPTION) {
+                Logger.log(this + ":pheader = " + pHeader);
+            }
+            if (pHeader < 10) { // If the line is too short, we don't have anything
+                return false;
+            }
+            String header = rawSms.substring(0, pHeader);
+            if (Logger.BUILD_DEBUG && LOG_SMS_RECEPTION) {
+                Logger.log(this + ":header = \"" + header.replace('\r', '%').replace('\n', '$') + "\"");
+            }
+            String phone;
+            {
+                String headerArgs[] = Strings.split(',', header);
+                phone = headerArgs[1];
+                phone = phone.substring(1, phone.length() - 1);
+                if (Logger.BUILD_DEBUG && LOG_SMS_RECEPTION) {
+                    Logger.log(this + ":phone = \"" + phone.replace('\r', '%').replace('\n', '$') + "\"");
+                }
+            }
+
+            String content = rawSms.substring(pHeader + 2, rawSms.length() - 8);
+            if (Logger.BUILD_DEBUG && LOG_SMS_RECEPTION) {
+                Logger.log(this + ":content = \"" + content.replace('\r', '%').replace('\n', '$') + "\"");
+            }
+
+            handleSMS(phone, content);
+            return true;
+        } catch (Exception ex) {
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log(this, ex, 167);
+            }
+        } finally {
+            deleteSms(index);
+        }
+        return false;
     }
 }

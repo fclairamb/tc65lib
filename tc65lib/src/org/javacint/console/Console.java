@@ -27,7 +27,6 @@ public class Console implements Runnable {
     private final StreamConnection stream;
     private InputStream in;
     private PrintStream out;
-    private String header = "Console";
     private final Vector commandsReceiver = new Vector();
 
     /**
@@ -38,6 +37,14 @@ public class Console implements Runnable {
     public void addCommandReceiver(ConsoleCommand receiver) {
         synchronized (commandsReceiver) {
             commandsReceiver.addElement(receiver);
+        }
+    }
+
+    public void copyCommandReceivers(Console src) {
+        synchronized (commandsReceiver) {
+            for (Enumeration en = src.commandsReceiver.elements(); en.hasMoreElements();) {
+                commandsReceiver.addElement(en.nextElement());
+            }
         }
     }
 
@@ -62,10 +69,6 @@ public class Console implements Runnable {
      */
     public Console(StreamConnection stream) {
         this.stream = stream;
-    }
-
-    public void setHeader(String header) {
-        this.header = header;
     }
 
     private void writeLine(String line) throws IOException {
@@ -95,10 +98,15 @@ public class Console implements Runnable {
             for (int i = 0; i < lines.length; ++i) {
                 writeLine("[AT] " + lines[i]);
             }
+        } else if (line.startsWith("#AT")) {
+            line = line.substring(1);
+            String[] lines = Strings.split('\n', ATCommands.sendLong(line));
+            for (int i = 0; i < lines.length; ++i) {
+                writeLine("[AT slow] " + lines[i]);
+            }
         } else if (line.equals("restart")) {
             ATExecution.restart();
         } else if (line.equals("help")) {
-            writeLine(header);
             writeLine("[HELP] help                         This help");
             writeLine("[HELP] conf list                    List all configuration settings");
             writeLine("[HELP] conf <key>=<value>           Define a configuration setting");
@@ -107,7 +115,6 @@ public class Console implements Runnable {
             writeLine("[HELP] restart                      Restart the device");
             writeLine("[HELP] AT***                        Send AT commads");
             writeLine("[HELP] stats                        Get some system stats");
-            writeLine("[HELP] sms send <phone> <message>   Send an SMS");
         } else if (line.equals("conf list") || line.equals("conf")) {
 
             Hashtable defSettings = Settings.getDefaultSettings();
@@ -169,6 +176,7 @@ public class Console implements Runnable {
     }
 
     private void portOpen() throws IOException {
+        in = stream.openInputStream();
         out = new PrintStream(stream.openOutputStream());
     }
 
@@ -178,26 +186,18 @@ public class Console implements Runnable {
                 in.close();
             } catch (Exception ex) {
             }
+            in = null;
         }
-        in = null;
 
         if (out != null) {
             try {
                 out.close();
             } catch (Exception ex) {
             }
-        }
-        out = null;
-
-        if (stream != null) {
-            try {
-                stream.close();
-            } catch (Exception ex) {
-            }
+            out = null;
         }
     }
-    StringBuffer buffer = new StringBuffer(64);
-    Vector history = new Vector();
+    private final Vector history = new Vector();
 
     private void addHistory(String line) {
         history.addElement(line);
@@ -205,6 +205,7 @@ public class Console implements Runnable {
             history.removeElementAt(0);
         }
     }
+    private final StringBuffer buffer = new StringBuffer(64);
 
     public String readLine() {
         try {
@@ -301,8 +302,7 @@ public class Console implements Runnable {
             while (true) {
                 out.print(PROMPT);
                 out.flush();
-                String line = readLine().
-                        trim();
+                String line = readLine().trim();
                 try {
                     if (line.length() > 0) {
                         parseCommand(line);

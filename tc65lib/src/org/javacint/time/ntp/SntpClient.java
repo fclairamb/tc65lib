@@ -2,7 +2,7 @@ package org.javacint.time.ntp;
 
 import javax.microedition.io.Datagram;
 import javax.microedition.io.DatagramConnection;
-import org.javacint.io.Streams;
+import org.javacint.io.Connections;
 import org.javacint.logging.Logger;
 import org.javacint.time.TimeClient;
 
@@ -50,7 +50,7 @@ public class SntpClient implements TimeClient {
             Logger.log("NTP server: " + server);
         }
         byte[] buf = new NtpMessage().toByteArray();
-        DatagramConnection conn = Streams.udp(server, 123);
+        DatagramConnection conn = Connections.udp(server, 123);
         try {
             Datagram dtgm = conn.newDatagram(buf, buf.length);
 

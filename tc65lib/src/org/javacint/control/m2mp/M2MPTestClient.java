@@ -1,10 +1,8 @@
 package org.javacint.control.m2mp;
 
-import com.siemens.icm.io.ATCommand;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Hashtable;
-import java.util.Timer;
 import org.javacint.at.ATExecution;
 import org.javacint.common.Bytes;
 import org.javacint.console.ConsoleCommand;
@@ -20,7 +18,7 @@ public class M2MPTestClient implements ConsoleCommand, SettingsProvider, IProtoc
 	private final M2MPClient rtclient;
 //	private final ATCommand atc;
 
-	public M2MPTestClient(final ATCommand atc, final Timer timer) throws Exception {
+	public M2MPTestClient() throws Exception {
 //		this.atc = atc;
 		rtclient = new M2MPClientImpl();
 		rtclient.setIdent("imei:" + ATExecution.getImei());

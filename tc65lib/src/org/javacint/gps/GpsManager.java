@@ -33,9 +33,9 @@ public class GpsManager implements Runnable, SettingsProvider {
      */
     public GpsManager(GpsPositionListener listener) {
         this.listener = listener;
-        if (Logger.BUILD_DEBUG) {
-            Logger.log("GpsManager.init()");
-        }
+//        if (Logger.BUILD_DEBUG) {
+//            Logger.log("GpsManager.init()");
+//        }
         Settings.addProvider(this);
     }
 

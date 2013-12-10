@@ -1,6 +1,5 @@
 package org.javacint.console;
 
-import com.siemens.icm.io.ATCommand;
 import java.io.InputStream;
 import java.io.PrintStream;
 import org.javacint.at.ATExecution;
@@ -14,13 +13,6 @@ import org.javacint.logging.Logger;
  *
  */
 public class PinManagementCommandReceiver implements ConsoleCommand {
-
-    private final ATCommand atc;
-
-    public PinManagementCommandReceiver(ATCommand atc) {
-        this.atc = atc;
-    }
-
     public boolean consoleCommand(String command, InputStream is, PrintStream out) {
         try {
             if (command.startsWith("pin ")) {

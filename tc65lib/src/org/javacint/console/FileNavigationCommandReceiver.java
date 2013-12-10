@@ -13,6 +13,7 @@ import java.util.Enumeration;
 import java.util.Date;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
+import org.javacint.common.BufferedReader;
 import org.javacint.common.Strings;
 
 /**
@@ -80,9 +81,14 @@ public class FileNavigationCommandReceiver implements ConsoleCommand {
         for (Enumeration list = currentDir.list(); list.hasMoreElements();) {
             String fileName = (String) list.nextElement();
             FileConnection file = getFile(fileName);
-            out.print((file.isDirectory() ? "D" : "F") + "\t" + getShortPath(file) + "\t" + new Date(file.lastModified()));
+            String line = (file.isDirectory() ? "D" : "F") + " " + getShortPath(file);
+            out.print(line);
+            for (int i = line.length(); i < 30; i++) {
+                out.print(" ");
+            }
+            out.println(new Date(file.lastModified()));
             if (!file.isDirectory()) {
-                out.print("\t" + file.fileSize());
+                out.print("\t" + file.fileSize() + "b");
             }
             out.println();
         }
@@ -111,6 +117,30 @@ public class FileNavigationCommandReceiver implements ConsoleCommand {
         }
     }
 
+    private void commandMore(String filename, InputStream in, PrintStream out) throws IOException {
+        FileConnection file = getFile(filename);
+
+        if (file.exists()) {
+            out.println("[MORE] " + getShortPath(file));
+            BufferedReader reader = new BufferedReader(file.openInputStream());
+            try {
+                int nb = 0;
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (nb != 0 && nb++ % 40 == 0) {
+                        out.println("--- MORE ---");
+                        in.read();
+                    }
+                    out.println(line);
+                }
+            } finally {
+                reader.close();
+            }
+        } else {
+            out.println("[CAT ERR] The file \"" + getShortPath(file) + "\" doesn't exist !");
+        }
+    }
+
     private void commandDf(PrintStream out) {
         long usedSize = currentDir.usedSize();
         long totalSize = currentDir.totalSize();
@@ -130,6 +160,8 @@ public class FileNavigationCommandReceiver implements ConsoleCommand {
                 commandCd(command.substring(3), out);
             } else if (command.startsWith("cat ")) {
                 commandCat(command.substring(4), out);
+            } else if (command.startsWith("more ")) {
+                commandMore(command.substring(5), in, out);
             } else if (command.equals("df")) {
                 commandDf(out);
             } else if (command.equals("pwd")) {

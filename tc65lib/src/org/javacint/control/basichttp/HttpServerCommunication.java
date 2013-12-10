@@ -1,6 +1,5 @@
 package org.javacint.control.basichttp;
 
-import com.siemens.icm.io.ATCommand;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;

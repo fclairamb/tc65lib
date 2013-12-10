@@ -6,7 +6,7 @@ import com.siemens.icm.io.file.FileConnection;
 //# import com.cinterion.io.file.FileConnection;
 //#endif
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
@@ -19,116 +19,162 @@ import org.javacint.logging.Logger;
  */
 public class PropertiesFile {
 
-	private static final String PATH_PREFIX = "file:///a:/";
-	private final String path;
-	private Hashtable data;
+    protected static final String PATH_PREFIX = "file:///a:/";
+    protected String path;
+    protected Hashtable data;
+    private static final boolean LOG = true;
 
-	public PropertiesFile(String path) throws IOException {
-		this.path = path;
-		load();
-	}
+    public PropertiesFile(String path) throws IOException {
+        this.path = path;
+        data = new Hashtable();
+        load();
+    }
 
-	public Hashtable getData() {
-		return data;
-	}
+    protected PropertiesFile() {
+    }
 
-	public void setData(Hashtable data) {
-		this.data = data;
-	}
+    public Hashtable getData() {
+        return data;
+    }
 
-	public void set(String name, String value) {
-		data.put(name, value);
-	}
+    public void set(String name, String value) {
+        data.put(name, value);
+    }
 
-	public void set(String name, boolean value) {
-		data.put(name, value ? "1" : "0");
-	}
+    public void set(String name, boolean value) {
+        data.put(name, value ? "1" : "0");
+    }
 
-	public void set(String name, int value) {
-		data.put(name, "" + value);
-	}
+    public void set(String name, int value) {
+        data.put(name, "" + value);
+    }
 
-	public void set(String name, long value) {
-		data.put(name, "" + value);
-	}
+    public void set(String name, long value) {
+        data.put(name, "" + value);
+    }
 
-	public String get(String name, String defaultValue) {
-		String value = (String) data.get(name);
-		return value != null ? value : defaultValue;
-	}
+    public String get(String name, String defaultValue) {
+        String value = (String) data.get(name);
+        return value != null ? value : defaultValue;
+    }
 
-	public boolean get(String name, boolean defaultValue) {
-		String value = (String) data.get(name);
-		if ("1".equals(value)) {
-			return true;
-		} else if ("0".equals(value)) {
-			return false;
-		} else {
-			return defaultValue;
-		}
-	}
+    public boolean get(String name, boolean defaultValue) {
+        String value = (String) data.get(name);
+        if ("1".equals(value)) {
+            return true;
+        } else if ("0".equals(value)) {
+            return false;
+        } else {
+            return defaultValue;
+        }
+    }
 
-	public int get(String name, int defaultValue) {
-		try {
-			return Integer.parseInt((String) data.get(name));
-		} catch (Exception ex) {
-			return defaultValue;
-		}
-	}
+    public int get(String name, int defaultValue) {
+        try {
+            return Integer.parseInt((String) data.get(name));
+        } catch (Exception ex) {
+            return defaultValue;
+        }
+    }
 
-	public long get(String name, long defaultValue) {
-		try {
-			return Long.parseLong((String) data.get(name));
-		} catch (Exception ex) {
-			return defaultValue;
-		}
-	}
+    public long get(String name, long defaultValue) {
+        try {
+            return Long.parseLong((String) data.get(name));
+        } catch (Exception ex) {
+            return defaultValue;
+        }
+    }
 
-	private void load() throws IOException {
-		FileConnection fc = getFileConnection();
-		data = new Hashtable();
-		if (fc.exists()) {
-			BufferedReader br = new BufferedReader(fc.openInputStream());
-			String line;
-			while ((line = br.readLine()) != null) {
-				int c = line.indexOf('=');
-				String key = line.substring(0, c);
-				String value = line.substring(c + 1);
-				data.put(key, value);
-			}
-			br.close();
-		}
-	}
+    protected final void load() throws IOException {
+        FileConnection fc = (FileConnection) Connector.open(PATH_PREFIX + path, Connector.READ);
+        if (!fc.exists()) { // If we can't find it, we revert to the old file
+            fc = (FileConnection) Connector.open(PATH_PREFIX + path + ".old", Connector.READ);
+            if (fc.exists()) {
+                if (Logger.BUILD_CRITICAL) {
+                    Logger.log(this + ".load: Could not find settings file, reverting to backup file !");
+                }
+            } else {
+                return;
+            }
+        }
+        BufferedReader reader = new BufferedReader(fc.openInputStream());
+        try {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                int c = line.indexOf('=');
+                if (c > 0) {
+                    String key = line.substring(0, c);
+                    String value = line.substring(c + 1);
+                    data.put(key, value);
+                } else {
+                    if (Logger.BUILD_DEBUG) {
+                        Logger.log(this + ".load: Invalid line \"" + line + "\"");
+                    }
+                }
+            }
+        } finally {
+            reader.close();
+        }
+    }
 
-	public void save() throws IOException {
-		try {
-			FileConnection fc = (FileConnection) Connector.open(PATH_PREFIX + path, Connector.READ_WRITE);
-			if (fc.exists()) {
-				fc.delete();
-			}
-			fc.create();
-			OutputStream os = fc.openOutputStream();
-			{
-				String key;
-				for (Enumeration en = data.keys(); en.hasMoreElements();) {
-					key = (String) en.nextElement();
-					os.write((key + "=" + data.get(key) + "\n").getBytes());
-				}
-			}
-			os.flush();
-			os.close();
-		} catch (Exception ex) {
-			if (Logger.BUILD_CRITICAL) {
-				Logger.log(this + ".save", ex, true);
-			}
-		}
-	}
+    public void save() throws IOException {
+        { // First we save the previous file (path --> path.old)
+            FileConnection old = (FileConnection) Connector.open(PATH_PREFIX + path + ".old", Connector.READ_WRITE);
+            FileConnection current = (FileConnection) Connector.open(PATH_PREFIX + path, Connector.READ_WRITE);
+            if (current.exists()) {
 
-	public String toString() {
-		return "ParametersFile{" + path + "}";
-	}
+                if (old.exists()) {
+                    if (LOG) {
+                        Logger.log("Deleting \"" + path + ".old\".");
+                    }
+                    old.delete();
+                }
 
-	private FileConnection getFileConnection() throws IOException {
-		return (FileConnection) Connector.open(PATH_PREFIX + path, Connector.READ);
-	}
+                // If the program crashes here, config is lost
+
+                if (LOG) {
+                    Logger.log("Renaming \"" + path + "\" to \"" + path + ".old\".");
+                }
+                current.rename(path + ".old");
+            }
+        }
+        // The we try to open the new file ( path.tmp )
+        FileConnection fc = (FileConnection) Connector.open(PATH_PREFIX + path + ".tmp", Connector.READ_WRITE);
+        if (fc.exists()) {
+            fc.delete();
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log(this + ".save: Previous temporary file exists, expect data loss !", true);
+            }
+        }
+        fc.create();
+        PrintStream out = new PrintStream(fc.openOutputStream());
+        try {
+            for (Enumeration en = data.keys(); en.hasMoreElements();) {
+                String key = (String) en.nextElement();
+                out.print(key + "=" + data.get(key) + "\n");
+            }
+        } finally {
+            out.close();
+        }
+        // And if everything when fine (no exception triggered, we save it to the correct name)
+        if (LOG) {
+            Logger.log("Renaming \"" + path + ".tmp\" to \"" + path + "\".");
+        }
+        fc.rename(path);
+    }
+
+    public void delete() throws IOException {
+        FileConnection fc = (FileConnection) Connector.open(PATH_PREFIX + path, Connector.READ_WRITE);
+        if (fc.exists()) {
+            fc.delete();
+        }
+        fc = (FileConnection) Connector.open(PATH_PREFIX + path + ".old", Connector.READ_WRITE);
+        if (fc.exists()) {
+            fc.delete();
+        }
+    }
+
+    public String toString() {
+        return "ParametersFile{" + path + "}";
+    }
 }

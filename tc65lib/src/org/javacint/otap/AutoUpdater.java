@@ -163,7 +163,7 @@ public class AutoUpdater extends TimerTask {
         } else {// If it's not, we guess it's the 
             remoteVersion = reader.readLine();
         }
-        if (Logger.BUILD_DEBUG) {
+        if (Logger.BUILD_DEBUG && LOG) {
             Logger.log(this + ": remoteVersion=" + remoteVersion);
         }
         lastDone = System.currentTimeMillis();
@@ -173,7 +173,7 @@ public class AutoUpdater extends TimerTask {
                 Logger.log(this + " : We will update from " + version + " to " + remoteVersion, true);
             }
         } else {
-            if (Logger.BUILD_NOTICE) {
+            if (Logger.BUILD_NOTICE && LOG) {
                 Logger.log(this + " : No update is required !");
             }
         }

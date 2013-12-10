@@ -10,6 +10,7 @@ import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.SocketConnection;
 import org.javacint.at.ATExecution;
+import org.javacint.common.PropertiesFile;
 import org.javacint.common.ResourceProvider;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
@@ -66,7 +67,7 @@ public final class APNAutodetection {
                 trim().
                 toLowerCase().
                 replace(' ', '_');
-        if (Logger.BUILD_DEBUG) {
+        if (Logger.BUILD_DEBUG && LOG) {
             Logger.log("Operator: " + operator);
             Logger.log("MCC: " + mcc);
             Logger.log("MNC: " + mnc);

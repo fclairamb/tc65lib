@@ -1,34 +1,25 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.io;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import javax.microedition.io.CommConnection;
 import javax.microedition.io.Connector;
-import javax.microedition.io.StreamConnection;
 import javax.microedition.io.DatagramConnection;
+import javax.microedition.io.StreamConnection;
 
-/**
- *
- * @author florent
- */
-public class Streams {
+public class Connections {
 
     public static StreamConnection serial(int port, int speed) throws IOException {
         return (StreamConnection) Connector.open("comm:com" + port + ";baudrate=" + speed + ";blocking=on;autocts=off;autorts=off");
     }
 
+    public static StreamConnection tcp(String host) throws IOException {
+        return (StreamConnection) Connector.open("socket://" + host);
+    }
+
     public static StreamConnection tcp(String host, int port) throws IOException {
-        return (StreamConnection) Connector.open("socket://" + host + ":" + port);
+        return tcp(host + ":" + port);
     }
 
     public static DatagramConnection udp(String host, int port) throws IOException {
-        return (DatagramConnection) Connector.open("udp://" + host + ":" + port);
+        return (DatagramConnection) Connector.open("datagram://" + host + ":" + port);
     }
 }
