@@ -1,8 +1,8 @@
 package org.javacint.demo;
 
-import java.io.IOException;
 import java.util.TimerTask;
 import org.javacint.apnauto.APNAutodetection;
+import org.javacint.console.AddNetworkConsoleCommand;
 import org.javacint.console.ConsiderUpdateCommand;
 import org.javacint.console.ConsoleBySetting;
 import org.javacint.console.DateCommand;
@@ -13,7 +13,7 @@ import org.javacint.console.NTPTestCommand;
 import org.javacint.console.SmsSenderCommand;
 import org.javacint.console.UptimeCommand;
 import org.javacint.console.VersionCommand;
-import org.javacint.io.Streams;
+import org.javacint.io.Connections;
 import org.javacint.loading.Loader;
 import org.javacint.loading.NamedRunnable;
 import org.javacint.logging.Logger;
@@ -23,7 +23,6 @@ import org.javacint.sms.PingSMSConsumer;
 import org.javacint.sms.SMSReceiver;
 import org.javacint.sms.StandardFeaturesSMSConsumer;
 import org.javacint.task.Timers;
-import org.javacint.time.TimeClient;
 import org.javacint.time.TimeRetriever;
 import org.javacint.time.ntp.SntpClient;
 import org.javacint.watchdog.WatchdogEmbedded;
@@ -57,7 +56,10 @@ public class StartupLoader extends TimerTask {
             public void run() {
                 WatchdogManager.add(loader);
                 WatchdogManager.add(new WatchdogEmbedded());
+                WatchdogManager.add(new WatchdogOnJavaGpio(7, false));
+                WatchdogManager.add(new WatchdogOnJavaGpio(8, false));
                 WatchdogManager.add(new WatchdogOnJavaGpio(9, false));
+                WatchdogManager.add(new WatchdogOnJavaGpio(10, false));
                 WatchdogManager.start(5000, 20000); // 20s is a reasonnable watchdog timer
             }
         });
@@ -77,7 +79,7 @@ public class StartupLoader extends TimerTask {
         loader.addRunnable(new NamedRunnable("Console:loading") {
             public void run() {
                 try {
-                    Global.console = new ConsoleBySetting(Streams.serial(0, 115200));
+                    Global.console = new ConsoleBySetting(Connections.serial(0, 115200));
                     Global.console.addCommandReceiver(new DateCommand());
                     Global.console.addCommandReceiver(new NTPTestCommand());
                     Global.console.addCommandReceiver(new ConsiderUpdateCommand(version));
@@ -87,6 +89,7 @@ public class StartupLoader extends TimerTask {
                     Global.console.addCommandReceiver(new UptimeCommand());
                     Global.console.addCommandReceiver(new FileNavigationCommandReceiver());
                     Global.console.addCommandReceiver(new SmsSenderCommand());
+                    Global.console.addCommandReceiver(new AddNetworkConsoleCommand(Global.console));
                 } catch (Exception ex) {
                     if (Logger.BUILD_CRITICAL) {
                         Logger.log("Console:loading", ex, true);

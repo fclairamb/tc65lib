@@ -55,7 +55,7 @@ public final class ATCommands {
         atCommandURC = aturc;
         //atCommandData = atdata;
     }
-    private static final int POOL_MAX_WAIT = 30000; // ms
+    private static final int POOL_MAX_WAIT = 30000; // 30s
 
     public static synchronized ATCommandPooled getATCommand() {
         if (atCommand1.getBlockingThread() != null && atCommand2.getBlockingThread() != null) { // If we have no available instance, we wait for one
@@ -199,13 +199,26 @@ public final class ATCommands {
         }
     }
 
-    static String sendLong(ATCommand atc, String cmd) {
-        return sendRawLong(atc, cmd + '\r');
+    public static String sendLong(String cmd) {
+        return sendLongRaw(cmd + '\r');
     }
 
-    static String sendRawLong(final ATCommand atc, final String cmd) {
+    public static String sendLongRaw(String cmd) {
+        ATCommandPooled atc = null;
+        try {
+            atc = getATCommand();
+            return atc.sendLongRaw(cmd);
+        } finally {
+            atc.release();
+        }
+    }
+
+    static String sendLongRaw(final ATCommand atc, final String cmd) {
         final StringBuffer str = new StringBuffer(); // We use this as as string reference
         try {
+            if (DEBUG) {
+                Logger.log(atcInstanceToString(atc) + " <--- " + cmd);
+            }
             synchronized (atc) {
                 atc.send(cmd, new ATCommandResponseListener() {
                     public void ATResponse(String result) {
@@ -222,7 +235,12 @@ public final class ATCommands {
                 Logger.log("ATCommands.sendRawLong(" + atc + "," + cmd + ")", ex, true);
             }
         }
-        return str.length() != 0 ? str.toString() : null;
+        String value = str.length() != 0 ? str.toString() : null;
+
+        if (DEBUG) {
+            Logger.log(atcInstanceToString(atc) + " <--- " + value);
+        }
+        return value;
     }
 
     public static void addListener(ATCommandListener listener) {

@@ -6,6 +6,8 @@ import com.siemens.icm.io.*;
 //# import com.cinterion.io.*;
 //#endif
 
+import org.javacint.logging.Logger;
+
 /**
  * Pooled ATCommand instance wrapper.
  */
@@ -31,19 +33,21 @@ public class ATCommandPooled {
     }
 
     public String send(String cmd) {
-        return send(cmd, false);
+        return sendRaw(cmd + '\r');
     }
 
     public String sendRaw(String cmd) {
-        return send(cmd, true);
-    }
-    
-    private String send(String cmd, boolean isRaw) {
-        if (Thread.currentThread() == blockingThread) {
-            return isRaw ? ATCommands.sendRaw(atc, cmd) : ATCommands.send(atc, cmd);
-        } else {
-            return isRaw ? ATCommands.sendRaw(cmd) : ATCommands.send(cmd);
+        if (Thread.currentThread() != blockingThread) {
+            Logger.log("You're using an ATC that belongs to " + blockingThread.getName() + ".");
         }
+        return ATCommands.sendRaw(atc, cmd);
+    }
+
+    public String sendLongRaw(String cmd) {
+        if (Thread.currentThread() != blockingThread) {
+            Logger.log("You're using an ATC that belongs to " + blockingThread.getName() + ".");
+        }
+        return ATCommands.sendLongRaw(atc, cmd);
     }
 
     public void release() {
