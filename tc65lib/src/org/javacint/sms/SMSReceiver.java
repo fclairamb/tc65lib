@@ -6,11 +6,13 @@ import com.siemens.icm.io.*;
 //# import com.cinterion.io.*;
 //#endif
 import java.util.Enumeration;
+import java.util.TimerTask;
 import java.util.Vector;
 import org.javacint.at.ATCommands;
 import org.javacint.at.ATURCQueueHandler;
 import org.javacint.common.Strings;
 import org.javacint.logging.Logger;
+import org.javacint.task.Timers;
 
 /**
  * SMS Receiving class
@@ -74,20 +76,45 @@ public class SMSReceiver implements ATCommandListener {
         // URC on SMS reception
         ATCommands.sendUrc("AT+CNMI=1,1");
 
-        // We will read all messages
-        instance.readAllMessages();
+        // We will read all messages later to avoid slowing down the program loading
+        Timers.getSlow().schedule(new TimerTask() {
+            public void run() {
+                instance.readAllMessages();
+            }
+        }, 0);
     }
 
     private void readAllMessages() {
         // We list all messages
-        final String[] lines = Strings.split('\n', ATCommands.sendLong("AT+CMGL=\"ALL\""));
-        for (int i = 0; i < lines.length; i++) {
-            // We only get the ID of the message (because it's simpler to have only one method to handle all SMSes)
-            String line = lines[i];
-            if (line.startsWith("+CMGL: ")) {
-                String sSmdId = line.substring("+CMGL: ".length(), line.indexOf(','));
-                readSms(Integer.parseInt(sSmdId));
+
+        // We are getting the messagest list in asynchronous mode, so we
+        // can't have a timeout error but the response can still be too long
+        // to be retrieved.
+        String response = ATCommands.sendLong("AT+CMGL=\"ALL\"");
+        if (response != null) {
+            final String[] lines = Strings.split('\n', response);
+            for (int i = 0; i < lines.length; i++) {
+                // We only get the ID of the message (because it's simpler to have only one method to handle all SMSes)
+                String line = lines[i];
+                if (line.startsWith("+CMGL: ")) {
+                    String sSmdId = line.substring("+CMGL: ".length(), line.indexOf(','));
+                    readSms(Integer.parseInt(sSmdId));
+                }
             }
+        } else {
+            // If we failed to get the messages list, we will get them one by one
+            for (int i = 0; i < (25 + 30 + 55); i++) {
+                readSms(i);
+            }
+            /* 
+             * console# AT^SLMS
+             * [AT] AT^SLMS
+             * [AT] ^SLMS: "MT",55,30
+             * [AT] ^SLMS: "SM",30,30
+             * [AT] ^SLMS: "ME",25,0
+             * [AT] 
+             * [AT] OK
+             */
         }
     }
 

@@ -22,7 +22,7 @@ public class PropertiesFile {
     protected static final String PATH_PREFIX = "file:///a:/";
     protected String path;
     protected Hashtable data;
-    private static final boolean LOG = true;
+    private static final boolean LOG = false;
 
     public PropertiesFile(String path) throws IOException {
         this.path = path;
