@@ -300,8 +300,6 @@ public class Console implements Runnable {
         try {
             portOpen();
             while (true) {
-                out.print(PROMPT);
-                out.flush();
                 String line = readLine().trim();
                 try {
                     if (line.length() > 0) {
@@ -312,7 +310,8 @@ public class Console implements Runnable {
                         Logger.log("Console.parseCommand: \"" + line + "\"", ex, true);
                     }
                 }
-
+                out.print(PROMPT);
+                out.flush();
             }
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
