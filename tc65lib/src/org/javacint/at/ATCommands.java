@@ -20,11 +20,12 @@ import org.javacint.logging.Logger;
 public final class ATCommands {
 
 //#if DebugLevel=="debug"
-    private static final boolean DEBUG_LEVEL = true;
-//#elif DebugLevel=="warn" || DebugLevel=="fatal"
-//# private static final boolean DEBUG_LEVEL = false;
+//#     private static final boolean DEBUG_LEVEL = true;
+//#else
+private static final boolean DEBUG_LEVEL = false;
 //#endif
-    private static final boolean DEBUG = DEBUG_LEVEL && false; // We don't want to log everything just because we're in debug
+    private static final boolean LOG = false; // We don't want to log everything just because we're in debug
+    private static final boolean DEBUG = DEBUG_LEVEL && LOG;
     private static final ATCommandPooled atCommand1, atCommand2;
     private static final ATCommand atCommandURC;
     //private static final ATCommand atCommandData;

@@ -16,7 +16,7 @@ import org.javacint.logging.Logger;
  */
 public class Settings {
 
-    private static final boolean LOG = true;
+    private static final boolean LOG = false;
     /**
      * Settings container. It has both the default and specific settings.
      */

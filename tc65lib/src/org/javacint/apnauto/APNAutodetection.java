@@ -10,7 +10,6 @@ import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.SocketConnection;
 import org.javacint.at.ATExecution;
-import org.javacint.common.PropertiesFile;
 import org.javacint.common.ResourceProvider;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
@@ -157,9 +156,8 @@ public final class APNAutodetection {
             } else {
                 apn = Settings.get(Settings.SETTING_APN);
                 if (apn != null) {
-
                     if (Logger.BUILD_VERBOSE) {
-                        Logger.log("We're going to load APN : " + apn);
+                        Logger.log("APN used: " + apn);
                     }
                     ATExecution.applyAPN(apn);
                 }

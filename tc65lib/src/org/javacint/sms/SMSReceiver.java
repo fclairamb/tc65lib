@@ -7,7 +7,6 @@ import com.siemens.icm.io.*;
 //#endif
 import java.util.Enumeration;
 import java.util.Vector;
-import org.javacint.at.ATCommandPooled;
 import org.javacint.at.ATCommands;
 import org.javacint.at.ATURCQueueHandler;
 import org.javacint.common.Strings;
@@ -75,10 +74,19 @@ public class SMSReceiver implements ATCommandListener {
         // URC on SMS reception
         ATCommands.sendUrc("AT+CNMI=1,1");
 
-        // We will read up to 20 messages stored
-        for (int i = 1; i <= 20; i++) {
-            if (!instance.readSms(i)) { // netbeans doesn't like empty for
-                break;
+        // We will read all messages
+        instance.readAllMessages();
+    }
+
+    private void readAllMessages() {
+        // We list all messages
+        final String[] lines = Strings.split('\n', ATCommands.sendLong("AT+CMGL=\"ALL\""));
+        for (int i = 0; i < lines.length; i++) {
+            // We only get the ID of the message (because it's simpler to have only one method to handle all SMSes)
+            String line = lines[i];
+            if (line.startsWith("+CMGL: ")) {
+                String sSmdId = line.substring("+CMGL: ".length(), line.indexOf(','));
+                readSms(Integer.parseInt(sSmdId));
             }
         }
     }
@@ -91,17 +99,19 @@ public class SMSReceiver implements ATCommandListener {
     }
 
     public void ATEvent(String urc) {
+        urc = urc.trim();
         if (Logger.BUILD_DEBUG && LOG_SMS_RECEPTION) {
             Logger.log(this + ".ATEvent( \"" + urc + "\" )");
         }
-        if (urc.indexOf("+CMTI:") > 0) {                //if it is SMS
+        if (urc.startsWith("+CMTI:")) {                //if it is SMS
+
             String sIndex;
             try {
                 sIndex = urc.substring(urc.lastIndexOf(',') + 1);
                 readSms(Integer.parseInt(sIndex));
             } catch (Exception ex) {
                 if (Logger.BUILD_CRITICAL) {
-                    Logger.log(this + ".ATEvent( " + urc + " )", ex, true);
+                    Logger.log(this + ".ATEvent( \"" + urc + "\" )", ex, true);
                 }
             }
         }
