@@ -20,8 +20,9 @@ public class ShutdownLoader extends TimerTask {
     public void run() {
 
         Loader loader = new Loader();
-
-        Logger.log("Midlet.destroy( " + uncond + " );");
+        if (Logger.BUILD_WARNING) {
+            Logger.log("Midlet.destroy( " + uncond + " );");
+        }
 
         loader.addRunnable(new NamedRunnable("Settings:save") {
             public void run() {

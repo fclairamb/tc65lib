@@ -30,7 +30,7 @@ public class SMSReceiver implements ATCommandListener {
     public static void removeConsumer(SMSConsumer c) {
         consumers.removeElement(c);    //actually it IS synchronized, so we don't need additional synchronized block
     }
-    private static final boolean LOG_SMS_HANDLING = true;
+    private static final boolean LOG_SMS_HANDLING = false;
 
     /**
      * Each consumer should return true once they consider it is of no other
@@ -41,7 +41,7 @@ public class SMSReceiver implements ATCommandListener {
             for (Enumeration e = consumers.elements(); e.hasMoreElements();) {
                 SMSConsumer cons = (SMSConsumer) e.nextElement();
                 try {
-                    if (LOG_SMS_HANDLING) {
+                    if (Logger.BUILD_DEBUG && LOG_SMS_HANDLING) {
                         Logger.log(cons + ".smsReceived(\"" + from + "\", \"" + content + "\");");
                     }
                     if (cons.smsReceived(from, content)) {

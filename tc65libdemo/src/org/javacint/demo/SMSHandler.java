@@ -15,7 +15,7 @@ public class SMSHandler implements SMSConsumer {
 
     public boolean smsReceived(String from, String content) {
         if (Logger.BUILD_NOTICE) {
-            Logger.log("SMSHandler: " + from + ", " + content);
+            Logger.log("Demo: Received sms from \"" + from + "\": " + content);
         }
 
         // If we have something that we are supposed to handle
