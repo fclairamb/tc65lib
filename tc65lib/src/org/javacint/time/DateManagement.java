@@ -2,6 +2,7 @@ package org.javacint.time;
 
 import java.util.Calendar;
 import java.util.Date;
+import org.javacint.at.ATExecution;
 
 /**
  * Date management. This class allows to get the right time by calculating an
@@ -49,6 +50,9 @@ public class DateManagement {
     }
 
     public static void setCurrentTime(long time) {
+        // This doesn't change the JVM's time, it's only useful for the next startup
+        ATExecution.setRTClock(new Date(time * 1000));
+        
         timeOffset_ = time - chipTime();
     }
 

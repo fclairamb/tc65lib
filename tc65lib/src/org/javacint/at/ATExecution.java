@@ -5,6 +5,8 @@ import com.siemens.icm.io.*;
 //#elif sdkns == "cinterion"
 //# import com.cinterion.io.*;
 //#endif
+import java.util.Calendar;
+import java.util.Date;
 import org.javacint.common.Strings;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
@@ -253,6 +255,29 @@ public class ATExecution {
                 Logger.log(THIS + ".getSimNum", ex, true);
             }
             return ex.getClass() + ":" + ex.getMessage();
+        }
+    }
+
+    /**
+     * Set the internal real-time clock.
+     *
+     * @param date Date to define
+     */
+    public static void setRTClock(Date date) {
+        try {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            String clk = ("" + cal.get(Calendar.YEAR)).substring(2) + "/"
+                    + Strings.addZeros("" + (cal.get(Calendar.MONTH) + 1), 2) + "/"
+                    + Strings.addZeros("" + cal.get(Calendar.DAY_OF_MONTH), 2) + ","
+                    + Strings.addZeros("" + cal.get(Calendar.HOUR_OF_DAY), 2) + ":"
+                    + Strings.addZeros("" + cal.get(Calendar.MINUTE), 2) + ":"
+                    + Strings.addZeros("" + cal.get(Calendar.SECOND), 2);
+            ATCommands.send("AT+CCLK=\"" + clk + "\"");
+        } catch (Throwable ex) {
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log(THIS + ".setRTClock", ex);
+            }
         }
     }
 
