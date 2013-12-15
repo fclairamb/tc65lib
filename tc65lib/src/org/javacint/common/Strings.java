@@ -83,4 +83,18 @@ public class Strings {
         }
         return r.toString();
     }
+
+    /**
+     * Add some zeros to a string so that it reaches a number of required chars
+     *
+     * @param value Value of the string
+     * @param numberOfNumbers Number of chars the string must have
+     * @return Resulting string
+     */
+    public static String addZeros(String value, int numberOfNumbers) {
+        while (value.length() < numberOfNumbers) {
+            value = "0" + value;
+        }
+        return value;
+    }
 }
