@@ -43,10 +43,12 @@ public class Logger {
      * Build logging level
      */
     public static final int buildLoggingLevel =
-            //#if DebugLevel=="debug"
-            E_DEBUG;
+//#if DebugLevel=="debug"
+//#             E_DEBUG;
+//#elif	DebugLevel=="info"	
+E_NOTICE;
 //#elif	DebugLevel=="warn"		
-//# E_NOTICE;
+//#             E_NOTICE;
 //#endif
     /**
      * Shows everything
