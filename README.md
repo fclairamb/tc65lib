@@ -18,11 +18,11 @@ Quick look at the console: http://www.youtube.com/watch?v=oVC7AD7IUGg&t=00m27s
 
 The features that will be provided in this library are:
 - Settings management (tested)
-- Watchdog management (added code)
+- Watchdog management (tested)
 - Logging (tested)
 - Console (tested)
 - Time sync (tested)
-- SMS receiving and sending (added code)
+- SMS receiving and sending (tested)
 - Call receiving and making
 - Automatic OTAP management (tested)
 - Communication with server: MQTT / M2MP / HTTP ? (NOT done)
