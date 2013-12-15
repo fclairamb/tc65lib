@@ -11,6 +11,10 @@ It is highly recommended to obfuscate your programs to remove the unnecessary co
 
 The library is now looking more and more to viable alternative to my (and your) in-house code.
 
+Javadoc: http://docs.webingenia.com/tc65lib/javadoc/ (automatically updated)
+
+Doxygen: http://docs.webingenia.com/tc65lib/doxygen/ (includes source-code, automatically updated)
+
 Sample version: http://webingenia.com:8080/demo/demo-0.1.9.jad
 
 Quick look at the console: http://www.youtube.com/watch?v=oVC7AD7IUGg&t=00m27s
@@ -23,7 +27,7 @@ The features that will be provided in this library are:
 - Console (tested)
 - Time sync (tested)
 - SMS receiving and sending (tested)
-- Call receiving and making
+- Call receiving and making (not done)
 - Automatic OTAP management (tested)
 - Communication with server: MQTT / M2MP / HTTP ? (NOT done)
 
