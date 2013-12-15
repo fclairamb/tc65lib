@@ -12,6 +12,7 @@ It is highly recommended to obfuscate your programs to remove the unnecessary co
 The library is now looking more and more to viable alternative to my (and your) in-house code.
 
 Javadoc: http://docs.webingenia.com/tc65lib/javadoc/ (automatically updated)
+
 Doxygen: http://docs.webingenia.com/tc65lib/doxygen/ (includes source-code, automatically updated)
 
 Sample version: http://webingenia.com:8080/demo/demo-0.1.9.jad
