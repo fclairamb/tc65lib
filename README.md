@@ -7,7 +7,7 @@ The goal of this library is to provide a base library for existing and new progr
 
 This library is actually intended to be used as a framework. You don't have to use all the components but some of them are mandatory (like logging, settings, at handling).
 
-It is necessary to obfuscate your programs to remove the unecessary components of the library. 
+It is highly recommended to obfuscate your programs to remove the unnecessary components of the library.
 
 The library is now looking more and more to viable alternative to my (and your) in-house code.
 
