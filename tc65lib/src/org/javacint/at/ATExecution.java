@@ -38,8 +38,7 @@ public class ATExecution {
     /**
      * Get the current RSSI.
      *
-     * @param atc AT Command instance
-     * @return
+     * @return RSSI level
      */
     public static int getRssi() {
         try {

@@ -34,8 +34,6 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
 
     /**
      * Constructor
-     *
-     * @param atc ATCommand instance to use
      */
     public M2MPClientImpl() {
         if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {

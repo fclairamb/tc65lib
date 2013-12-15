@@ -72,7 +72,6 @@ public class GpsNmeaParser implements Runnable {
     /**
      * NMEA GPS Parser constructor
      *
-     * @param atc ATCommand to use
      * @param listener Listener of received positions
      * @param portNumber Port number (0 for ASC0, 1 for ASC1, -1 for XT65
      * internal GPS)

@@ -29,7 +29,6 @@ public class GpsManager implements Runnable, SettingsProvider {
     /**
      * GPS Manager constructor
      *
-     * @param atc ATCommand
      */
     public GpsManager(GpsPositionListener listener) {
         this.listener = listener;

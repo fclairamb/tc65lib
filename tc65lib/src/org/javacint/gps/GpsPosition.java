@@ -90,7 +90,6 @@ public class GpsPosition {
      * YYMMDDhhmmss,lat,lon,speed,altitude
      */
     public String toString() {
-
         return "Loc{sta:" + this.status + ",date:" + this.date + ",lat:" + this.lat + ",lon:" + this.lon + ",spd:" + this.speed + ",ang:" + this.angle + ",alt:" + this.altitude + ",sat:" + this.nbSatellites + ",dop:" + this.dop + "}";
     }
 
@@ -105,7 +104,7 @@ public class GpsPosition {
      * <li>14 - Reception and moving.</li>
      * </ul>
      *
-     * @return
+     * @return Bytes conversion of the current location.
      */
     public byte[] toBytes() {
         if (status == STATUS_OK) {
