@@ -86,7 +86,7 @@ public class FileNavigationCommandReceiver implements ConsoleCommand {
             for (int i = line.length(); i < 30; i++) {
                 out.print(" ");
             }
-            out.println(new Date(file.lastModified()));
+            out.print(new Date(file.lastModified()));
             if (!file.isDirectory()) {
                 out.print("\t" + file.fileSize() + "b");
             }
