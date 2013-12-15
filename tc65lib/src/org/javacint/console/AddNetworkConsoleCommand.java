@@ -5,6 +5,10 @@ import java.io.PrintStream;
 import org.javacint.io.Connections;
 import org.javacint.logging.Logger;
 
+/**
+ * Add a new console on a remote server connection.
+ * It's only made available to show how we can create new consoles.
+ */
 public class AddNetworkConsoleCommand implements ConsoleCommand {
 
     private static final String CMD_CLIENT = "console net client ";
@@ -28,7 +32,7 @@ public class AddNetworkConsoleCommand implements ConsoleCommand {
                 }
             }
         } else if (command.equals("help")) {
-            out.println(CMD_CLIENT + " <ip>:<port>");
+            out.println("[HELP] " + CMD_CLIENT + " <ip>:<port>");
         }
         return false;
     }
