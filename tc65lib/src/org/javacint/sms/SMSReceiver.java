@@ -206,14 +206,14 @@ public class SMSReceiver implements ATCommandListener {
                 Logger.log(this + ":content = \"" + content.replace('\r', '%').replace('\n', '$') + "\"");
             }
 
+            // We have to delete it before we handle it, because restart messages end up in infinite loops
+            deleteSms(index);
             handleSMS(phone, content);
             return true;
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
                 Logger.log(this, ex, 167);
             }
-        } finally {
-            deleteSms(index);
         }
         return false;
     }
