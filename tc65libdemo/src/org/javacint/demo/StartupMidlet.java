@@ -10,9 +10,11 @@ public class StartupMidlet extends MIDlet {
 
     public void startApp() {
         String version = getAppProperty("MIDlet-Version");
-        System.out.println("demo v"+version);
+        System.out.print("Demo v" + version + "\r");
         // The first task is to plan a loading task.
         Timers.getSlow().schedule(new StartupLoader(version), 0);
+
+        // We're now leaving startApp (and releasing the starting thread)
     }
 
     public void pauseApp() {

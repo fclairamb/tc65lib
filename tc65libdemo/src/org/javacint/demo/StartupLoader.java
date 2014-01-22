@@ -4,7 +4,7 @@ import java.util.TimerTask;
 import org.javacint.apnauto.APNAutodetection;
 import org.javacint.console.AddNetworkConsoleCommand;
 import org.javacint.console.ConsiderUpdateCommand;
-import org.javacint.console.ConsoleBySetting;
+import org.javacint.console.Console;
 import org.javacint.console.DateCommand;
 import org.javacint.console.FileNavigationCommandReceiver;
 import org.javacint.console.GPSTestCommand;
@@ -21,6 +21,7 @@ import org.javacint.otap.AutoUpdater;
 import org.javacint.settings.Settings;
 import org.javacint.sms.PingSMSConsumer;
 import org.javacint.sms.SMSReceiver;
+import org.javacint.sms.SimpleSMS;
 import org.javacint.sms.StandardFeaturesSMSConsumer;
 import org.javacint.task.Timers;
 import org.javacint.time.TimeRetriever;
@@ -28,6 +29,7 @@ import org.javacint.time.ntp.SntpClient;
 import org.javacint.watchdog.WatchdogEmbedded;
 import org.javacint.watchdog.WatchdogManager;
 import org.javacint.watchdog.WatchdogOnJavaGpio;
+import org.javacint.watchdog.WatchdogStatusProvider;
 
 /**
  * Loader wrapper.
@@ -79,7 +81,7 @@ public class StartupLoader extends TimerTask {
         loader.addRunnable(new NamedRunnable("Console:loading") {
             public void run() {
                 try {
-                    Global.console = new ConsoleBySetting(Connections.serial(0, 115200));
+                    Global.console = new Console(Connections.serial(0, 115200));
                     Global.console.addCommandReceiver(new DateCommand());
                     Global.console.addCommandReceiver(new NTPTestCommand());
                     Global.console.addCommandReceiver(new ConsiderUpdateCommand(version));
@@ -161,6 +163,35 @@ public class StartupLoader extends TimerTask {
             }
         });
 
+        if (false) { // This is some watchdog testing code
+            loader.addRunnable(new NamedRunnable("Uptime SMS Sender") {
+                private final long start = System.currentTimeMillis();
+                private final String dest = "+33686955405";
+
+                public void run() {
+                    Timers.getSlow().schedule(new TimerTask() {
+                        public void run() {
+                            SimpleSMS.send(dest, "Uptime is " + (System.currentTimeMillis() - start) / 1000 + "s");
+                        }
+                    }, 0, 900000);
+                    WatchdogManager.add(new WatchdogStatusProvider() {
+                        private boolean sent;
+
+                        public String getWorkingStatus() {
+                            if ((System.currentTimeMillis() - start) > (3600 * 1000)) {
+                                if (!sent) {
+                                    sent = true;
+                                    SimpleSMS.send(dest, "We need to restart now !");
+                                }
+                                return "1h have passed, We want to restart now";
+                            }
+
+                            return null;
+                        }
+                    });
+                }
+            });
+        }
         // And we start the loading task right now.
         Timers.getSlow().schedule(loader, 0);
     }
