@@ -1,12 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.console;
 
 import java.io.InputStream;
 import java.io.PrintStream;
-import org.javacint.common.BufferedReader;
 import org.javacint.email.Email;
 import org.javacint.email.EmailSender;
 import org.javacint.task.Timers;
@@ -18,29 +13,35 @@ public class EmailCommand implements ConsoleCommand {
 
     public boolean consoleCommand(String command, InputStream is, PrintStream out) {
         if (command.equals("email")) {
-            BufferedReader reader = new BufferedReader(is);
             Email email = new Email();
-            out.print("From: ");
-            email.from = reader.readLine();
-            out.print("To: ");
-            email.to = reader.readLine();
-            out.print("Subject: ");
-            email.subject = reader.readLine();
+            out.println("From: ");
+            email.from = Console.readLine(is, out);
+            out.println("");
+            out.println("To: ");
+            email.to = Console.readLine(is, out);
+            out.println("");
+            out.println("Subject: ");
+            email.subject = Console.readLine(is, out);
+            out.println("");
             out.println("Content:");
             {
                 StringBuffer sb = new StringBuffer();
                 String line;
-                while ((line = reader.readLine()).length() > 0) {
+                while ((line = Console.readLine(is, out)).length() > 0) {
                     sb.append(line);
+                    out.println("");
                 }
                 email.message = sb.toString();
             }
-            out.print("Server: ");
-            String server = reader.readLine();
+            out.println("");
+            out.println("Server: ");
+            String server = Console.readLine(is, out);
             EmailSender sender = new EmailSender(server, email);
             out.println("Sending...");
             Timers.getSlow().schedule(sender, 0);
             return true;
+        } else if (command.equals("help")) {
+            out.println("[HELP] email                            - Send an email");
         }
         return false;
     }
