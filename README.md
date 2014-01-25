@@ -17,7 +17,9 @@ Doxygen: http://docs.webingenia.com/tc65lib/doxygen/ (includes source-code, auto
 
 Sample version: http://webingenia.com:8080/demo/demo-0.1.9.jad
 
-Quick look at the console: http://www.youtube.com/watch?v=oVC7AD7IUGg&t=00m27s
+Quick look at the console: 
+* http://asciinema.org/a/6782 (settings management demo + few commands)
+* http://asciinema.org/a/6783 (auto-update on new version detection)
 
 
 The features that will be provided in this library are:
@@ -32,3 +34,7 @@ The features that will be provided in this library are:
 - Communication with server: MQTT / M2MP / HTTP ? (NOT done)
 
 You are welcome to request features and forks and they might be accepted.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/fclairamb/tc65lib/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
