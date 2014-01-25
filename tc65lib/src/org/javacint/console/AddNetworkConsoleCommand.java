@@ -18,6 +18,11 @@ public class AddNetworkConsoleCommand implements ConsoleCommand {
     private static final String CMD_SERVER = "console net server ";
     private final Console parent;
 
+    /**
+     * Create a new console from an other console.
+     *
+     * @param parent Console to create new consoles from
+     */
     public AddNetworkConsoleCommand(Console parent) {
         this.parent = parent;
     }
@@ -52,8 +57,8 @@ public class AddNetworkConsoleCommand implements ConsoleCommand {
                 }
             }
         } else if (command.equals("help")) {
-            out.println("[HELP] " + CMD_CLIENT + " <ip>:<port>");
-            out.println("[HELP] " + CMD_SERVER + " <port>");
+            out.println("[HELP] console net client <ip>:<port>   - Open a TCP connection and act as new console");
+            out.println("[HELP] console net server <port>        - Accept any TCP connection and act a a console on each of them");
         }
         return false;
     }

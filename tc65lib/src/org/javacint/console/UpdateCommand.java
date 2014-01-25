@@ -23,6 +23,8 @@ public class UpdateCommand implements ConsoleCommand {
                 ATExecution.update(args[1], args[2]);
             }
             return true;
+        } else if (command.equals("help")) {
+            out.println("[HELP] update                           - Update the program");
         }
         return false;
     }

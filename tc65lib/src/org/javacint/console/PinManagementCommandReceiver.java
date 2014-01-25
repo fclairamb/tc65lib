@@ -34,9 +34,9 @@ public class PinManagementCommandReceiver implements ConsoleCommand {
                     return true;
                 }
             } else if (command.equals("help")) {
-                out.println("[HELP] pin lock <code>");
-                out.println("[HELP] pin unlock <code>");
-                out.println("[HELP] pin change <old code> <new code>");
+                out.println("[HELP] pin lock <code>                  - Lock SIM with a pin code");
+                out.println("[HELP] pin unlock <code>                - Unlock SIM using a pin code");
+                out.println("[HELP] pin change <old code> <new code> - Change the SIM pin code");
             }
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {

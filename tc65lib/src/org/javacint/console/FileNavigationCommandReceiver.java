@@ -175,13 +175,13 @@ public class FileNavigationCommandReceiver implements ConsoleCommand {
             } else if (command.startsWith("cp ")) {
                 commandCp(command.substring(3), out);
             } else if (command.equals("help")) {
-                out.println("[HELP] cd <dir>          - to change current directory");
-                out.println("[HELP] ls                - to list files in current directory");
-                out.println("[HELP] cat <file>        - to display the current file content");
-                out.println("[HELP] df                - to look the currently used space");
-                out.println("[HELP] rm <file>         - to delete a file");
-                out.println("[HELP] pwd               - to display the current directory path");
-                out.println("[HELP] wget <url> <file> - to download a file to a filename");
+                out.println("[HELP] cd <dir>                         - to change current directory");
+                out.println("[HELP] ls                               - to list files in current directory");
+                out.println("[HELP] cat <file>                       - to display the current file content");
+                out.println("[HELP] df                               - to look the currently used space");
+                out.println("[HELP] rm <file>                        - to delete a file");
+                out.println("[HELP] pwd                              - to display the current directory path");
+                out.println("[HELP] wget <url> <file>                - to download a file to a filename");
                 return false;
             } else {
                 return false;

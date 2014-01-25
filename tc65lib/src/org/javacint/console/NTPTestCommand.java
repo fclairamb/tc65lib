@@ -37,7 +37,7 @@ public class NTPTestCommand implements ConsoleCommand {
             Timers.getSlow().schedule(timeRetriever, 0);
             return true;
         } else if (command.equals("help")) {
-            out.println("[HELP] ntp <server> - Get time from a server");
+            out.println("[HELP] ntp <server>                     - Get time from a server");
         }
         return false;
     }

@@ -34,7 +34,7 @@ public class GPSTestCommand implements ConsoleCommand, GpsPositionListener {
                 out.println("[HELP] gps [start|stop]");
             }
         } else if (command.equals("help")) {
-            out.println("[HELP] gps [start|stop]");
+            out.println("[HELP] gps [start|stop]                 - GPS start/stop");
         }
         return false;
     }

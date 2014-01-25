@@ -8,7 +8,7 @@ import org.javacint.otap.AutoUpdater;
  * Auto updater triggering command.
  * Usage:<br />
  * <q>update</q>
- * 
+ *
  */
 public class ConsiderUpdateCommand implements ConsoleCommand {
 
@@ -16,7 +16,8 @@ public class ConsiderUpdateCommand implements ConsoleCommand {
 
     /**
      * Constructor.
-     * @param version Current version of the program. 
+     *
+     * @param version Current version of the program.
      */
     public ConsiderUpdateCommand(String version) {
         this.version = version;
@@ -26,6 +27,8 @@ public class ConsiderUpdateCommand implements ConsoleCommand {
         if (command.equals("consider")) {
             AutoUpdater.schedule(version);
             return true;
+        } else if (command.equals("help")) {
+            out.println("[HELP] consider                         - Consider updating code");
         }
         return false;
     }

@@ -22,8 +22,8 @@ public class UptimeCommand implements ConsoleCommand {
             }, 0, time * 1000);
             return true;
         } else if (command.equals("help")) {
-            out.println("[HELP] uptime - Show the program's uptime");
-            out.println("[HELP] uptime <s> - Show the program's frequently");
+            out.println("[HELP] uptime                           - Show the program's uptime");
+            out.println("[HELP] uptime <s>                       - Show the program's uptime frequently");
         }
         return false;
     }

@@ -16,7 +16,7 @@ public class VersionCommand implements ConsoleCommand {
             out.println("[VERSION] " + version);
             return true;
         } else if (command.equals("help")) {
-            out.println("[HELP] version - Show the current version");
+            out.println("[HELP] version                          - Show the current version");
         }
         return false;
     }

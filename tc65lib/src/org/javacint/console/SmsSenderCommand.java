@@ -29,8 +29,7 @@ public class SmsSenderCommand implements ConsoleCommand {
 
                 return true;
             } else if (line.equals("help")) {
-                out.println("[HELP] sms send <tel> <message> - Send a message <message> to <tel>");
-                return false;
+                out.println("[HELP] sms send <tel> <message>         - Send a message <message> to <tel>");
             }
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {

@@ -40,6 +40,13 @@ public class Console implements Runnable {
         }
     }
 
+    /**
+     * Copy all the command receivers of one console to an other console.
+     * 
+     * Please not that the command receives are the same instance.
+     *
+     * @param src Source console.
+     */
     public void copyCommandReceivers(Console src) {
         synchronized (commandsReceiver) {
             for (Enumeration en = src.commandsReceiver.elements(); en.hasMoreElements();) {
@@ -107,14 +114,14 @@ public class Console implements Runnable {
         } else if (line.equals("restart")) {
             ATExecution.restart();
         } else if (line.equals("help")) {
-            writeLine("[HELP] help                         This help");
-            writeLine("[HELP] conf list                    List all configuration settings");
-            writeLine("[HELP] conf <key>=<value>           Define a configuration setting");
-            writeLine("[HELP] conf <key>                   Get a configuration setting");
-            writeLine("[HELP] conf save                    Save the configuration settings");
-            writeLine("[HELP] restart                      Restart the device");
-            writeLine("[HELP] AT***                        Send AT commads");
-            writeLine("[HELP] stats                        Get some system stats");
+            writeLine("[HELP] help                             - This help");
+            writeLine("[HELP] conf list                        - List all configuration settings");
+            writeLine("[HELP] conf <key>=<value>               - Define a configuration setting");
+            writeLine("[HELP] conf <key>                       - Get a configuration setting");
+            writeLine("[HELP] conf save                        - Save the configuration settings");
+            writeLine("[HELP] restart                          - Restart the device");
+            writeLine("[HELP] AT***                            - Send AT commads");
+            writeLine("[HELP] stats                            - Get some system stats");
         } else if (line.equals("conf list") || line.equals("conf")) {
 
             Hashtable defSettings = Settings.getDefaultSettings();
@@ -205,10 +212,10 @@ public class Console implements Runnable {
             history.removeElementAt(0);
         }
     }
-    private final StringBuffer buffer = new StringBuffer(64);
 
-    public String readLine() {
+    public static String readLine(InputStream in, PrintStream out) {
         try {
+            final StringBuffer buffer = new StringBuffer(64);
             while (true) {
                 int c = in.read();
                 if (c == '\n' || c == '\r') { // If we have an end of line
@@ -227,7 +234,7 @@ public class Console implements Runnable {
                     return "";
                 } else if (c == 27) {
                     // I'm not really sure about this part
-                    handleEscape(getEscapeSequence());
+                    handleEscape(getEscapeSequence(in), out);
                 } else { // We add chars to the buffer
                     buffer.append((char) c);
                     out.write(c);
@@ -237,12 +244,15 @@ public class Console implements Runnable {
             if (Logger.BUILD_CRITICAL) {
                 Logger.log("Console.readLine", ex);
             }
+            return null;
         }
-
-        return null;
     }
 
-    private int[] getEscapeSequence() throws IOException {
+    public String readLine() {
+        return readLine(in, out);
+    }
+
+    private static int[] getEscapeSequence(InputStream in) throws IOException {
         int c;
         int[] esc = new int[10];
         esc[0] = in.read();
@@ -267,11 +277,10 @@ public class Console implements Runnable {
         out.write('1');
         out.write('S');
         out.print(PROMPT);
-        buffer.setLength(0);
     }
 
     // TODO: test it
-    private void writeClearScreen() {
+    private static void writeClearScreen(PrintStream out) {
         out.write(27);
         out.write('[');
         out.write('2');
@@ -279,7 +288,7 @@ public class Console implements Runnable {
     }
 
     // TODO: test it
-    private void handleEscape(int[] escapeSequence) {
+    private static void handleEscape(int[] escapeSequence, PrintStream out) {
         if (escapeSequence[0] == '[') {
             if (escapeSequence[2] == 'A') {
                 out.print("<UP>");
@@ -287,10 +296,10 @@ public class Console implements Runnable {
                 out.print("<DOWN>");
             } else if (escapeSequence[2] == 'C') {
                 out.print("<FORWARD>");
-                writeClearScreen();
+                writeClearScreen(out);
             } else if (escapeSequence[2] == 'D') {
                 out.print("<BACKWARD>");
-                writeErasePrompt();
+                writeClearScreen(out);
             }
         }
     }

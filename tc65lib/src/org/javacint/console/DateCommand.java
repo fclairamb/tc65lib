@@ -15,8 +15,9 @@ public class DateCommand implements ConsoleCommand {
         if (command.equals("date")) {
             out.println("[DATE] " + new Date(DateManagement.time() * 1000));
             return true;
-        } else {
-            return false;
+        } else if (command.equals("help")) {
+            out.println("[HELP] date                             - Display the current date");
         }
+        return false;
     }
 }
