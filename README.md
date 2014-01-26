@@ -33,6 +33,7 @@ The features that will be provided in this library are:
 - Call receiving and making (not done)
 - Automatic OTAP management (tested)
 - Communication with server: MQTT / M2MP / HTTP ? (NOT done)
+- Email sending (tested)
 
 You are welcome to request features and forks and they might be accepted.
 
