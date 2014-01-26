@@ -2,14 +2,17 @@ package org.javacint.demo;
 
 import java.util.TimerTask;
 import org.javacint.apnauto.APNAutodetection;
+import org.javacint.at.ATExecution;
 import org.javacint.console.AddNetworkConsoleCommand;
 import org.javacint.console.ConsiderUpdateCommand;
 import org.javacint.console.Console;
 import org.javacint.console.DateCommand;
+import org.javacint.console.EmailCommand;
 import org.javacint.console.FileNavigationCommandReceiver;
 import org.javacint.console.GPSTestCommand;
 import org.javacint.console.IDCommand;
 import org.javacint.console.NTPTestCommand;
+import org.javacint.console.PinManagementCommandReceiver;
 import org.javacint.console.SmsSenderCommand;
 import org.javacint.console.UptimeCommand;
 import org.javacint.console.VersionCommand;
@@ -52,16 +55,19 @@ public class StartupLoader extends TimerTask {
             Logger.log("TC65LibDemo v" + version);
         }
 
+        loader.addRunnable(new NamedRunnable("init") {
+            public void run() {
+                ATExecution.setSsync(0);
+            }
+        });
+
         // We register the loader to the watchdog management class 
         // to make sure the program actually load in reasonnable time.
         loader.addRunnable(new NamedRunnable("Watchdog:start") {
             public void run() {
                 WatchdogManager.add(loader);
                 WatchdogManager.add(new WatchdogEmbedded());
-                WatchdogManager.add(new WatchdogOnJavaGpio(7, false));
-                WatchdogManager.add(new WatchdogOnJavaGpio(8, false));
                 WatchdogManager.add(new WatchdogOnJavaGpio(9, false));
-                WatchdogManager.add(new WatchdogOnJavaGpio(10, false));
                 WatchdogManager.start(5000, 20000); // 20s is a reasonnable watchdog timer
             }
         });
@@ -92,6 +98,8 @@ public class StartupLoader extends TimerTask {
                     Global.console.addCommandReceiver(new FileNavigationCommandReceiver());
                     Global.console.addCommandReceiver(new SmsSenderCommand());
                     Global.console.addCommandReceiver(new AddNetworkConsoleCommand(Global.console));
+                    Global.console.addCommandReceiver(new PinManagementCommandReceiver());
+                    Global.console.addCommandReceiver(new EmailCommand());
                 } catch (Exception ex) {
                     if (Logger.BUILD_CRITICAL) {
                         Logger.log("Console:loading", ex, true);
@@ -160,6 +168,7 @@ public class StartupLoader extends TimerTask {
             public void run() {
                 // We have finished loading so we don't need to monitor this anymore
                 WatchdogManager.remove(loader);
+                ATExecution.setSsync(2);
             }
         });
 
