@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.time;
 
 import java.io.IOException;
@@ -16,7 +12,7 @@ import org.javacint.common.BufferedReader;
  *
  * For PHP: <?= time ?>
  * For Java: System.out.println( System.currentTimeMillis() / 1000 );
- * For Python: print int( time.time() )
+ * For Python: print(int(time.time()))
  */
 public class HttpTimeClient implements TimeClient {
 
