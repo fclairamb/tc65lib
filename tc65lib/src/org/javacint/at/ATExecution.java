@@ -156,14 +156,29 @@ public class ATExecution {
         ATCommands.send("AT+CFUN=1,1");
     }
 
+    /**
+     * Trigger an update.
+     * The update is performed using the settings "apn" and "jadurl".
+     */
     public static void update() {
         update(null, null);
     }
 
+    /**
+     * Trigger an update
+     *
+     * @param target JAD file to use
+     */
     public static void update(String target) {
         update(null, target);
     }
 
+    /**
+     * Trigger an update
+     *
+     * @param apn APN to use (using "apn" setting if null)
+     * @param target JAD file to use (using "jadurl" setting if null)
+     */
     public static void update(String apn, String target) {
         if (apn == null) {
             apn = Settings.get(Settings.SETTING_APN);
@@ -220,6 +235,13 @@ public class ATExecution {
         }
     }
 
+    /**
+     * Apply an APN.
+     * This is only using the AT^SJNET AT command
+     *
+     * @param apn APN to apply
+     * @return true if the APN was correctly formatted
+     */
     public static boolean applyAPN(String apn) {
         try {
             String ret = ATCommands.send("AT^SJNET=" + apn);
@@ -234,6 +256,11 @@ public class ATExecution {
         return false;
     }
 
+    /**
+     * Get the network operator's name.
+     *
+     * @return Network operator's name
+     */
     public static String getCopsOperator() {
         try {
             String ret = ATCommands.send("AT+COPS?");
@@ -249,6 +276,13 @@ public class ATExecution {
         return null;
     }
 
+    /**
+     * Get our own phone number.
+     *
+     * It relies on som SIM entries. It is unreliable.
+     *
+     * @return SIM Number
+     */
     public static String getSimNum() {
         try {
             String ret = ATCommands.send("AT+CNUM");
@@ -289,6 +323,10 @@ public class ATExecution {
         }
     }
 
+    /**
+     * Pin code handling.
+     *
+     */
     public static class PIN {
 
         public static boolean pinLock(boolean lock, String code) {
@@ -304,11 +342,28 @@ public class ATExecution {
                 return false;
             }
         }
+        /**
+         * Pin status: READY
+         */
         public static int PINSTATUS_READY = 0;
+        /**
+         * Pin status: PIN required
+         */
         public static int PINSTATUS_SIMPIN = 1;
+        /**
+         * Pin status: PUK required
+         */
         public static int PINSTATUS_SIMPUK = 2;
+        /**
+         * Pin status: UNKNOWN
+         */
         public static int PINSTATUS_UNKNOWN = -1;
 
+        /**
+         * Get the current pin status
+         *
+         * @return Pin status
+         */
         public static int pinStatus() {
             try {
 //                synchronized (atc) {
@@ -336,6 +391,12 @@ public class ATExecution {
             }
         }
 
+        /**
+         * Issue a pin.
+         *
+         * @param code Pin code to issue
+         * @return true if PIN is correct
+         */
         public static boolean pinSend(String code) {
             try {
 //                synchronized (atc) {
@@ -353,6 +414,13 @@ public class ATExecution {
             }
         }
 
+        /**
+         * Change the PIN code.
+         *
+         * @param oldPin Old PIN code
+         * @param newPin New PIN code
+         * @return true if it could be done correctly
+         */
         public static boolean pinChange(String oldPin, String newPin) {
             try {
 //                synchronized (atc) {
@@ -369,6 +437,11 @@ public class ATExecution {
             }
         }
 
+        /**
+         * Get the number of PIN code tries left.
+         *
+         * @return Number of pin code left (-1 in case of error)
+         */
         public static int pinNbTriesLeft() {
             try {
 //                synchronized (atc) {
