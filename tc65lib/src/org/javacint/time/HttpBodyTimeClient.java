@@ -13,12 +13,15 @@ import org.javacint.common.BufferedReader;
  * For PHP: <?= time ?>
  * For Java: System.out.println( System.currentTimeMillis() / 1000 );
  * For Python: print(int(time.time()))
+ * <br />
+ * Compared to HttpHeaderTimeClient, this method sucks. We should probably drop
+ * it.
  */
-public class HttpTimeClient implements TimeClient {
+public class HttpBodyTimeClient implements TimeClient {
 
     private final String url;
 
-    public HttpTimeClient(String url) {
+    public HttpBodyTimeClient(String url) {
         this.url = url;
     }
 

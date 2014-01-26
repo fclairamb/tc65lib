@@ -16,6 +16,7 @@ import org.javacint.console.PinManagementCommandReceiver;
 import org.javacint.console.SmsSenderCommand;
 import org.javacint.console.UptimeCommand;
 import org.javacint.console.VersionCommand;
+import org.javacint.console.WatchdogStatusError;
 import org.javacint.io.Connections;
 import org.javacint.loading.Loader;
 import org.javacint.loading.NamedRunnable;
@@ -24,15 +25,13 @@ import org.javacint.otap.AutoUpdater;
 import org.javacint.settings.Settings;
 import org.javacint.sms.PingSMSConsumer;
 import org.javacint.sms.SMSReceiver;
-import org.javacint.sms.SimpleSMS;
 import org.javacint.sms.StandardFeaturesSMSConsumer;
 import org.javacint.task.Timers;
+import org.javacint.time.HttpHeaderTimeClient;
 import org.javacint.time.TimeRetriever;
-import org.javacint.time.ntp.SntpClient;
 import org.javacint.watchdog.WatchdogEmbedded;
 import org.javacint.watchdog.WatchdogManager;
 import org.javacint.watchdog.WatchdogOnJavaGpio;
-import org.javacint.watchdog.WatchdogStatusProvider;
 
 /**
  * Loader wrapper.
@@ -100,6 +99,7 @@ public class StartupLoader extends TimerTask {
                     Global.console.addCommandReceiver(new AddNetworkConsoleCommand(Global.console));
                     Global.console.addCommandReceiver(new PinManagementCommandReceiver());
                     Global.console.addCommandReceiver(new EmailCommand());
+                    Global.console.addCommandReceiver(new WatchdogStatusError());
                 } catch (Exception ex) {
                     if (Logger.BUILD_CRITICAL) {
                         Logger.log("Console:loading", ex, true);
@@ -160,7 +160,7 @@ public class StartupLoader extends TimerTask {
         loader.addRunnable(new NamedRunnable("TimeUpdater:scheduled") {
             public void run() {
                 // This will get the time every 24h
-                new TimeRetriever(new SntpClient()).schedule();
+                new TimeRetriever(new HttpHeaderTimeClient("http://www.google.com/")).schedule();
             }
         });
 
@@ -172,35 +172,6 @@ public class StartupLoader extends TimerTask {
             }
         });
 
-        if (false) { // This is some watchdog testing code
-            loader.addRunnable(new NamedRunnable("Uptime SMS Sender") {
-                private final long start = System.currentTimeMillis();
-                private final String dest = "+33686955405";
-
-                public void run() {
-                    Timers.getSlow().schedule(new TimerTask() {
-                        public void run() {
-                            SimpleSMS.send(dest, "Uptime is " + (System.currentTimeMillis() - start) / 1000 + "s");
-                        }
-                    }, 0, 900000);
-                    WatchdogManager.add(new WatchdogStatusProvider() {
-                        private boolean sent;
-
-                        public String getWorkingStatus() {
-                            if ((System.currentTimeMillis() - start) > (3600 * 1000)) {
-                                if (!sent) {
-                                    sent = true;
-                                    SimpleSMS.send(dest, "We need to restart now !");
-                                }
-                                return "1h have passed, We want to restart now";
-                            }
-
-                            return null;
-                        }
-                    });
-                }
-            });
-        }
         // And we start the loading task right now.
         Timers.getSlow().schedule(loader, 0);
     }
