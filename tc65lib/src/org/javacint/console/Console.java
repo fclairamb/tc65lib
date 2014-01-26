@@ -42,7 +42,7 @@ public class Console implements Runnable {
 
     /**
      * Copy all the command receivers of one console to an other console.
-     * 
+     *
      * Please not that the command receives are the same instance.
      *
      * @param src Source console.
@@ -213,6 +213,17 @@ public class Console implements Runnable {
         }
     }
 
+    /**
+     * Simulate a console line reading input.
+     *
+     * It echoes each chars and returns the string on CR.
+     *
+     * @param in InputStream for parsing raw keyboard input
+     * @param out PrintStream for displaying output
+     * @return The line read from the inputstream
+     *
+     * TODO: There are some problems with this method that we should fix.
+     */
     public static String readLine(InputStream in, PrintStream out) {
         try {
             final StringBuffer buffer = new StringBuffer(64);

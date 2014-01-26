@@ -29,6 +29,7 @@ public class EmailCommand implements ConsoleCommand {
                 String line;
                 while ((line = Console.readLine(is, out)).length() > 0) {
                     sb.append(line);
+                    sb.append('\n');
                     out.println("");
                 }
                 email.message = sb.toString();
