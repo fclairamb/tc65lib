@@ -4,6 +4,7 @@ The goal of this library is to provide a base library for existing and new progr
 * TC65
 * TC65i / TC65i-X
 * BSG5 / BSG5-X
+* EHS5 / EHS6
 
 This library is actually intended to be used as a framework. You don't have to use all the components but some of them are mandatory (like logging, settings, at handling).
 
