@@ -138,6 +138,15 @@ public class ATExecution {
     }
 
     /**
+     * Setup SYNC pin.
+     *
+     * @param mode SYNC pin mode
+     */
+    public static void setSsync(int mode) {
+        ATCommands.send("AT^SSYNC=" + mode + "\r");
+    }
+
+    /**
      * Restarts the chip.
      */
     public static void restart() {
