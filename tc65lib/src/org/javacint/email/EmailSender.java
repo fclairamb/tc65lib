@@ -101,7 +101,7 @@ public class EmailSender extends TimerTask {
                 writeLine("From: <" + email.from + ">");
                 writeLine("To: <" + email.to + ">");
                 writeLine("Subject: " + email.subject);
-                writeLine("X-Java-Date: " + DateManagement.date());
+                writeLine("Date: " + DateManagement.date());
                 writeLine("");
 
                 // We send the message
