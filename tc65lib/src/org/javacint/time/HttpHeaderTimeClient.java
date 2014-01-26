@@ -7,11 +7,12 @@ import javax.microedition.io.HttpConnection;
 /**
  * Simple HTTP Header time client.
  *
- * Gets time (GMT) from the "Date" HTTP header by performing a HEAD request.
+ * Gets time (GMT) from the "Date" HTTP header by performing a request.
  */
 public class HttpHeaderTimeClient implements TimeClient {
 
     private final String url;
+    private final String method;
 
     /**
      * Constructor.
@@ -20,13 +21,19 @@ public class HttpHeaderTimeClient implements TimeClient {
      */
     public HttpHeaderTimeClient(String url) {
         this.url = url;
+        method = HttpConnection.HEAD;
+    }
+
+    public HttpHeaderTimeClient(String url, String method) {
+        this.url = url;
+        this.method = method;
     }
 
     public long getTime() throws IOException {
         HttpConnection conn = null;
         try {
             conn = (HttpConnection) Connector.open(url);
-            conn.setRequestMethod(HttpConnection.HEAD);
+            conn.setRequestMethod(method);
             long time = conn.getDate();
             if (time != 0) {
                 return time / 1000;
