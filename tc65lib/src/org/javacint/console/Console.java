@@ -212,6 +212,7 @@ public class Console implements Runnable {
             history.removeElementAt(0);
         }
     }
+    private static final char CTRL_Z = 0x1a;
 
     /**
      * Simulate a console line reading input.
@@ -221,6 +222,8 @@ public class Console implements Runnable {
      * @param in InputStream for parsing raw keyboard input
      * @param out PrintStream for displaying output
      * @return The line read from the inputstream
+     * 
+     * The output can be null, in that case it means we won't have an echo
      *
      * TODO: There are some problems with this method that we should fix.
      */
@@ -229,16 +232,19 @@ public class Console implements Runnable {
             final StringBuffer buffer = new StringBuffer(64);
             while (true) {
                 int c = in.read();
-                if (c == '\n' || c == '\r') { // If we have an end of line
+                if (c == '\n' || c == '\r' || c == CTRL_Z) { // If we have an end of line
                     String str = buffer.toString();
                     buffer.setLength(0);
-
-                    out.write(c);
+                    if (out != null) {
+                        out.write(c);
+                    }
 
                     return str;
                 } else if (c == 127) { // If we have backspace
                     if (buffer.length() > 0) { // If there's chars to remove
-                        out.write(c);
+                        if (out != null) {
+                            out.write(c);
+                        }
                         buffer.setLength(buffer.length() - 1);
                     }
                 } else if (c == 13) {
@@ -248,7 +254,9 @@ public class Console implements Runnable {
                     handleEscape(getEscapeSequence(in), out);
                 } else { // We add chars to the buffer
                     buffer.append((char) c);
-                    out.write(c);
+                    if (out != null) {
+                        out.write(c);
+                    }
                 }
             }
         } catch (Exception ex) {
