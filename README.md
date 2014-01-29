@@ -46,7 +46,3 @@ The features that will be provided in this library are:
 - Email sending (tested)
 
 You are welcome to request features and forks and they might be accepted.
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/fclairamb/tc65lib/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
