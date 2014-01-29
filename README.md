@@ -18,13 +18,14 @@ Doxygen: http://docs.webingenia.com/tc65lib/doxygen/ (includes source-code, auto
 
 Sample version: http://94.23.55.152:8080/demo/demo-0.1.9.jad
 
-To install it:
-''If you have an APN named ''websfr'', it will be something like that:''
+**To install it the demo app:**
+
+*If you have an APN named ''websfr'', it will be something like that:*
 
     AT^SCFG="Userware/Autostart/Delay","","50"
     AT^SCFG="Userware/Autostart","","1"
     AT^SCFG="Userware/Stdout","ASC0"
-    AT^SJOTAP=,"http://94.23.55.152:8080/demo/demo.jad","a:",,,"gprs","websfr",,,,,,
+    AT^SJOTAP=,http://94.23.55.152:8080/demo/demo.jad,a:,,,"gprs","websfr",,
     AT^SJOTAP
 
 Quick look at the console: 
