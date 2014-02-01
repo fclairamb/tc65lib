@@ -205,11 +205,13 @@ public class GpsNmeaParser implements Runnable {
             }
         } else if (aNMEA[0].compareTo("GPGGA") == 0) {
             try {
-                pos.nbSatellites = Integer.parseInt(aNMEA[7]);
-                double alt = (double) (long) Double.parseDouble(aNMEA[9]) * 10;
-                alt /= 10;
-                if (alt != 0) {
-                    pos.altitude = alt;
+                pos.nbSatellites = aNMEA[7].length() > 0 ? Integer.parseInt(aNMEA[7]) : -1;
+                if (aNMEA[9].length() > 0) {
+                    double alt = (double) (long) Double.parseDouble(aNMEA[9]) * 10;
+                    alt /= 10;
+                    if (alt != 0) {
+                        pos.altitude = alt;
+                    }
                 }
             } catch (NumberFormatException ex) {
                 Logger.log(this + ".parseNmea(" + nmea + "):209", ex);
@@ -265,16 +267,9 @@ public class GpsNmeaParser implements Runnable {
             if ((p = aNMEA[1].indexOf(':')) != -1) {
                 listener.positionAdditionnalReceived(aNMEA[1].substring(0, p).toLowerCase(), aNMEA[1].substring(p + 1));
             }
-//            if (aNMEA[1].startsWith("Version:")) {
-//                listener.positionAdditionnalReceived(GpsPositionListener.TYPE_GPS_CHIP_VERSION, aNMEA[1].substring("Version:".length()));
-//            }
-//            if (aNMEA[1].startsWith("Version2:")) {
-//                listener.positionAdditionnalReceived(GpsPositionListener.TYPE_GPS_CHIP_VERSION2, aNMEA[1].substring("Version2:".length()));
-//            }
         }
 
         return false;
-
     }
 
     /**
