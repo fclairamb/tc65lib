@@ -159,25 +159,31 @@ public class GpsNmeaParser implements Runnable {
         if (aNMEA[0].compareTo("GPRMC") == 0) {
             try {
                 // Latitude
-                double lat = DegToDec(Double.parseDouble(aNMEA[3]));
+                double lat = aNMEA[3].length() > 0 ? DegToDec(Double.parseDouble(aNMEA[3])) : -255;
                 if (aNMEA[4].compareTo("S") == 0) {
                     lat *= -1;
                 }
 
                 // Lontitude
-                double lon = DegToDec(Double.parseDouble(aNMEA[5]));
+                double lon = aNMEA[5].length() > 0 ? DegToDec(Double.parseDouble(aNMEA[5])) : -255;
                 if (aNMEA[6].compareTo("W") == 0) {
                     lon *= -1;
                 }
 
                 // Speed
-                double spd = (double) (long) (Double.parseDouble(aNMEA[7]) * 1.852 * 10);
-                spd /= 10;
+                double spd;
+                // Speed can be omitted by some chips
+                if (aNMEA[7].length() > 0) {
+                    spd = (double) (long) (Double.parseDouble(aNMEA[7]) * 1.852 * 10);
+                    spd /= 10;
+                } else {
+                    spd = 0;
+                }
 
                 // Angle
                 float angle = aNMEA[8].length() > 0 ? Float.parseFloat(aNMEA[8]) : -1;
 
-                if (lat != 0 && lon != 0 && aNMEA[9].compareTo("") != 0) {
+                if (lat != -255 && lon != -255 && aNMEA[9].length() > 0) {
                     synchronized (pos) {
                         pos.lat = lat;
                         pos.lon = lon;
@@ -187,6 +193,8 @@ public class GpsNmeaParser implements Runnable {
                         pos.btime = timeToBtime(aNMEA[1]);
                         pos.status = GpsPosition.STATUS_OK;
                     }
+                } else {
+                    pos.status = GpsPosition.STATUS_NO_LOC;
                 }
 
             } catch (NumberFormatException ex) {
@@ -196,18 +204,16 @@ public class GpsNmeaParser implements Runnable {
                 return true;
             }
         } else if (aNMEA[0].compareTo("GPGGA") == 0) {
-            double alt = 0;
             try {
-                alt = (double) (long) Double.parseDouble(aNMEA[9]) * 10;
+                pos.nbSatellites = Integer.parseInt(aNMEA[7]);
+                double alt = (double) (long) Double.parseDouble(aNMEA[9]) * 10;
                 alt /= 10;
+                if (alt != 0) {
+                    pos.altitude = alt;
+                }
             } catch (NumberFormatException ex) {
-                Logger.log(this + ".parseNmea(" + nmea + "):144", ex);
+                Logger.log(this + ".parseNmea(" + nmea + "):209", ex);
             }
-
-            if (alt != 0) {
-                pos.altitude = alt;
-            }
-
         } else if (aNMEA[0].compareTo("GPGSA") == 0) {
             try {
                 if (aNMEA[15].length() > 0) {
@@ -451,7 +457,7 @@ public class GpsNmeaParser implements Runnable {
             iCheckSum ^= sToCheckSum.charAt(i);
         }
 
-        // We reduce it to a 2 letters Hexa numbers (because it's Uint16, as Uint8 don't exists)
+        // We reduce it to a 2 letters Hexa numbers
         iCheckSum %= 256;
 
         if (iCheckSum == iGPSCheckSum) { // Checksum is OK

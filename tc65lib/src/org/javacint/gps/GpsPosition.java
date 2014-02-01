@@ -41,11 +41,18 @@ public class GpsPosition {
      */
     public double dop;
     /**
-     * Number of satellites
+     * Number of satellites.
+     * <ul>
+     * <li>&gt;=0 : 0 or more satellites</li>
+     * <li>-1 : We don't have the information but we received some data</li>
+     * <li>-2 : We don't have the information and we didn't receive anything
+     * yet</li>
+     * </ul>
      */
     public int nbSatellites = -2;
     /**
-     * Bogus time
+     * Bogus time.
+     * It is hour*3600 + minute*60 + second of the present day.
      */
     public int btime;
     /**
@@ -96,12 +103,18 @@ public class GpsPosition {
     /**
      * Convert the position to a byte array.
      *
-     * These are the possible sizes:
+     * These are the possible sizes (in bytes):
      * <ul>
-     * <li>1 - No reception, we only have the number of satellites.</li>
-     * <li>5 - No reception, we have the time and the number of satellites.</li>
-     * <li>12 - Reception, but not moving.</li>
-     * <li>14 - Reception and moving.</li>
+     * <li>1 - No reception, we only have the number of satellites (and no time
+     * yet):
+     * [1B: nb satellites]</li>
+     * <li>5 - No reception, we have the time and the number of satellites:
+     * [4B: timestamp], [1B: nb satellites]</li>
+     * <li>12 - Reception, but not moving:
+     * [4B: timestamp], [4B: latitude (float)], [4B: longitude (float)]</li>
+     * <li>14 - Reception and moving:
+     * [4B: timestamp], [4B: latitude (float)], [4B: longitude (float)],
+     * [2B: speed]</li>
      * </ul>
      *
      * @return Bytes conversion of the current location.
@@ -176,5 +189,9 @@ public class GpsPosition {
 
     public boolean hasLocation() {
         return status == STATUS_OK;
+    }
+
+    public boolean hasSignal() {
+        return status != STATUS_NO_SIGNAL;
     }
 }
