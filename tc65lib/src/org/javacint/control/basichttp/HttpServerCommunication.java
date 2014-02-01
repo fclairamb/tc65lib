@@ -21,8 +21,14 @@ import org.javacint.watchdog.WatchdogStatusProvider;
 /**
  * Basic HTTP Server Communication.
  *
- * Communication is done by opening an HTTP communication: Messages are: -
- * <strong>client-server</strong><br />
+ * Communication is done by opening an HTTP communication and sending raw data.
+ * The protocol is not pretty or smart but it's easy to implement. The device
+ * sends its data (the client to server messages) and then waits for the
+ * server's data ending with "OK". To acknoledge new settings or commands, the
+ * client has to open a new connection.
+ * <br />
+ * Messages are:
+ * <strong>client to server</strong><br />
  * <ul>
  * <li>SEN:type=data (any kind of sensor data)</li>
  * <li>STA:type=data (any kind of status data)</li>
@@ -30,7 +36,7 @@ import org.javacint.watchdog.WatchdogStatusProvider;
  * <li>SETA:name=value (setting acknowledge)</li>
  * <li>CMDA:id (commmand acknowledge)</li>
  * </ul>
- * <strong>server-client</strong><br />
+ * <strong>server to client</strong><br />
  * <ul>
  * <li>SET:name=value (setting change)</li>
  * <li>CMD:id:command (command send)</li>
@@ -42,7 +48,7 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
     /**
      * The loop of the thread
      */
-    private boolean l;
+    private boolean loop;
     /**
      * The thread of this HTTP management class
      */
@@ -60,7 +66,7 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
     private final String SETTING_HTTP_WAIT_MAX = "http.waitmax";
     private final String SETTING_HTTP_WAIT_MIN = "http.waitmin";
     private String ident;
-    private HttpCommandReceiver consumer;
+    private HttpCommandReceiver receiver;
     private String serverUrl;
 
     /**
@@ -69,7 +75,7 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
     public HttpServerCommunication(String serverUrl, String ident, HttpCommandReceiver receiver) {
         this.serverUrl = serverUrl;
         this.ident = ident;
-        //this.consumer = consumer;
+        this.receiver = receiver;
         init();
     }
 
@@ -212,7 +218,7 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
             if (dataToSend.size() < 200) {
                 dataToSend.addElement(DateManagement.time() + ":" + line);
             } else if (Logger.BUILD_CRITICAL) {
-                Logger.log("_dataToSend is already too big ! ");
+                Logger.log("dataToSend is already too big ! ");
             }
 
             if (dataToSend.size() > 50) {
@@ -276,7 +282,7 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
                 httpRequest(Settings.get(SETTING_HTTP_URL) + "/tc65CmdAck?ident=" + ident + "&cmdId=" + cmdId, null);
 
                 try {
-                    consumer.httpCommand(cmd);
+                    receiver.httpCommand(cmd);
                 } catch (Exception ex) {
                     if (Logger.BUILD_CRITICAL) {
                         Logger.log(this + ".treatCommand(" + line + "):26", ex, true);
@@ -368,14 +374,14 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
      * The thread method
      */
     public void run() {
-        while (l) {
+        while (loop) {
             try {
                 parseSetting(SETTING_HTTP_URL);
                 parseSetting(SETTING_HTTP_LOG);
                 parseSetting(SETTING_HTTP_WAIT_MAX);
                 parseSetting(SETTING_HTTP_WAIT_MIN);
 
-                while (l) {
+                while (loop) {
                     Vector received = null;
 
                     long time = System.currentTimeMillis() / 1000;
@@ -451,7 +457,7 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
      * Start the HTTP Communication class
      */
     public void start() {
-        l = true;
+        loop = true;
         synchronized (thread) {
             thread.start();
         }
@@ -461,7 +467,7 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
      * Stop the HTTP communication class
      */
     public void stop() {
-        l = false;
+        loop = false;
         synchronized (thread) {
             thread.notifyAll();
         }
