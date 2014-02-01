@@ -20,7 +20,11 @@ public class ATCommandPooled {
         this.atc = atc;
     }
 
-    ATCommand getATCommand() {
+    /**
+     * Internal AT Command.
+     * Using the internal ATCommand directly should be done carefully.
+     */
+    public ATCommand atc() {
         return atc;
     }
 
@@ -32,6 +36,12 @@ public class ATCommandPooled {
         blockingThread = Thread.currentThread();
     }
 
+    /**
+     * Send an AT command.
+     * It must be sent without the ending "\r" char.
+     * @param cmd Command to send
+     * @return Response
+     */
     public String send(String cmd) {
         return sendRaw(cmd + '\r');
     }

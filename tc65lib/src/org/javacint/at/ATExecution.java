@@ -265,15 +265,64 @@ public class ATExecution {
         try {
             String ret = ATCommands.send("AT+COPS?");
             String[] spl = Strings.split('\n', ret);
-            String line = spl[1].trim();
-            line = line.substring(line.indexOf('"') + 1, line.length() - 1);
-            return line;
+            ret = spl[1].trim();
+            ret = ret.substring(ret.indexOf('"') + 1, ret.length() - 1);
+            return ret;
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
                 Logger.log(THIS + ".getCopsOperator", ex);
             }
         }
         return null;
+    }
+
+    /**
+     * Get the power input voltage status.
+     *
+     * @return Power input voltage (mV)
+     */
+    public static int getVoltage() {
+        try {
+            String ret = ATCommands.send("AT^SBV");
+            String[] spl = Strings.split('\n', ret);
+            ret = spl[1].trim().substring("^SBV: ".length());
+            return Integer.parseInt(ret);
+        } catch (Exception ex) {
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log(THIS + ".getVoltage", ex, true);
+            }
+            return -1;
+        }
+    }
+
+    public static void enableTemp(boolean en) {
+        ATCommands.send("AT^SCTM=1," + (en ? "1" : "0"));
+    }
+
+    /**
+     * Get the temperature.
+     *
+     * @return Temperature of the chip (-500 in case of error)
+     */
+    public static int getTemp() {
+        String ret = "";
+        try {
+            ret = ATCommands.send("AT^SCTM?");
+            String tab[] = Strings.split('\n', ret.trim());
+//            Logger.log("getTemp:312 = " + tab[1]);
+            tab = Strings.split(':', tab[1]);
+//            Logger.log("getTemp:314 = " + tab[1]);
+            tab = Strings.split(',', tab[1]);
+//            Logger.log("getTemp:316 = " + tab[2]);
+            int value = Integer.parseInt(tab[2]);
+            return value;
+        } catch (Exception ex) {
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log(THIS + ".tempGet:2/ret=\"" + ret.replace('\n', '.').
+                        replace('\r', '.') + "\"", ex, true);
+            }
+            return -500;
+        }
     }
 
     /**

@@ -51,7 +51,7 @@ public final class ATCommands {
         atCommandURC = aturc;
         //atCommandData = atdata;
     }
-    private static final int POOL_MAX_WAIT = 30000; // 30s
+    private static final int POOL_MAX_WAIT = 10000; // 10s
 
     public static synchronized ATCommandPooled getATCommand() {
         if (atCommand1.getBlockingThread() != null && atCommand2.getBlockingThread() != null) { // If we have no available instance, we wait for one
@@ -159,9 +159,9 @@ public final class ATCommands {
             return "ATURC";
         } /*else if (atc == atCommandData) {
          return "ATData";
-         }*/ else if (atc == atCommand1.getATCommand()) {
+         }*/ else if (atc == atCommand1.atc()) {
             return "AT1";
-        } else if (atc == atCommand2.getATCommand()) {
+        } else if (atc == atCommand2.atc()) {
             return "AT2";
         } else {
             return "ATUnk";
