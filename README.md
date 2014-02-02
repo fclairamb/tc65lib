@@ -16,7 +16,17 @@ Javadoc: http://docs.webingenia.com/tc65lib/javadoc/ (automatically updated)
 
 Doxygen: http://docs.webingenia.com/tc65lib/doxygen/ (includes source-code, automatically updated)
 
-Sample version: http://webingenia.com:8080/demo/demo-0.1.9.jad
+Sample version: http://94.23.55.152:8080/demo/demo-0.1.9.jad
+
+**To install it the demo app:**
+
+*If you have an APN named ''websfr'', it will be something like that:*
+
+    AT^SCFG="Userware/Autostart/Delay","","50"
+    AT^SCFG="Userware/Autostart","","1"
+    AT^SCFG="Userware/Stdout","ASC0"
+    AT^SJOTAP=,http://94.23.55.152:8080/demo/demo.jad,a:,,,"gprs","websfr",,
+    AT^SJOTAP
 
 Quick look at the console: 
 * http://asciinema.org/a/6782 (settings management demo + few commands)
@@ -36,7 +46,3 @@ The features that will be provided in this library are:
 - Email sending (tested)
 
 You are welcome to request features and forks and they might be accepted.
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/fclairamb/tc65lib/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
