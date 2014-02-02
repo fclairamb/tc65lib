@@ -5,8 +5,10 @@ package org.javacint.settings;
 ////#elif sdkns == "cinterion"
 ////# import com.cinterion.io.file.FileConnection;
 ////#endif
+import com.siemens.icm.io.file.FileConnection;
 import java.io.*;
 import java.util.*;
+import javax.microedition.io.Connector;
 import org.javacint.logging.Logger;
 
 /**
@@ -73,6 +75,14 @@ public class Settings {
      */
     public static void loading(boolean l) {
         loading = l;
+        if (loading) {
+            // It's the first startup if the settings file doesn't exists
+            try {
+                FileConnection fc = (FileConnection) Connector.open("file:///a:/" + fileName, Connector.READ);
+                firstStartup = !fc.exists();
+            } catch (Exception ex) {
+            }
+        }
     }
 
     /**
