@@ -2,15 +2,18 @@ package org.javacint.watchdog;
 
 //#if sdkns == "siemens"
 import com.siemens.icm.misc.Watchdog;
+import org.javacint.at.ATCommands;
+import org.javacint.at.ATExecution;
+import org.javacint.settings.Settings;
 //#elif sdkns == "cinterion"
 //# import com.cinterion.misc.Watchdog;
 //#endif
 
 /**
  * Embedded watchdog management class.
- * 
+ *
  * This code can only be used on the TC65 v3, TC65i[-X] chips
- * 
+ *
  */
 public class WatchdogEmbedded implements WatchdogActor {
 
@@ -37,6 +40,9 @@ public class WatchdogEmbedded implements WatchdogActor {
      */
     private void init(int timeout) {
         Watchdog.start(timeout);
+        if (Settings.firstStartup()) {
+            ATExecution.setWatchdogMode(1);
+        }
     }
 
     /**

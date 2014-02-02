@@ -372,6 +372,10 @@ public class ATExecution {
         }
     }
 
+    public static void setWatchdogMode(int mode) {
+        ATCommands.send("AT^SCFG=\"Userware/Watchdog\",\"" + mode + "\"");
+    }
+
     /**
      * Pin code handling.
      *
