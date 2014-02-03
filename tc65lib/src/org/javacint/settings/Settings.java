@@ -1,11 +1,11 @@
 package org.javacint.settings;
 
-////#if sdkns == "siemens"
-//import com.siemens.icm.io.file.FileConnection;
-////#elif sdkns == "cinterion"
-////# import com.cinterion.io.file.FileConnection;
-////#endif
+//#if sdkns == "siemens"
 import com.siemens.icm.io.file.FileConnection;
+//#elif sdkns == "cinterion"
+//# import com.cinterion.io.file.FileConnection;
+//#endif
+
 import java.io.*;
 import java.util.*;
 import javax.microedition.io.Connector;

@@ -2,12 +2,12 @@ package org.javacint.watchdog;
 
 //#if sdkns == "siemens"
 import com.siemens.icm.misc.Watchdog;
-import org.javacint.at.ATCommands;
-import org.javacint.at.ATExecution;
-import org.javacint.settings.Settings;
 //#elif sdkns == "cinterion"
 //# import com.cinterion.misc.Watchdog;
 //#endif
+
+import org.javacint.at.ATExecution;
+import org.javacint.settings.Settings;
 
 /**
  * Embedded watchdog management class.

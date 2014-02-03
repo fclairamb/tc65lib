@@ -1,6 +1,10 @@
 package org.javacint.gsm;
 
-import com.siemens.icm.io.ATCommandListener;
+//#if sdkns == "siemens"
+import com.siemens.icm.io.*;
+//#elif sdkns == "cinterion"
+//# import com.cinterion.io.*;
+//#endif
 import org.javacint.at.ATCommands;
 import org.javacint.at.ATURCQueueHandler;
 import org.javacint.common.Strings;

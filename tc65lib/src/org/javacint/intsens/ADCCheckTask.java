@@ -1,6 +1,10 @@
 package org.javacint.intsens;
 
-import com.siemens.icm.io.ADC;
+//#if sdkns == "siemens"
+import com.siemens.icm.io.*;
+//#elif sdkns == "cinterion"
+//# import com.cinterion.io.*;
+//#endif
 import java.util.TimerTask;
 import org.javacint.logging.Logger;
 
