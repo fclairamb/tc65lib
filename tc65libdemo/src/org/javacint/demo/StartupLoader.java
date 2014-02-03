@@ -1,6 +1,7 @@
 package org.javacint.demo;
 
 import java.util.TimerTask;
+import javax.microedition.io.HttpConnection;
 import org.javacint.apnauto.APNAutodetection;
 import org.javacint.at.ATExecution;
 import org.javacint.console.AddNetworkConsoleCommand;
@@ -14,6 +15,7 @@ import org.javacint.console.IDCommand;
 import org.javacint.console.NTPTestCommand;
 import org.javacint.console.PinManagementCommandReceiver;
 import org.javacint.console.SmsSenderCommand;
+import org.javacint.console.UpdateCommand;
 import org.javacint.console.UptimeCommand;
 import org.javacint.console.VersionCommand;
 import org.javacint.console.WatchdogStatusError;
@@ -100,6 +102,7 @@ public class StartupLoader extends TimerTask {
                     Global.console.addCommandReceiver(new PinManagementCommandReceiver());
                     Global.console.addCommandReceiver(new EmailCommand());
                     Global.console.addCommandReceiver(new WatchdogStatusError());
+                    Global.console.addCommandReceiver(new UpdateCommand());
                 } catch (Exception ex) {
                     if (Logger.BUILD_CRITICAL) {
                         Logger.log("Console:loading", ex, true);
@@ -160,7 +163,8 @@ public class StartupLoader extends TimerTask {
         loader.addRunnable(new NamedRunnable("TimeUpdater:scheduled") {
             public void run() {
                 // This will get the time every 24h
-                new TimeRetriever(new HttpHeaderTimeClient("http://www.google.com/")).schedule();
+                // We use the JAD file URL to fetch the time
+                new TimeRetriever(new HttpHeaderTimeClient(Settings.get(Settings.SETTING_JADURL), HttpConnection.GET)).schedule();
             }
         });
 
