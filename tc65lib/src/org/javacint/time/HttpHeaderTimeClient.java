@@ -30,9 +30,8 @@ public class HttpHeaderTimeClient implements TimeClient {
     }
 
     public long getTime() throws IOException {
-        HttpConnection conn = null;
+        HttpConnection conn = (HttpConnection) Connector.open(url);
         try {
-            conn = (HttpConnection) Connector.open(url);
             conn.setRequestMethod(method);
             long time = conn.getDate();
             if (time != 0) {
@@ -41,9 +40,7 @@ public class HttpHeaderTimeClient implements TimeClient {
                 throw new RuntimeException("Server returned no valid date in http header");
             }
         } finally {
-            if (conn != null) {
-                conn.close();
-            }
+            conn.close();
         }
     }
 }

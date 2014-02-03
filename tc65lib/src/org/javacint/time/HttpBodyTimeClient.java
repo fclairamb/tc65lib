@@ -27,12 +27,16 @@ public class HttpBodyTimeClient implements TimeClient {
 
     public long getTime() throws IOException {
         HttpConnection conn = (HttpConnection) Connector.open(url);
-        int rc = conn.getResponseCode();
-        if (rc == 200) {
-            BufferedReader reader = new BufferedReader(conn.openInputStream());
-            return Long.parseLong(reader.readLine());
-        } else {
-            throw new RuntimeException("Server returned " + rc);
+        try {
+            int rc = conn.getResponseCode();
+            if (rc == 200) {
+                BufferedReader reader = new BufferedReader(conn.openInputStream());
+                return Long.parseLong(reader.readLine());
+            } else {
+                throw new RuntimeException("Server returned " + rc);
+            }
+        } finally {
+            conn.close();
         }
     }
 }

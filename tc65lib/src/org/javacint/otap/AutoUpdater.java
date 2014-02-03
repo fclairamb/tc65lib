@@ -144,24 +144,27 @@ public class AutoUpdater extends TimerTask {
         final String url = Settings.get(Settings.SETTING_JADURL);
         HttpConnection conn = (HttpConnection) Connector.open(url);
         conn.setRequestProperty("user-agent", userAgent);
-        int rc = conn.getResponseCode();
-
-        // If we get a wrong HTTP response code, we might as well just stop trying
-        if (rc != HttpConnection.HTTP_OK) {
-            if (Logger.BUILD_NOTICE) {
-                Logger.log(this + ".needsUpdate: Could not fetch the version's file !", true);
-            }
-            cancel();
-        }
-
         String remoteVersion;
-        BufferedReader reader = new BufferedReader(conn.openInputStream());
+        try {
+            int rc = conn.getResponseCode();
 
-        // If it's a jad file, we search for the version property
-        if (url.endsWith(".jad")) {
-            remoteVersion = jadFileGetVersion(reader);
-        } else {// If it's not, we guess it's the 
-            remoteVersion = reader.readLine();
+            // If we get a wrong HTTP response code, we might as well just stop trying
+            if (rc != HttpConnection.HTTP_OK) {
+                if (Logger.BUILD_NOTICE) {
+                    Logger.log(this + ".needsUpdate: Could not fetch the version's file !", true);
+                }
+                cancel();
+            }
+            BufferedReader reader = new BufferedReader(conn.openInputStream());
+
+            // If it's a jad file, we search for the version property
+            if (url.endsWith(".jad")) {
+                remoteVersion = jadFileGetVersion(reader);
+            } else {// If it's not, we guess it's the 
+                remoteVersion = reader.readLine();
+            }
+        } finally {
+            conn.close();
         }
         if (Logger.BUILD_DEBUG && LOG) {
             Logger.log(this + ": remoteVersion=" + remoteVersion);
