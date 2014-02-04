@@ -43,6 +43,9 @@ icon.lu
 fastm2m.lu
 web.pt.lu
 
+[310-260]
+epc.tmobile.com
+
 [454]
 hkcsl
 
