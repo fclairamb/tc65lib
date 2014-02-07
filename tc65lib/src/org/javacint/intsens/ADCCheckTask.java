@@ -22,7 +22,7 @@ public abstract class ADCCheckTask extends TimerTask {
 
     public void run() {
         try {
-            if (lastValue == -1000) {
+            if (adc == null) {
                 adc = new ADC(adcNb, 0);
             }
 

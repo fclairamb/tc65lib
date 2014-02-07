@@ -34,9 +34,9 @@ public abstract class VoltageCheckTask extends TimerTask {
         }
     }
 
-    public void schedule() {
-        // Every two minutes
-        Timers.getSlow().schedule(this, 0, 2 * 60 * 1000);
+    public void schedule(long period) {
+        // Every minute
+        Timers.getSlow().schedule(this, 0, period);
     }
 
     public abstract void changed(int voltage);
