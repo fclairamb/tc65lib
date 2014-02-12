@@ -26,6 +26,7 @@ public abstract class ADCCheckTask extends TimerTask {
                 adc = new ADC(adcNb, 0);
             }
 
+            Thread.sleep(500);
             int value = adc.getValue();
 
             if (Math.abs(value - lastValue) >= diff) {
