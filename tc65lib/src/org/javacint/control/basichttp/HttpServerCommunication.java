@@ -30,21 +30,22 @@ import org.javacint.watchdog.WatchdogStatusProvider;
  * Messages are:
  * <strong>client to server</strong><br />
  * <ul>
- * <li>SEN:type=data (any kind of sensor data)</li>
- * <li>STA:type=data (any kind of status data)</li>
- * <li>LOG:type:data (any kind of log data)</li>
- * <li>SETA:name=value (setting acknowledge)</li>
- * <li>CMDA:id (commmand acknowledge)</li>
+ * <li>&lt;time&gt;:SEN:type=data (any kind of sensor data)</li>
+ * <li>&lt;time&gt;:STA:type=data (any kind of status data)</li>
+ * <li>&lt;time&gt;:LOG:type:data (any kind of log data)</li>
+ * <li>&lt;time&gt;:SETA:name=value (setting acknowledge)</li>
+ * <li>&lt;time&gt;:CMDA:id (commmand acknowledge)</li>
  * </ul>
  * <strong>server to client</strong><br />
  * <ul>
- * <li>SET:name=value (setting change)</li>
- * <li>CMD:id:command (command send)</li>
+ * <li>&lt;time&gt;:SET:name=value (setting change)</li>
+ * <li>&lt;time&gt;:CMD:id:command (command send)</li>
  * <li>OK (data sent by client correctly handled)</li>
  * </ul>
  */
 public class HttpServerCommunication implements SettingsProvider, LoggingReceiver, WatchdogStatusProvider, Runnable {
 
+    private static final boolean LOG = true;
     /**
      * The loop of the thread
      */
@@ -66,16 +67,30 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
     private final String SETTING_HTTP_WAIT_MAX = "http.waitmax";
     private final String SETTING_HTTP_WAIT_MIN = "http.waitmin";
     private String ident;
-    private HttpCommandReceiver receiver;
+    private Vector receivers = new Vector();
     private String serverUrl;
+
+    class CommandsReceiver implements HttpCommandReceiver {
+
+        public boolean httpCommand(String command) {
+            if (command.equals("settings")) {
+                Hashtable settings = Settings.getSettings();
+                for (Enumeration en = settings.keys(); en.hasMoreElements();) {
+                    String key = (String) en.nextElement();
+                    addData("SETA:" + key + "=" + settings.get(key));
+                }
+                return true;
+            }
+            return false;
+        }
+    }
 
     /**
      * Default constructor of the HttpServerCommunication class
      */
-    public HttpServerCommunication(String serverUrl, String ident, HttpCommandReceiver receiver) {
+    public HttpServerCommunication(String serverUrl, String ident) {
         this.serverUrl = serverUrl;
         this.ident = ident;
-        this.receiver = receiver;
         init();
     }
 
@@ -84,6 +99,15 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
         Logger.setLoggingReceiver(this);
         thread.setPriority(Thread.MIN_PRIORITY);
         parseSetting(SETTING_HTTP_LOG);
+        receivers.addElement(new CommandsReceiver());
+    }
+
+    public void addReceiver(HttpCommandReceiver receiver) {
+        receivers.addElement(receiver);
+    }
+
+    public void delReceiver(HttpCommandReceiver receiver) {
+        receivers.removeElement(receiver);
     }
 
     /**
@@ -99,9 +123,8 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
             lines = new Vector();
         }
 
-        if (Logger.BUILD_DEBUG) {
-            Logger.log("HttpServerCommunication.httpRequest( \"" + url + "\", Vector.size()=" + lines.
-                    size() + " );");
+        if (LOG) {
+            Logger.log("HTTP.httpRequest( \"" + url + "\", Vector.size()=" + lines.size() + " );");
         }
         Vector vector = null;
 
@@ -119,8 +142,8 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
 
             for (Enumeration en = lines.elements(); en.hasMoreElements();) {
                 String line = (String) en.nextElement();
-                if (Logger.BUILD_DEBUG) {
-                    Logger.log("HttpServerCommunication.httpRequest --> " + line);
+                if (LOG) {
+                    Logger.log("HTTP --> " + line);
                 }
                 os.write(line.getBytes());
                 os.write('\n');
@@ -135,8 +158,8 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
             BufferedReader bbr = new BufferedReader(is);
             String line;
             while ((line = bbr.readLine()) != null) {
-                if (Logger.BUILD_DEBUG) {
-                    Logger.log("HttpServerCommunication.httpRequest <-- " + line);
+                if (LOG) {
+                    Logger.log("HTTP <-- " + line);
                 }
                 vector.addElement(line);
             }
@@ -151,9 +174,6 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
             ATExecution.setGprsAttach(false);
 
             if (ex.getClass() == ConnectionNotFoundException.class) {
-
-
-
                 try {
                     Thread.sleep(30000);
                 } catch (InterruptedException ex1) {
@@ -176,9 +196,6 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
                 if (Logger.BUILD_CRITICAL) {
                     Logger.log("HttpServerCommunication.httpRequest.2", ex, true);
                 }
-
-//				_error = "HTTP.httpRequest.2:" + ex.getClass() + ":" + ex.
-//						getMessage();
             }
 
             try {
@@ -189,9 +206,6 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
                 if (Logger.BUILD_CRITICAL) {
                     Logger.log("HttpServerCommunication.httpRequest.3", ex, true);
                 }
-
-//				_error = "HTTP.httpRequest.2:" + ex.getClass() + ":" + ex.
-//						getMessage();
             }
 
             if (Logger.BUILD_DEBUG) {
@@ -202,6 +216,9 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
 
         error = null; // Everything is going fine
         lastSuccessfulRequestTime = System.currentTimeMillis() / 1000;
+        if (LOG) {
+            Logger.log("HTTP.httpRequest: Vector.size() = " + vector.size());
+        }
         return vector;
     }
 
@@ -282,7 +299,14 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
                 httpRequest(Settings.get(SETTING_HTTP_URL) + "/tc65CmdAck?ident=" + ident + "&cmdId=" + cmdId, null);
 
                 try {
-                    receiver.httpCommand(cmd);
+                    synchronized (receivers) {
+                        for (Enumeration en = receivers.elements(); en.hasMoreElements();) {
+                            HttpCommandReceiver r = (HttpCommandReceiver) en.nextElement();
+                            if (r.httpCommand(cmd)) {
+                                break;
+                            }
+                        }
+                    }
                 } catch (Exception ex) {
                     if (Logger.BUILD_CRITICAL) {
                         Logger.log(this + ".treatCommand(" + line + "):26", ex, true);
@@ -330,7 +354,7 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
                 try {
                     String line = (String) en.nextElement();
 
-                    if (Logger.BUILD_DEBUG) {
+                    if (LOG) {
                         Logger.log("treatReceivedLines: line=\"" + line + "\"");
                     }
 
@@ -398,7 +422,7 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
 
                     // If we have some data to send, we send it
                     if (queue.hasData() && (time - lastRequestTime > waitBeforeSend)) {
-                        if (Logger.BUILD_DEBUG) {
+                        if (LOG) {
                             Logger.log("HTTP: Sending data");
                         }
                         received = httpRequest(url, queue.
@@ -409,7 +433,7 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
 
                     // If we need to request something, we do it now
                     if (received == null && (time - lastRequestTime > waitBeforeReceive)) {
-                        if (Logger.BUILD_DEBUG) {
+                        if (LOG) {
                             Logger.log("HTTP: Receiving data");
                         }
                         received = httpRequest(url, null);

@@ -11,13 +11,14 @@ public class ConsoleHttpCommandReceiver implements HttpCommandReceiver {
         this.console = console;
     }
 
-    public void httpCommand(String command) {
+    public boolean httpCommand(String command) {
         try {
-            console.parseCommand(command);
+            return console.parseCommand(command);
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
                 Logger.log(this + ".httpCommand(" + command + ")", ex, true);
             }
+            return false;
         }
     }
 }

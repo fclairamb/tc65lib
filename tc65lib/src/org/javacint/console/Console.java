@@ -82,7 +82,7 @@ public class Console implements Runnable {
         out.println(line);
     }
 
-    public void parseCommand(String line) throws Exception {
+    public boolean parseCommand(String line) throws Exception {
         addHistory(line);
         out.println();
         synchronized (commandsReceiver) {
@@ -90,7 +90,7 @@ public class Console implements Runnable {
                 try {
                     ConsoleCommand commandReceiver = (ConsoleCommand) en.nextElement();
                     if (commandReceiver.consoleCommand(line, in, out)) {
-                        return;
+                        return true;
                     }
                 } catch (Throwable ex) {
                     if (Logger.BUILD_CRITICAL) {
@@ -179,7 +179,9 @@ public class Console implements Runnable {
             }
         } else {
             writeLine("[ERROR] Command \"" + line + "\" not found. Type help for help.");
+            return false;
         }
+        return true;
     }
 
     private void portOpen() throws IOException {
@@ -222,7 +224,7 @@ public class Console implements Runnable {
      * @param in InputStream for parsing raw keyboard input
      * @param out PrintStream for displaying output
      * @return The line read from the inputstream
-     * 
+     *
      * The output can be null, in that case it means we won't have an echo
      *
      * TODO: There are some problems with this method that we should fix.
