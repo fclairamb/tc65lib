@@ -334,8 +334,14 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
                 int pos = line.indexOf('=');
                 String name = line.substring(0, pos);
                 String value = line.substring(pos + 1);
-                addData("SETA:" + name + "=" + value);
-                Settings.set(name, value);
+                String before = Settings.get(name);
+                if (before != null) {
+                    Settings.setWithoutEvent(name, value);
+                    addData("SETA:" + name + "=" + value);
+                    Settings.onSettingsChanged(new String[]{name});
+                } else {
+                    addData("SETA:" + name);
+                }
             }
             Settings.save();
         } catch (Exception ex) {
