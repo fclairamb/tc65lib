@@ -1,5 +1,6 @@
 package org.javacint.control.basichttp;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
@@ -54,7 +55,7 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
      * The thread of this HTTP management class
      */
     private final Thread thread = new Thread(this, "htt");
-    private SafeQueue queue = new SafeQueue("http");
+    private SafeQueue queue = new SafeQueue("http", 30, 50, 4096);
     private final Vector dataToSend = new Vector();
     private long waitBeforeReceive = 1;
     private long waitBeforeSend = 1;
@@ -99,6 +100,8 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
         Logger.setLoggingReceiver(this);
         thread.setPriority(Thread.MIN_PRIORITY);
         parseSetting(SETTING_HTTP_LOG);
+        parseSetting(SETTING_HTTP_WAIT_MIN);
+        parseSetting(SETTING_HTTP_WAIT_MAX);
         receivers.addElement(new CommandsReceiver());
     }
 
@@ -149,12 +152,19 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
                 os.write('\n');
             }
 
+            if (LOG) {
+                Logger.log("HTTP --> EOF");
+            }
+
+            int code = conn.getResponseCode();
+            if (LOG) {
+                Logger.log("HTTP CODE: " + code);
+            }
+
             // We display the generated content
             vector = new Vector();
-//			StringBuffer buffer = new StringBuffer();
 
             is = conn.openInputStream();
-
             BufferedReader bbr = new BufferedReader(is);
             String line;
             while ((line = bbr.readLine()) != null) {
@@ -206,11 +216,6 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
                 if (Logger.BUILD_CRITICAL) {
                     Logger.log("HttpServerCommunication.httpRequest.3", ex, true);
                 }
-            }
-
-            if (Logger.BUILD_DEBUG) {
-                Logger.log("HttpServerCommunication.httpRequest: " + (vector != null ? "vector.size()=" + vector.
-                        size() : "null"));
             }
         }
 
@@ -453,13 +458,17 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
                         }
                     }
 
-                    sleep(Math.min(waitBeforeReceive, waitBeforeSend) * 1000);
+                    if (received != null) {
+                        sleep(waitBeforeSend * 1000);
+                    } else {
+                        sleep(waitBeforeReceive * 1000);
+                    }
                 }
             } catch (Exception ex) {
-                queue.saveMemoryInFile();
                 if (Logger.BUILD_CRITICAL) {
                     Logger.log("HttpServerCommunication.run", ex);
                 }
+                queue.saveMemoryInFile();
             }
         }
         // When the thread ends, we save memory content to file
@@ -468,6 +477,9 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
 // === /Runnable ===
 
     private void sleep(long time) {
+        if (LOG) {
+            Logger.log("Sleeping " + time + "ms");
+        }
         try {
             synchronized (thread) {
                 thread.wait(time);
@@ -515,6 +527,10 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
                 return "No error detected but nothing was transmitted for " + timeWithoutTransmission + "s";
             }
         }
+    }
+
+    public void resetQueue() throws IOException {
+        queue.deleteEverything();
     }
 
     public String toString() {
