@@ -265,7 +265,7 @@ public class GpsNmeaParser implements Runnable {
             // This is the complementary data
             int p;
             if ((p = aNMEA[1].indexOf(':')) != -1) {
-                listener.positionAdditionnalReceived(aNMEA[1].substring(0, p).toLowerCase(), aNMEA[1].substring(p + 1));
+                listener.positionAdditionnalReceived(aNMEA[1].substring(0, p).toLowerCase(), aNMEA[1].substring(p + 1).trim());
             }
         }
 
