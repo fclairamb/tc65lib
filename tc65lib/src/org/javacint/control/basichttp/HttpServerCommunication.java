@@ -55,10 +55,13 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
      * The thread of this HTTP management class
      */
     private final Thread thread = new Thread(this, "htt");
-    private SafeQueue queue = new SafeQueue("http", 30, 50, 4096);
+    private static final int FILE_SIZE = 4096;
+    private static final int TOTAL_RESERVED_SIZE = 512 * 1024;
+    private SafeQueue queue = new SafeQueue("http", 30, TOTAL_RESERVED_SIZE / FILE_SIZE, FILE_SIZE);
     private final Vector dataToSend = new Vector();
     private long waitBeforeReceive = 1;
     private long waitBeforeSend = 1;
+    private long waitBecauseOfError = 0;
     private long lastRequestTime = System.currentTimeMillis() / 1000;
     private long lastSuccessfulRequestTime = System.currentTimeMillis() / 1000;
     private String url;
@@ -119,6 +122,9 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
      * @param url Destination URL
      * @param lines Lines to send
      * @return Lines of the answer
+     *
+     * WARNING: Requests are chunked. For servers like django integrated one
+     * you have to use a front-end server.
      */
     public Vector httpRequest(String url, Vector lines) {
         lastRequestTime = System.currentTimeMillis() / 1000;
@@ -176,7 +182,7 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
 
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
-                Logger.log(this + ".httpRequest:1", ex, true);
+                Logger.log(this + ".httpRequest:1", ex, error != null);
             }
 
             error = "HTTP.httpRequest.1:" + ex.getClass() + ":" + ex.getMessage();
@@ -204,7 +210,7 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
                 }
             } catch (Exception ex) {
                 if (Logger.BUILD_CRITICAL) {
-                    Logger.log("HttpServerCommunication.httpRequest.2", ex, true);
+                    Logger.log("HttpServerCommunication.httpRequest.2", ex, error != null);
                 }
             }
 
@@ -214,7 +220,7 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
                 }
             } catch (Exception ex) {
                 if (Logger.BUILD_CRITICAL) {
-                    Logger.log("HttpServerCommunication.httpRequest.3", ex, true);
+                    Logger.log("HttpServerCommunication.httpRequest.3", ex, error != null);
                 }
             }
         }
@@ -455,13 +461,16 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
                         if (lastLine.compareTo("OK") == 0) {
                             queue.deleteFirstItemsListWaiting();
                             treatReceivedLines(received);
+                            waitBecauseOfError = 0;
+                        } else {
+                            waitBecauseOfError += 10;
                         }
                     }
 
                     if (received != null) {
-                        sleep(waitBeforeSend * 1000);
+                        sleep((waitBeforeSend + waitBecauseOfError) * 1000);
                     } else {
-                        sleep(waitBeforeReceive * 1000);
+                        sleep((waitBeforeReceive + waitBecauseOfError) * 1000);
                     }
                 }
             } catch (Exception ex) {
@@ -469,7 +478,11 @@ public class HttpServerCommunication implements SettingsProvider, LoggingReceive
                     Logger.log("HttpServerCommunication.run", ex);
                 }
                 queue.saveMemoryInFile();
+                waitBecauseOfError += 10;
             }
+        }
+        if (waitBecauseOfError > 900) {
+            waitBecauseOfError = 900;
         }
         // When the thread ends, we save memory content to file
         queue.saveMemoryInFile();
