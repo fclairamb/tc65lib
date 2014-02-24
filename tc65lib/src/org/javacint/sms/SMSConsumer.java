@@ -7,10 +7,12 @@ public interface SMSConsumer {
 
     /**
      * Method called by SMS receiver.
-     * Each consumer should return true once they consider it is of no other consumer's interest. It works the same with command receivers.
-     * @param from address of the sender
-     * @param content decoded text from SMS body
-     * @return true once the consumer consider it is of no other consumer's interest, false otherwise
+     * Each consumer should return true once they consider it is of no other
+     * consumer's interest. It works the same with command receivers.
+     *
+     * @param msg Message
+     * @return true once the consumer consider it is of no other consumer's
+     * interest, false otherwise
      */
-    public boolean smsReceived(String from, String content);
+    public boolean smsReceived(Message msg);
 }

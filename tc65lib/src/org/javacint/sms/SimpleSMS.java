@@ -12,15 +12,19 @@ public class SimpleSMS {
     private static final char CTRL_Z = 0x1a;
     private static final boolean DEBUG = true;
 
-    public static boolean send(String dest, String msg) {
+    public static boolean send(String phone, String content) {
+        return send(new Message(phone, content));
+    }
+
+    public static boolean send(Message msg) {
         try {
             String ret;
             ATCommandPooled acp = null;
             try {
                 acp = ATCommands.getATCommand();
                 acp.send("at+cmgf=1");
-                ret = acp.send("at+cmgs=" + dest);
-                ret += acp.send(msg + CTRL_Z);
+                ret = acp.send("at+cmgs=" + msg.getPhone());
+                ret += acp.send(msg.getContent() + CTRL_Z);
             } finally {
                 acp.release();
             }

@@ -13,28 +13,28 @@ import org.javacint.settings.Settings;
  */
 public class StandardFeaturesSMSConsumer implements SMSConsumer {
 
-    public boolean smsReceived(String from, String content) {
-        String spl[] = Strings.split('#', content);
+    public boolean smsReceived(Message msg) {
+        String spl[] = Strings.split('#', msg.getContent());
 
         // We check the code
         if (!spl[0].equals(Settings.get(Settings.SETTING_CODE))) {
             return false;
         }
 
-        String cmd = spl[1];
+        String cmd = spl[1].toLowerCase();
 
         if (cmd.equals("set")) { // Set a settings (and save it)
             Settings.set(spl[1], spl[2]);
             Settings.save();
         } else if (cmd.equals("get")) { // Get a setting and return it by SMS
             String name = spl[1];
-            SimpleSMS.send(from, name + "=" + Settings.get(name));
+            SimpleSMS.send(msg.getPhone(), name + "=" + Settings.get(name));
         } else if (cmd.equals("reset")) { // Reset all settings
             Settings.reset();
         } else if (cmd.equals("restart")) { // Restart the chip
             ATExecution.restart();
         } else if (cmd.equals("atc")) { // Execute and AT command
-            SimpleSMS.send(from, ATCommands.send(spl[1]));
+            SimpleSMS.send(msg.getPhone(), ATCommands.send(spl[1]));
         } else {
             return false;
         }

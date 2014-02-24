@@ -5,9 +5,9 @@ package org.javacint.sms;
  */
 public class PingSMSConsumer implements SMSConsumer {
 
-    public boolean smsReceived(String from, String content) {
-        if (content.startsWith("ping ")) {
-            SimpleSMS.send(from, "pong " + content.substring(5));
+    public boolean smsReceived(Message msg) {
+        if (msg.getContent().startsWith("ping ")) {
+            SimpleSMS.send(msg.getPhone(), "pong " + msg.getContent().substring(5));
             return true;
         }
         return false;

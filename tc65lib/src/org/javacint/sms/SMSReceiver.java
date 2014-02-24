@@ -38,20 +38,20 @@ public class SMSReceiver implements ATCommandListener {
      * Each consumer should return true once they consider it is of no other
      * consumer's interest. It works the same with command receivers.
      */
-    private boolean handleSMS(String from, String content) {
+    private boolean handleSMS(Message msg) {
         synchronized (consumers) {
             for (Enumeration e = consumers.elements(); e.hasMoreElements();) {
                 SMSConsumer cons = (SMSConsumer) e.nextElement();
                 try {
                     if (Logger.BUILD_DEBUG && LOG_SMS_HANDLING) {
-                        Logger.log(cons + ".smsReceived(\"" + from + "\", \"" + content + "\");");
+                        Logger.log(cons + ".smsReceived( " + msg + " );");
                     }
-                    if (cons.smsReceived(from, content)) {
+                    if (cons.smsReceived(msg)) {
                         return true;
                     }
                 } catch (Exception ex) {
                     if (Logger.BUILD_CRITICAL) {
-                        Logger.log(this + ".handleSMS( " + from + ", " + content + " ) failed in " + cons, ex, true);
+                        Logger.log(this + ".handleSMS( " + msg + " ) failed in " + cons, ex, true);
                     }
                 }
             }
@@ -206,9 +206,11 @@ public class SMSReceiver implements ATCommandListener {
                 Logger.log(this + ":content = \"" + content.replace('\r', '%').replace('\n', '$') + "\"");
             }
 
+            Message msg = new Message(phone, content);
+
             // We have to delete it before we handle it, because restart messages end up in infinite loops
             deleteSms(index);
-            handleSMS(phone, content);
+            handleSMS(msg);
             return true;
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
