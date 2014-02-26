@@ -1,38 +1,63 @@
 TC65Lib (javacint)
 =======
-The goal of this library is to provide a base library for existing and new programs on all the Gemalto java enabled M2M devices:
+
+General library to simplify development around the Cinterion / Gemalto java enabled devices.
+
+Goals
+----
+* Support most devices
+* Shorten the devleopment and release to market time at the maximum (see the demo code)
+* Have a clean and simple to use base code
+
+This library is intended to be used as a framework. You don't have to use all the components but some of them are mandatory (like logging, settings, AT commands handling).
+
+It is highly recommended to obfuscate your programs to remove the unnecessary components of the library.
+
+Supported devices
+-----------------
+The goal is to support all these devices:
+
 * TC65
 * TC65i / TC65i-X
 * BSG5 / BSG5-X
 * EHS5 / EHS6
 
-This library is actually intended to be used as a framework. You don't have to use all the components but some of them are mandatory (like logging, settings, at handling).
+Only devices with the siemens and cinterion SDK namespaces are supported at this stage. Supporting other devices is relatively simple (see how the sdkns variable works). Contributions are welcome.
 
-It is highly recommended to obfuscate your programs to remove the unnecessary components of the library.
-
-The library is now looking more and more to viable alternative to my (and your) in-house code.
+Documentation
+-------------
+There is no non-automatic documentation at this stage. Only some demo code.
 
 Javadoc: http://docs.webingenia.com/tc65lib/javadoc/ (automatically updated)
 
 Doxygen: http://docs.webingenia.com/tc65lib/doxygen/ (includes source-code, automatically updated)
 
-Sample version: http://94.23.55.152:8080/demo/demo-0.1.9.jad
+Test it
+-------
 
-**To install it the demo app:**
+If you have an APN named ''websfr'', you can load the latest version by typing the following AT commands:
 
-*If you have an APN named ''websfr'', it will be something like that:*
+    AT^SJOTAP=,http://94.23.55.152:8080/demo/demo.jad,a:,,,"gprs","websfr",,
+    AT^SJOTAP
+    
+Don't forget to prepare your chip if you didn't do it:
 
     AT^SCFG="Userware/Autostart/Delay","","50"
     AT^SCFG="Userware/Autostart","","1"
     AT^SCFG="Userware/Stdout","ASC0"
-    AT^SJOTAP=,http://94.23.55.152:8080/demo/demo.jad,a:,,,"gprs","websfr",,
-    AT^SJOTAP
 
+If the latest version is broken, you can use this one:
+http://94.23.55.152:8080/demo/demo-0.1.9.jad
+
+Demo
+----
 Quick look at the console: 
 * http://asciinema.org/a/6782 (settings management demo + few commands)
 * http://asciinema.org/a/6783 (auto-update on new version detection)
 
 
+Features
+--------
 The features that will be provided in this library are:
 - Settings management (tested)
 - Watchdog management (tested)
@@ -42,7 +67,8 @@ The features that will be provided in this library are:
 - SMS receiving and sending (tested)
 - Call receiving and making (not done)
 - Automatic OTAP management (tested)
-- Communication with server: MQTT / M2MP / HTTP ? (NOT done)
+- Communication with server: MQTT / M2MP / HTTP ? (HTTP comm is functionnal)
 - Email sending (tested)
+- GPS management (tested)
 
-You are welcome to request features and forks and they might be accepted.
+You are welcome to request features and pulls, they might be accepted.
