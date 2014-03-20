@@ -2,6 +2,7 @@ package org.javacint.console;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -189,6 +190,24 @@ public class Console implements Runnable {
         out = new PrintStream(stream.openOutputStream());
     }
 
+    /**
+     * Get the input stream.
+     * 
+     * @return Inputstream
+     */
+    public InputStream getInputStream() {
+        return in;
+    }
+
+    /**
+     * Get the output stream.
+     * 
+     * @return Outputstream
+     */
+    public OutputStream getOutputStream() {
+        return out;
+    }
+
     private void portClose() {
         if (in != null) {
             try {
@@ -328,7 +347,6 @@ public class Console implements Runnable {
 
     public void run() {
         try {
-            portOpen();
             while (true) {
                 String line = readLine().trim();
                 try {
@@ -350,7 +368,17 @@ public class Console implements Runnable {
         }
     }
 
+    /**
+     * Start the console.
+     */
     public void start() {
+        try {
+            portOpen();
+        } catch (Exception ex) {
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log("Console.start", ex, true);
+            }
+        }
         thread.start();
     }
 
