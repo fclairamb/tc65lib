@@ -190,7 +190,7 @@ public class ATExecution {
             Logger.log("ATCommandsWrapper.update( ATCommand, \"" + apn + "\", \"" + target + "\" );", true);
         }
 
-        {// If we are on a TC65 and not a TC65i (might be a good time to remove this code)
+        {// Only useful if we are on a TC65 and not a TC65i (it might be a good time to remove this code)
             String[] spl = Strings.split(",", apn);
             apn = "";
             for (int i = 0; i < spl.length && i < 4; i++) {
