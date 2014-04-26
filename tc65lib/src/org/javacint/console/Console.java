@@ -185,14 +185,17 @@ public class Console implements Runnable {
         return true;
     }
 
-    private void portOpen() throws IOException {
+    public void open() throws IOException {
+        if (in != null) {
+            return;
+        }
         in = stream.openInputStream();
         out = new PrintStream(stream.openOutputStream());
     }
 
     /**
      * Get the input stream.
-     * 
+     *
      * @return Inputstream
      */
     public InputStream getInputStream() {
@@ -201,7 +204,7 @@ public class Console implements Runnable {
 
     /**
      * Get the output stream.
-     * 
+     *
      * @return Outputstream
      */
     public OutputStream getOutputStream() {
@@ -373,7 +376,7 @@ public class Console implements Runnable {
      */
     public void start() {
         try {
-            portOpen();
+            open();
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
                 Logger.log("Console.start", ex, true);
