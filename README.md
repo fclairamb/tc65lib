@@ -17,12 +17,12 @@ Supported devices
 -----------------
 The goal is to support all these devices:
 
-* TC65
-* TC65i / TC65i-X
+* TC65 v3
+* **TC65i v1** / **TC65i v2** / TC65i-X
 * BSG5 / BSG5-X
 * EHS5 / EHS6
 
-Only devices with the siemens and cinterion SDK namespaces are supported at this stage. Supporting other devices is relatively simple (see how the sdkns variable works). Contributions are welcome.
+Code has been tested successfully with devices in bold (siemens and cinterion namespace sdk).
 
 Documentation
 -------------
