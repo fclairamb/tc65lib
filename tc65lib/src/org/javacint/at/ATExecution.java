@@ -133,6 +133,10 @@ public class ATExecution {
         ATCommands.send("AT+CGATT=" + (attach ? "1" : "0"));
     }
 
+    /**
+     * Set airplane mode
+     * @param mode true for ON (no GSM)
+     */
     public static void setAirplaneMode(boolean mode) {
         ATCommands.send("at^scfg=\"MEopMode/Airplane\",\"" + (mode ? "on" : "off") + "\"");
     }
