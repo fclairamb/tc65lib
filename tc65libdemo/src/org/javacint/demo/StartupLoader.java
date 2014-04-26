@@ -1,6 +1,7 @@
 package org.javacint.demo;
 
 import java.util.TimerTask;
+import javax.microedition.io.CommConnection;
 import javax.microedition.io.HttpConnection;
 import org.javacint.apnauto.APNAutodetection;
 import org.javacint.at.ATExecution;
@@ -79,6 +80,9 @@ public class StartupLoader extends TimerTask {
             public void run() {
                 Settings.loading(true);
                 Settings.addProvider(new BaseSettingsProvider());
+                if (Settings.firstStartup()) {
+                    ATExecution.setWatchdogMode(ATExecution.WATCHDOG_MODE_RESTART);
+                }
             }
         });
 
