@@ -22,6 +22,11 @@ public class ATExecution {
 
     private static final String THIS = "ATExec";
 
+    /**
+     * Get gsm cell monitoring data.
+     *
+     * @return Cell monitoring data
+     */
     public static String[] getMONC() {
         try {
             String ret = ATCommands.send("AT^SMONC");
@@ -30,7 +35,7 @@ public class ATExecution {
             return spl;
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
-                Logger.log(THIS + ".getMCC", ex, true);
+                Logger.log(THIS + ".getMONC", ex, true);
             }
             return null;
         }
@@ -301,6 +306,11 @@ public class ATExecution {
         }
     }
 
+    /**
+     * Enable temperature reading.
+     *
+     * @param en true to enable it
+     */
     public static void enableTemp(boolean en) {
         ATCommands.send("AT^SCTM=1," + (en ? "1" : "0"));
     }
@@ -377,7 +387,24 @@ public class ATExecution {
             }
         }
     }
+    public static final int /**
+             * Watchdog does nothing
+             */
+            WATCHDOG_MODE_NOTHING = 0,
+            /**
+             * Watchdog restarts the module
+             */
+            WATCHDOG_MODE_RESTART = 1,
+            /**
+             * Watchdog shutdowns the module
+             */
+            WATCHDOG_MODE_SHUTDOWN = 2;
 
+    /**
+     * Set the watchdog mode.
+     *
+     * @param mode Watchdog mode
+     */
     public static void setWatchdogMode(int mode) {
         ATCommands.send("AT^SCFG=\"Userware/Watchdog\",\"" + mode + "\"");
     }
