@@ -7,6 +7,7 @@ import com.siemens.icm.io.*;
 //#endif
 import java.util.Calendar;
 import java.util.Date;
+import java.io.IOException;
 import org.javacint.common.Strings;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
@@ -135,6 +136,7 @@ public class ATExecution {
 
     /**
      * Set airplane mode
+     *
      * @param mode true for ON (no GSM)
      */
     public static void setAirplaneMode(boolean mode) {

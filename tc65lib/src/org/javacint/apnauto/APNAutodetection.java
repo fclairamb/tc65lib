@@ -4,6 +4,7 @@ package org.javacint.apnauto;
 import com.siemens.icm.io.*;
 //#elif sdkns == "cinterion"
 //# import com.cinterion.io.*;
+//#elif sdkns == "gemalto"
 //#endif
 import java.io.IOException;
 import java.util.Vector;
@@ -28,8 +29,17 @@ public final class APNAutodetection {
 
     private final Vector sources = new Vector();
     public static final boolean LOG = false;
+    private boolean showApn;
 
-    public APNAutodetection() {
+    /**
+     * Show the APN.
+     *
+     * Show the APN during APN auto-detection.
+     *
+     * @param show Show APN.
+     */
+    public void setShowApn(boolean show) {
+        this.showApn = show;
     }
 
     public void addParametersSource(ResourceProvider source) {
@@ -81,6 +91,12 @@ public final class APNAutodetection {
         return names;
     }
 
+    /**
+     * Automatically load the right APN setting.
+     * This method automatically loads the right APN settings for the modem.
+     *
+     * @return The detect APN setting
+     */
     public String autoLoadRightGPRSSettings() {
         String apn = null;
         try { // Let's detect the IMSI
@@ -125,11 +141,11 @@ public final class APNAutodetection {
                 String phoneManager = Settings.get(Settings.SETTING_MANAGERSPHONE);
 
                 if (apn != null) {
-                    if (Logger.BUILD_NOTICE) {
+                    if (showApn) {
                         Logger.log("New APN is : " + apn);
                     }
 
-                    // We only save the IMSI if we found a good APN
+                    // We only save the ICCID if we found a good APN
                     // This renew APN detection until we have the right APN detected
                     // The main drawback is : We will detect APN at each startup
                     // even if network is working fine
@@ -170,6 +186,14 @@ public final class APNAutodetection {
         return apn;
     }
 
+    /**
+     * Test all the APN settings of a GPRS parameters providers.
+     *
+     * @param reader Settings provider
+     * @return The working APN setting or null
+     * @throws ATCommandFailedException
+     * @throws IOException
+     */
     private GPRSSettings testGPRSParameters(GPRSParametersProvider reader) throws ATCommandFailedException, IOException {
         if (Logger.BUILD_DEBUG && LOG) {
             Logger.log(this + ".testGPRSSettingsReader:" + reader);
@@ -177,12 +201,26 @@ public final class APNAutodetection {
 
         for (GPRSSettings set; (set = reader.next()) != null;) {
             if (testApn(set)) {
+                if (showApn) {
+                    Logger.log("APN " + set + " : OK");
+                }
                 return set;
+            } else {
+                if (showApn) {
+                    Logger.log("APN " + set + " : FAIL");
+                }
             }
         }
         return null;
     }
 
+    /**
+     * Test an APN setting
+     *
+     * @param set Setting to test
+     * @return If it worked
+     * @throws ATCommandFailedException In case of AT failure
+     */
     private boolean testApn(GPRSSettings set) throws ATCommandFailedException {
         if (Logger.BUILD_DEBUG && LOG) {
             Logger.log(this + ".testApn: Testing " + set);
@@ -204,8 +242,12 @@ public final class APNAutodetection {
             }
             return true;
         } catch (Exception ex) {
+            // This is the standard message for APN detection failure, let's skip it
+            if (ex instanceof IOException && ex.getMessage().equals("Profile could not be activated")) {
+                return false;
+            }
             if (Logger.BUILD_CRITICAL) {
-                Logger.log("APNAutodetection: " + ex);
+                Logger.log(this + ".testApn: " + ex);
             }
         }
         return false;

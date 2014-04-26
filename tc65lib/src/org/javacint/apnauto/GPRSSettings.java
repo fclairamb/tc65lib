@@ -9,6 +9,10 @@ import org.javacint.logging.Logger;
 public final class GPRSSettings {
 
     private final static String EMPTY = "";
+    /**
+     * Default target.
+     * It's Google's DNS 1 server using DNS/TCP.
+     */
     public final static String DEFAULT_TARGET = "8.8.8.8:53";
     private String[] values;
     private int index_carrier = -1,
@@ -137,7 +141,7 @@ public final class GPRSSettings {
     }
 
     public String toString() {
-        return getCarrier() + " --> " + getApn() + ", " + getUser() + ", " + getPass();
+        return toSjnet(); //getCarrier() + " --> " + getApn() + ", " + getUser() + ", " + getPass();
     }
     /**
      * Parameter enclosing
