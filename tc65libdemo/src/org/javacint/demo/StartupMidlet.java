@@ -1,6 +1,7 @@
 package org.javacint.demo;
 
 import javax.microedition.midlet.*;
+import org.javacint.logging.Logger;
 import org.javacint.task.Timers;
 
 /**
@@ -9,11 +10,14 @@ import org.javacint.task.Timers;
 public class StartupMidlet extends MIDlet {
 
     public void startApp() {
-        String version = getAppProperty("MIDlet-Version");
-        System.out.print("Demo v" + version + "\r");
-        // The first task is to plan a loading task.
-        Timers.getSlow().schedule(new StartupLoader(version), 0);
-
+        try {
+            String version = getAppProperty("MIDlet-Version");
+            System.out.print("Demo v" + version + "\r");
+            // The first task is to plan a loading task.
+            Timers.getSlow().schedule(new StartupLoader(version), 0);
+        } catch (Throwable ex) {
+            Logger.log(this + ".startApp", ex);
+        }
         // We're now leaving startApp (and releasing the starting thread)
     }
 
