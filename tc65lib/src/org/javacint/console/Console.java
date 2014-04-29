@@ -23,7 +23,7 @@ import org.javacint.settings.Settings;
  * and on any StreamConnection implementation.
  */
 public class Console implements Runnable {
-
+    
     private Thread thread = new Thread(this, "con");
     private final StreamConnection stream;
     private InputStream in;
@@ -78,11 +78,11 @@ public class Console implements Runnable {
     public Console(StreamConnection stream) {
         this.stream = stream;
     }
-
+    
     private void writeLine(String line) throws IOException {
         out.println(line);
     }
-
+    
     public boolean parseCommand(String line) throws Exception {
         addHistory(line);
         out.println();
@@ -100,7 +100,7 @@ public class Console implements Runnable {
                 }
             }
         }
-
+        
         if (line.startsWith("AT")) {
             String[] lines = Strings.split('\n', ATCommands.send(line));
             for (int i = 0; i < lines.length; ++i) {
@@ -124,11 +124,11 @@ public class Console implements Runnable {
             writeLine("[HELP] AT***                            - Send AT commads");
             writeLine("[HELP] stats                            - Get some system stats");
         } else if (line.equals("conf list") || line.equals("conf")) {
-
+            
             Hashtable defSettings = Settings.getDefaultSettings();
-
+            
             Object keys[] = new Object[defSettings.size()];
-
+            
             { // Filling and sorting keys
                 Enumeration e = defSettings.keys();
                 for (int i = 0; e.hasMoreElements(); i++) {
@@ -137,7 +137,7 @@ public class Console implements Runnable {
                 Sorter s = new Sorter();
                 s.sort(keys);
             }
-
+            
             for (int i = 0; i < keys.length; i++) {
                 String key = (String) keys[i];
                 String defValue = (String) defSettings.get(key);
@@ -166,7 +166,7 @@ public class Console implements Runnable {
             writeLine("[STATS] MEM free:" + Runtime.getRuntime().freeMemory() + " total:" + Runtime.getRuntime().totalMemory());
         } else if (line.equals("history")) {
             Enumeration e = history.elements();
-
+            
             while (e.hasMoreElements()) {
                 String h = (String) e.nextElement();
                 writeLine("[HISTORY] " + h);
@@ -184,7 +184,7 @@ public class Console implements Runnable {
         }
         return true;
     }
-
+    
     public void open() throws IOException {
         if (in != null) {
             return;
@@ -210,7 +210,7 @@ public class Console implements Runnable {
     public OutputStream getOutputStream() {
         return out;
     }
-
+    
     private void portClose() {
         if (in != null) {
             try {
@@ -219,7 +219,7 @@ public class Console implements Runnable {
             }
             in = null;
         }
-
+        
         if (out != null) {
             try {
                 out.close();
@@ -229,7 +229,7 @@ public class Console implements Runnable {
         }
     }
     private final Vector history = new Vector();
-
+    
     private void addHistory(String line) {
         history.addElement(line);
         if (history.size() > 30) {
@@ -256,18 +256,19 @@ public class Console implements Runnable {
             final StringBuffer buffer = new StringBuffer(64);
             while (true) {
                 int c = in.read();
-                if (c == '\n' || c == '\r' || c == CTRL_Z) { // If we have an end of line
+                
+                if (c == '\n' || c == '\r') { // If we have an end of line
                     String str = buffer.toString();
                     buffer.setLength(0);
                     if (out != null) {
                         out.write(c);
                     }
-
+                    
                     return str;
-                } else if (c == 127) { // If we have backspace
+                } else if (c == '\b') { // If we have backspace
                     if (buffer.length() > 0) { // If there's chars to remove
                         if (out != null) {
-                            out.write(c);
+                            out.print("\b \b");
                         }
                         buffer.setLength(buffer.length() - 1);
                     }
@@ -290,11 +291,11 @@ public class Console implements Runnable {
             return null;
         }
     }
-
+    
     public String readLine() {
         return readLine(in, out);
     }
-
+    
     private static int[] getEscapeSequence(InputStream in) throws IOException {
         int c;
         int[] esc = new int[10];
@@ -332,22 +333,20 @@ public class Console implements Runnable {
 
     // TODO: test it
     private static void handleEscape(int[] escapeSequence, PrintStream out) {
-        if (escapeSequence[0] == '[') {
-            if (escapeSequence[2] == 'A') {
+        if (escapeSequence[0] == 91) {
+            if (escapeSequence[1] == 65) { // UP
                 out.print("<UP>");
-            } else if (escapeSequence[2] == 'B') {
+            } else if (escapeSequence[1] == 66) { // DOWN
                 out.print("<DOWN>");
-            } else if (escapeSequence[2] == 'C') {
+            } else if (escapeSequence[1] == 67) { // RIGHT
                 out.print("<FORWARD>");
-                writeClearScreen(out);
-            } else if (escapeSequence[2] == 'D') {
+            } else if (escapeSequence[1] == 68) { // LEFT
                 out.print("<BACKWARD>");
-                writeClearScreen(out);
             }
         }
     }
     private static final String PROMPT = "\r\nconsole# ";
-
+    
     public void run() {
         try {
             while (true) {
@@ -384,7 +383,7 @@ public class Console implements Runnable {
         }
         thread.start();
     }
-
+    
     public void stop() {
         portClose();
     }
