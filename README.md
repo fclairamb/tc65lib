@@ -6,7 +6,7 @@ General library to simplify development around the Cinterion / Gemalto java enab
 Goals
 ----
 * Support most devices
-* Shorten the devleopment and release to market time at the maximum (see the demo code)
+* Shorten the development and release to market time at the maximum (see the demo code)
 * Have a clean and simple to use base code
 
 This library is intended to be used as a framework. You don't have to use all the components but some of them are mandatory (like logging, settings, AT commands handling).
