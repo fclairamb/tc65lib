@@ -24,18 +24,21 @@ public abstract class ADCCheckTask extends TimerTask {
         try {
             if (adc == null) {
                 adc = new ADC(adcNb, 0);
+                if (Logger.BUILD_DEBUG) {
+                    Logger.log("Setting up ADC " + adcNb);
+                }
             }
 
             int value;
             synchronized (ADC.class) {
                 Thread.sleep(300);
                 value = adc.getValue();
+                if (Logger.BUILD_DEBUG) {
+                    Logger.log("ADC" + adcNb + ", got value " + value);
+                }
             }
 
-            if (Math.abs(value - lastValue) >= diff) {
-                lastValue = value;
-                changed(value);
-            }
+            considerValue(value);
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
                 Logger.log(this + ".run", ex, true);
@@ -48,6 +51,13 @@ public abstract class ADCCheckTask extends TimerTask {
 
     public String toString() {
         return "ADCCheckTask";
+    }
+
+    protected void considerValue(int value) {
+        if (Math.abs(value - lastValue) >= diff) {
+            lastValue = value;
+            changed(value);
+        }
     }
 
     public abstract void changed(int temp);

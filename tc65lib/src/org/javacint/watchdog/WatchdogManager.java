@@ -14,6 +14,8 @@ import org.javacint.task.Timers;
  */
 public final class WatchdogManager {
 
+    private WatchdogManager() {
+    }
     /**
      * The watchdog actors
      */

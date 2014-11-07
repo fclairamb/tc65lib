@@ -35,6 +35,7 @@ public final class ProtocolLayer implements IProtocolLayer {
                 net = new NetworkLayer();
                 net.setProtoLayer(this);
                 net.setIdent(clientId);
+                net.start();
             }
         } catch (Exception ex) {
             if (Logger.BUILD_DEBUG) {

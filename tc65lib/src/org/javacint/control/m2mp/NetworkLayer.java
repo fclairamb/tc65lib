@@ -43,7 +43,7 @@ class NetworkLayer implements ISocketLayer {
         public void run() {
             while (true) {
                 if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-                    Logger.log("NetworkLayer.NetworkSend.work();");
+                    Logger.log("...");
                 }
                 try {
                     if (dataOutQueue.size() > 0) {
@@ -60,7 +60,7 @@ class NetworkLayer implements ISocketLayer {
                     }
                 } catch (Exception ex) {
                     if (Logger.BUILD_CRITICAL) {
-                        Logger.log("NetworkLayer.work", ex);
+                        Logger.log("NetworkLayer.NetworkSend.run", ex);
                     }
                     break;
                 }
@@ -249,6 +249,11 @@ class NetworkLayer implements ISocketLayer {
     NetworkLayer() {
         send = new NetworkSend();
         recv = new NetworkReceive();
+    }
+
+    void start() {
+        new Thread(send, "m2mp-send").start();
+        new Thread(recv, "m2mp-recv").start();
     }
 
     public byte[] identMessage() {
