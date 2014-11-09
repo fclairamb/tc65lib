@@ -106,32 +106,35 @@ public final class APNAutodetection {
 
             if (simDetected == null) {
                 if (Logger.BUILD_CRITICAL) {
-                    Logger.log("No sim card detected !");
+                    Logger.log(this + ".AutoAPN: No sim card detected !");
                 }
             } else if (!simDetected.equals(simSaved)) {
                 if (Logger.BUILD_WARNING) {
-                    Logger.log("Sim card changed since last successful APN detection ! saved=" + simSaved + ", detected=" + simDetected);
+                    Logger.log(this + ".AutoAPN: Sim card changed since last successful APN detection ! saved=" + simSaved + ", detected=" + simDetected);
                 }
 
                 { // First we try if we have any chance with the current APN (maybe it was defined in the console or by SMS)
                     String apnSetting = Settings.get(Settings.SETTING_APN);
                     if (apnSetting != null) {
                         if (Logger.BUILD_DEBUG) {
-                            Logger.log(this + ".autoLoadRightGPRSSettings: Trying current APN setting...");
+                            Logger.log(this + ".AutoAPN:  Trying current APN setting...");
                         }
                         if (testApn(apnSetting, GPRSSettings.DEFAULT_TARGET)) {
                             apn = apnSetting;
                             if (Logger.BUILD_DEBUG) {
-                                Logger.log(this + ".autoLoadRightGPRSSettings: Current APN setting is ok!");
+                                Logger.log(this + ".AutoAPN: Current APN setting is ok!");
                             }
                         }
                     }
 
                     int size = sources.size();
+                    if (sources.isEmpty()) {
+                        Logger.log(this + ".AutoAPN: No sources specified !");
+                    }
                     for (int i = 0; i < size && apn == null; i++) {
                         GPRSParametersProvider provider = (GPRSParametersProvider) sources.elementAt(i);
                         if (Logger.BUILD_DEBUG) {
-                            Logger.log(this + ".autoLoadRightGPRSSettings: Trying APN parameters provider " + provider + " (" + (i + 1) + "/" + size + ")");
+                            Logger.log(this + ".AutoAPN: Trying APN parameters provider " + provider + " (" + (i + 1) + "/" + size + ")");
                         }
                         GPRSSettings set = testGPRSParameters(provider);
                         apn = set != null ? set.toSjnet() : null;
@@ -142,7 +145,7 @@ public final class APNAutodetection {
 
                 if (apn != null) {
                     if (showApn) {
-                        Logger.log("New APN is : " + apn);
+                        Logger.log(this + ".AutoAPN: New APN is : " + apn);
                     }
 
                     // We only save the ICCID if we found a good APN
@@ -173,14 +176,14 @@ public final class APNAutodetection {
                 apn = Settings.get(Settings.SETTING_APN);
                 if (apn != null) {
                     if (Logger.BUILD_VERBOSE) {
-                        Logger.log("APN used: " + apn);
+                        Logger.log(this + ".AutoAPN: APN used: " + apn);
                     }
                     ATExecution.applyAPN(apn);
                 }
             }
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
-                Logger.log("APNAutodetection.autoLoadRightGPRSSettings", ex);
+                Logger.log(this+".autoLoadRightGPRSSettings", ex);
             }
         }
         return apn;
