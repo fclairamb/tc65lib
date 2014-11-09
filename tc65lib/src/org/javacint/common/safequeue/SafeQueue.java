@@ -25,6 +25,7 @@ public class SafeQueue {
     private int maxMemoryQueueSize = 61;
     private boolean filesRotation = true;
     private final Vector memoryQueue = new Vector();
+    private static final boolean LOG = false;
 
     public SafeQueue(String name) {
         dirName = name;
@@ -46,7 +47,7 @@ public class SafeQueue {
     }
 
     public synchronized void addLine(String data) {
-        if (Logger.BUILD_DEBUG) {
+        if (Logger.BUILD_DEBUG && LOG) {
             Logger.log(this + ".addLine( \"" + data + "\" );");
         }
 
@@ -96,7 +97,7 @@ public class SafeQueue {
      * @return The first set of items waiting to be sent
      */
     public synchronized SafeQueueLineReader getFirstItemsSetWaiting() {
-        if (Logger.BUILD_VERBOSE) {
+        if (Logger.BUILD_VERBOSE && LOG) {
             Logger.log(this + ".getFirstItemsListWaiting();");
         }
 
@@ -104,7 +105,7 @@ public class SafeQueue {
         // If we have something in memory, we return the memory
         if (!memoryQueue.isEmpty()) {
 
-            if (Logger.BUILD_VERBOSE) {
+            if (Logger.BUILD_VERBOSE && LOG) {
                 Logger.log(this + ".getFirstItemsListWaiting: Vector[" + memoryQueue.
                         size() + "]");
             }
@@ -120,7 +121,7 @@ public class SafeQueue {
      * Delete the first set of items that must have been returned earlier
      */
     public synchronized void deleteFirstItemsListWaiting() {
-        if (Logger.BUILD_VERBOSE) {
+        if (Logger.BUILD_VERBOSE && LOG) {
             Logger.log(this + ".deleteFirstItemsListWaiting();");
         }
         if (!memoryQueue.isEmpty()) {
@@ -155,11 +156,11 @@ public class SafeQueue {
         try {
             // If we don't have enough space left on device
             if (!enoughSpaceLeftOnDevice()) {
-                if (Logger.BUILD_DEBUG) {
+                if (Logger.BUILD_NOTICE) {
                     Logger.log(this + ".saveMemoryInFile: Not enough space left on device");
                 }
                 if (filesRotation) {
-                    if (Logger.BUILD_DEBUG) {
+                    if (Logger.BUILD_VERBOSE && LOG) {
                         Logger.log(this + ".saveMemoryInFile: Rotating files (1)");
                     }
                     rotateFiles();
@@ -173,11 +174,11 @@ public class SafeQueue {
 
             FileConnection fc = findNextFile();
             if (fc == null) {
-                if (Logger.BUILD_DEBUG) {
+                if (Logger.BUILD_NOTICE) {
                     Logger.log(this + ".saveMemoryInFile: We've reached the last file");
                 }
                 if (filesRotation) {
-                    if (Logger.BUILD_DEBUG) {
+                    if (Logger.BUILD_VERBOSE && LOG) {
                         Logger.log(this + ".saveMemoryInFile: Rotating files (2)");
                     }
                     rotateFiles();
