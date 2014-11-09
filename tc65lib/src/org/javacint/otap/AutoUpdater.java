@@ -1,5 +1,6 @@
 package org.javacint.otap;
 
+import com.sun.midp.io.Properties;
 import java.io.IOException;
 import java.util.TimerTask;
 import javax.microedition.io.Connector;
@@ -28,7 +29,7 @@ public class AutoUpdater extends TimerTask {
     private final String version;
     protected final int timeBetweenUpdates;
     private String userAgent;
-    protected static final String JAD_FIELD_VERSION = "MIDlet-Version:";
+    protected static final String JAD_FIELD_VERSION = "MIDlet-Version";
     protected long lastDone;
     private Runnable before;
     private static final boolean LOG = false;
@@ -113,7 +114,7 @@ public class AutoUpdater extends TimerTask {
                     } catch (Throwable ex) {
                     }
                 }
-                ATExecution.update();
+                update();
             }
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
@@ -122,8 +123,46 @@ public class AutoUpdater extends TimerTask {
         }
     }
 
+    protected void update() {
+        ATExecution.update();
+    }
+
     protected boolean needsChecking() {
         return System.currentTimeMillis() - lastDone > timeBetweenUpdates;
+    }
+
+    protected Properties urlToProperties(String url) throws IOException {
+        HttpConnection conn = (HttpConnection) Connector.open(url);
+        conn.setRequestProperty("user-agent", userAgent);
+        try {
+            int rc = conn.getResponseCode();
+
+            // If we get a wrong HTTP response code, we might as well just stop trying
+            if (rc != HttpConnection.HTTP_OK) {
+                if (Logger.BUILD_NOTICE) {
+                    Logger.log(this + ".urlToProperties: Could not fetch " + url + " !", true);
+                }
+                cancel();
+            }
+            BufferedReader reader = new BufferedReader(conn.openInputStream());
+
+            {
+                String line;
+                Properties props = new Properties();
+                while ((line = reader.readLine()) != null) {
+                    int p = line.indexOf(":");
+                    if (p != -1) {
+                        String name = line.substring(0, p);
+                        String value = line.substring(p + 1).trim();
+//                        Logger.log(name + " = " + value);
+                        props.addProperty(name, value);
+                    }
+                }
+                return props;
+            }
+        } finally {
+            conn.close();
+        }
     }
 
     /**
@@ -142,30 +181,8 @@ public class AutoUpdater extends TimerTask {
 
         // We get the URL at each run because it might change from one run to an other
         final String url = Settings.get(Settings.SETTING_JADURL);
-        HttpConnection conn = (HttpConnection) Connector.open(url);
-        conn.setRequestProperty("user-agent", userAgent);
-        String remoteVersion;
-        try {
-            int rc = conn.getResponseCode();
-
-            // If we get a wrong HTTP response code, we might as well just stop trying
-            if (rc != HttpConnection.HTTP_OK) {
-                if (Logger.BUILD_NOTICE) {
-                    Logger.log(this + ".needsUpdate: Could not fetch the version's file !", true);
-                }
-                cancel();
-            }
-            BufferedReader reader = new BufferedReader(conn.openInputStream());
-
-            // If it's a jad file, we search for the version property
-            if (url.endsWith(".jad")) {
-                remoteVersion = jadFileGetVersion(reader);
-            } else {// If it's not, we guess it's the 
-                remoteVersion = reader.readLine();
-            }
-        } finally {
-            conn.close();
-        }
+        Properties props = urlToProperties(url);
+        String remoteVersion = props.getProperty(JAD_FIELD_VERSION);
         if (Logger.BUILD_DEBUG && LOG) {
             Logger.log(this + ": remoteVersion=" + remoteVersion);
         }
