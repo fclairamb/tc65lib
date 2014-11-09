@@ -360,6 +360,10 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
                 String value = Settings.get(settingName);
                 reportSettingChange(settingName, value);
             }
+
+            if (settingName.equals(SETTING_M2MP_SERVERS)) {
+                disconnect();
+            }
         }
     }
 
@@ -396,7 +400,7 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
     }
 
     public void disconnect() {
-        protSend.disconnected();
+        protSend.disconnect();
     }
 
     public void sendAckResponse(byte b) {

@@ -85,7 +85,7 @@ public final class ProtocolLayer implements IProtocolLayer {
     }
     int connectionTimeout = 1200;
 
-    private void disconnect() {
+    public void disconnect() {
         nbUnrepliedAcks = 0;
         net.disconnect();
     }
@@ -352,19 +352,19 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     private class ChannelManagementNameToId {
 
-        private short _counter = 0;
-        private Hashtable _nameToId = new Hashtable();
+        private short counter = 0;
+        private Hashtable nameToId = new Hashtable();
 
         public short getId(String name) {
             if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
                 Logger.log("ChannelManagementNameToId.getId( " + name + " );");
             }
 
-            if (_nameToId.containsKey(name)) {
-                return ((Short) _nameToId.get(name)).shortValue();
+            if (nameToId.containsKey(name)) {
+                return ((Short) nameToId.get(name)).shortValue();
             } else {
-                short v = ++_counter;
-                _nameToId.put(name, new Short(v));
+                short v = ++counter;
+                nameToId.put(name, new Short(v));
                 sendNamedChannel(name, (byte) v);
                 return v;
             }
@@ -376,7 +376,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     private void sendNamedChannel(String name, byte bId) {
         if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-            Logger.log("PrtocolLayer.SendNamedChannel( \"" + name + "\", " + bId + " );");
+            Logger.log(this + ".sendNamedChannel( \"" + name + "\", " + bId + " );");
         }
         byte[] bName = name.getBytes();
         byte[] frame = new byte[(bName.length + 3)];
@@ -442,7 +442,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     public void sendData(String channelName, byte[] data) {
         if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-            Logger.log("ProtocolLayer.SendData( \"" + channelName + "\", byte[" + data.length + "] );");
+            Logger.log("ProtocolLayer.sendData( \"" + channelName + "\", byte[" + data.length + "] );");
         }
 
         byte channelId = (byte) cmSend.getId(channelName);
@@ -451,7 +451,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     public void sendData(byte channelId, byte[] data) {
         if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-            Logger.log("ProtocolLayer.SendData( byte, byte[" + data.length + "] );");
+            Logger.log("ProtocolLayer.sendData( byte, byte[" + data.length + "] );");
         }
 
         byte[] frame = null;
