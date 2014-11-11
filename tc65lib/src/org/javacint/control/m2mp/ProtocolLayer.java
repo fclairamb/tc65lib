@@ -396,7 +396,7 @@ public final class ProtocolLayer implements IProtocolLayer {
         frame[1] = (byte) (frame.length - 2);
         frame[2] = bId;
         System.arraycopy(bName, 0, frame, 3, bName.length);
-        net.sendFrameFirst(frame);
+        net.sendFrame(frame);
     }
 
     public void receivedFrame(byte[] frame) {
@@ -590,6 +590,7 @@ public final class ProtocolLayer implements IProtocolLayer {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
             Logger.log(this + ".disconnected(); ");
         }
+        reset();
         if (app != null) {
             app.onDisconnected();
         }

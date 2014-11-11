@@ -245,7 +245,7 @@ class NetworkLayer implements ISocketLayer {
                         break;
                     } catch (Exception ex) {
                         if (Logger.BUILD_CRITICAL) {
-                            Logger.log(this + ".run:2", ex, true);
+                            Logger.log(this + ".run:2", ex);
                         }
                         break;
                     }
@@ -409,7 +409,7 @@ class NetworkLayer implements ISocketLayer {
      * Disconnects from the server
      */
     public void disconnect() {
-        if (socket != null) {
+        if (socket == null) {
             return;
         }
         try {
