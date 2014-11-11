@@ -111,7 +111,7 @@ public class Settings {
      */
     public static synchronized void load() {
         if (Logger.BUILD_DEBUG) {
-            Logger.log("Settings.load();");
+            Logger.log(THIS + ".load();");
         }
         try {
             settings = new PropertiesFileWithDefaultValues(fileName, getDefaultSettings());
@@ -120,7 +120,7 @@ public class Settings {
             // There shouldn't be any file to read from
 
             if (Logger.BUILD_CRITICAL) {
-                Logger.log("Settings.load", ex);
+                Logger.log(THIS + ".load", ex);
             }
         }
     }
@@ -149,7 +149,7 @@ public class Settings {
             }
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
-                Logger.log("Settings.OnSeettingChanged", ex);
+                Logger.log(THIS + ".onSettingsChanged", ex);
             }
         }
     }
@@ -197,7 +197,7 @@ public class Settings {
 
         if (!loading) {
             // We should never add or removed a settings provider when we have finished loading
-            throw new RuntimeException("Settings.addSettingsConsumer: We're not loading anymore !");
+            throw new RuntimeException(THIS + ".addProvider: We're not loading anymore !");
         }
 
         synchronized (providers) {
@@ -233,7 +233,7 @@ public class Settings {
             }
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
-                Logger.log("Settings.resetErything", ex);
+                Logger.log(THIS + ".reset", ex);
             }
         }
     }
@@ -260,7 +260,7 @@ public class Settings {
                 madeSomeChanges = false;
             } catch (Exception ex) {
                 if (Logger.BUILD_CRITICAL) {
-                    Logger.log("Settings.save", ex, true);
+                    Logger.log(THIS + ".save", ex, true);
                 }
             }
         }
@@ -303,7 +303,7 @@ public class Settings {
      */
     public static void set(String key, String value) {
         if (Logger.BUILD_DEBUG) {
-            Logger.log("Settings.set( \"" + key + "\", \"" + value + "\" );");
+            Logger.log(THIS + ".set( \"" + key + "\", \"" + value + "\" );");
         }
 
         if (setWithoutEvent(key, value)) {
@@ -346,7 +346,7 @@ public class Settings {
         }
 
         if (loading) {
-            throw new RuntimeException("Settings.setWithoutEvent: You can't change a setting while loading !");
+            throw new RuntimeException(THIS + ".setWithoutEvent: You can't change a setting while loading !");
         }
         settings.set(key, value);
         madeSomeChanges = true;
