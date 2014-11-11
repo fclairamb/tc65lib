@@ -176,7 +176,7 @@ public class GpsPositionFilter implements GpsPositionListener, SettingsProvider 
         settings.put(SETTING_LOG_RCVD, "0");
         settings.put(SETTING_LOG_SENT, "0");
         settings.put(SETTING_LOG_PERIOD, "0");
-        settings.put(SETTING_FILTER_SPEEDS, "3600:0,10:10,60:15");
+        settings.put(SETTING_FILTER_SPEEDS, "0:3600,10:10,25:60");
     }
 
     public void settingsChanged(String[] settings) {
@@ -204,7 +204,7 @@ public class GpsPositionFilter implements GpsPositionListener, SettingsProvider 
             for (int i = 0; i < filters.length; i++) {
                 String f = filters[i];
                 String[] values = Strings.split(':', f);
-                newSpeedFilters[i] = new SpeedFilter(Integer.parseInt(values[0]), Double.parseDouble(values[1]));
+                newSpeedFilters[i] = new SpeedFilter(Double.parseDouble(values[0]), Integer.parseInt(values[1]));
             }
             speedFilters = newSpeedFilters;
         } catch (Exception ex) {
@@ -220,5 +220,24 @@ public class GpsPositionFilter implements GpsPositionListener, SettingsProvider 
 
     public void positionAdditionnalReceived(String type, String value) {
         listener.positionAdditionnalReceived(type, value);
+    }
+
+    private static class SpeedFilter {
+
+        final double maxSpeed;
+        final int period;
+
+        public SpeedFilter(double minSpeed, int period) {
+            this.maxSpeed = minSpeed;
+            this.period = period;
+        }
+
+        public double getMinSpeed() {
+            return this.maxSpeed;
+        }
+
+        public int getPeriod() {
+            return this.period;
+        }
     }
 }
