@@ -23,7 +23,7 @@ public final class ProtocolLayer implements IProtocolLayer {
      * @param atc ATCommand instance
      */
     ProtocolLayer() {
-        disconnected();
+        reset();
     }
 
     /**
@@ -39,7 +39,7 @@ public final class ProtocolLayer implements IProtocolLayer {
             }
         } catch (Exception ex) {
             if (Logger.BUILD_DEBUG) {
-                Logger.log("ClientSend.start", ex);
+                Logger.log(this + ".start", ex);
             }
         }
     }
@@ -142,7 +142,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     private void treatFrameAckRequest(byte[] frame) {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log("ProtocolLayer.TreatFrameAckRequest( " + Bytes.byteArrayToPrettyString(frame) + " );");
+            Logger.log(this + ".treatFrameAckRequest( " + Bytes.byteArrayToPrettyString(frame) + " );");
         }
         app.onReceivedAckRequest(frame[1]);
         nbUnrepliedAcks = 0;
@@ -150,7 +150,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     private void treatFrameAckResponse(byte[] frame) {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log("ProtocolLayer.TreatFrameAckResponse( " + Bytes.byteArrayToPrettyString(frame) + " );");
+            Logger.log(this + ".treatFrameAckResponse( " + Bytes.byteArrayToPrettyString(frame) + " );");
         }
         app.onReceivedAckResponse(frame[1]);
         nbUnrepliedAcks = 0;
@@ -158,7 +158,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     private void treatFrameChannelDef(byte[] frame) {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log("ProtocolLayer.TreatFrameChannelDef( " + Bytes.byteArrayToPrettyString(frame) + " );");
+            Logger.log(this + ".treatFrameChannelDef( " + Bytes.byteArrayToPrettyString(frame) + " );");
         }
         /*
          * Bytes are : =========== 0 : Type 1 : Size 2 : Channel id 3-X :
@@ -173,7 +173,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     private void treatFrameData(byte[] frame) {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log("ProtocolLayer.TreatFrameData( " + Bytes.byteArrayToPrettyString(frame) + " );");
+            Logger.log(this + ".treatFrameData( " + Bytes.byteArrayToPrettyString(frame) + " );");
         }
 
         /*
@@ -190,7 +190,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     private void treatFrameDataLarge(byte[] frame) {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log("ProtocolLayer.TreatFrameDataLarge( " + Bytes.byteArrayToPrettyString(frame) + " );");
+            Logger.log(this + ".treatFrameDataLarge( " + Bytes.byteArrayToPrettyString(frame) + " );");
         }
 
         /*
@@ -208,7 +208,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     private void treatFrameDataArray(byte[] frame) {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log("ProtocolLayer.TreatFrameDataArray( " + Bytes.byteArrayToPrettyString(frame) + " );");
+            Logger.log(this + ".treatFrameDataArray( " + Bytes.byteArrayToPrettyString(frame) + " );");
         }
 
         /*
@@ -239,7 +239,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     private void treatFrameDataArrayLarge(byte[] frame) {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log("ProtocolLayer.TreatFrameDataArrayLarge( " + Bytes.byteArrayToPrettyString(frame) + " );");
+            Logger.log(this + ".treatFrameDataArrayLarge( " + Bytes.byteArrayToPrettyString(frame) + " );");
         }
 
         /*
@@ -272,7 +272,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     private void treatFrameIdentificationResult(byte[] frame) {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log("ProtocolLayer.TreatFrameIdentificationResult( " + Bytes.byteArrayToPrettyString(frame) + " );");
+            Logger.log(this + ".treatFrameIdentificationResult( " + Bytes.byteArrayToPrettyString(frame) + " );");
         }
 
         boolean identified = frame[1] == 0x01;
@@ -320,7 +320,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
         public void setName(byte channelId, String channelName) {
             if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                Logger.log("ChannelManagementIdToName.setName( " + channelId + ", \"" + channelName + "\" );");
+                Logger.log(this + ".setName( " + channelId + ", \"" + channelName + "\" );");
             }
             int iChannelId = (int) channelId;
 
@@ -343,10 +343,14 @@ public final class ProtocolLayer implements IProtocolLayer {
             String name = _names[iChannelId];
 
             if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                Logger.log("ChannelManagementIdToName.getName( " + channelId + " ) : \"" + name + "\";");
+                Logger.log(this + ".getName( " + channelId + " ) : \"" + name + "\";");
             }
 
             return name;
+        }
+
+        public String toString() {
+            return "ChannelManagementIdToName";
         }
     }
 
@@ -356,18 +360,26 @@ public final class ProtocolLayer implements IProtocolLayer {
         private Hashtable nameToId = new Hashtable();
 
         public short getId(String name) {
-            if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                Logger.log("ChannelManagementNameToId.getId( " + name + " );");
-            }
-
             if (nameToId.containsKey(name)) {
                 return ((Short) nameToId.get(name)).shortValue();
             } else {
                 short v = ++counter;
+                if (v >= 255) {
+                    nameToId.clear();
+                }
+
+                if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
+                    Logger.log(this + ".getId( " + name + " ): " + v);
+                }
+
                 nameToId.put(name, new Short(v));
                 sendNamedChannel(name, (byte) v);
                 return v;
             }
+        }
+
+        public String toString() {
+            return "ChannelManagementNameToId";
         }
     }
     private NetworkLayer net;
@@ -389,7 +401,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     public void receivedFrame(byte[] frame) {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log("ProtocolLayer.ReceivedFrame( " + Bytes.byteArrayToPrettyString(frame));
+            Logger.log(this + ".receivedFrame( " + Bytes.byteArrayToPrettyString(frame));
         }
 
         switch (frame[0]) {
@@ -426,7 +438,7 @@ public final class ProtocolLayer implements IProtocolLayer {
                 break;
             default:
                 if (Logger.BUILD_CRITICAL) {
-                    Logger.log("ProtocolLayer.receivedFrame: Unknow frame type: " + frame[0]);
+                    Logger.log(this + ".receivedFrame: Unknow frame type: " + frame[0]);
                 }
         }
     }
@@ -442,7 +454,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     public void sendData(String channelName, byte[] data) {
         if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-            Logger.log("ProtocolLayer.sendData( \"" + channelName + "\", byte[" + data.length + "] );");
+            Logger.log(this + ".sendData( \"" + channelName + "\", byte[" + data.length + "] );");
         }
 
         byte channelId = (byte) cmSend.getId(channelName);
@@ -451,7 +463,7 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     public void sendData(byte channelId, byte[] data) {
         if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-            Logger.log("ProtocolLayer.sendData( byte, byte[" + data.length + "] );");
+            Logger.log(this + ".sendData( byte, byte[" + data.length + "] );");
         }
 
         byte[] frame = null;
@@ -566,9 +578,18 @@ public final class ProtocolLayer implements IProtocolLayer {
         net.sendFrame(frame);
     }
 
-    public void disconnected() {
+    private void reset() {
+        if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
+            Logger.log(this + ".reset(); / new cmSend, new cmRecv");
+        }
         cmSend = new ChannelManagementNameToId();
         cmRecv = new ChannelManagementIdToName();
+    }
+
+    public void disconnected() {
+        if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
+            Logger.log(this + ".disconnected(); ");
+        }
         if (app != null) {
             app.onDisconnected();
         }
@@ -584,5 +605,9 @@ public final class ProtocolLayer implements IProtocolLayer {
 
     public long getLastSendTime() {
         return net.getLastSendTime();
+    }
+
+    public String toString() {
+        return "ProtocolLayer";
     }
 }

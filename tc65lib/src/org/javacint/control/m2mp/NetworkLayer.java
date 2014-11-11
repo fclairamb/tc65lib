@@ -55,7 +55,7 @@ class NetworkLayer implements ISocketLayer {
                             if (send(data)) {
                                 dataOutQueue.removeElement(data);
                             } else {
-                                connect();
+                                reconnect();
                             }
                         } else {
                             synchronized (dataOutQueue) {
@@ -64,7 +64,7 @@ class NetworkLayer implements ISocketLayer {
                         }
                     } catch (Exception ex) {
                         if (Logger.BUILD_CRITICAL) {
-                            Logger.log("NetworkLayer.NetworkSend.run", ex);
+                            Logger.log(this + ".run", ex);
                         }
                         break;
                     }
@@ -93,7 +93,7 @@ class NetworkLayer implements ISocketLayer {
                 return true;
             } catch (Exception ex) {
                 if (Logger.BUILD_WARNING) {
-                    Logger.log("NetworkLayer.send", ex);
+                    Logger.log(this + ".send", ex);
                 }
                 return false;
             }
@@ -101,7 +101,7 @@ class NetworkLayer implements ISocketLayer {
 
         public void queueSend(byte[] data) {
             if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-                Logger.log("NetworkLayer.NetworkSend.QueueSend();");
+                Logger.log(this + ".queueSend( byte[" + data.length + "] );");
             }
 
             synchronized (dataOutQueue) {
@@ -112,7 +112,7 @@ class NetworkLayer implements ISocketLayer {
 
         public void queueSendFirst(byte[] data) {
             if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-                Logger.log("NetworkLayer.NetworkSend.QueueSend();");
+                Logger.log(this + ".queueSendFirst( byte[" + data.length + "] );");
             }
 
             synchronized (dataOutQueue) {
@@ -123,6 +123,17 @@ class NetworkLayer implements ISocketLayer {
 
         private void stop(boolean b) {
         }
+
+        public String toString() {
+            return "NetworkSend";
+        }
+    }
+
+    private void reconnect() {
+
+        disconnect();
+
+        connect();
     }
 
     /**
@@ -188,7 +199,7 @@ class NetworkLayer implements ISocketLayer {
                                     System.arraycopy(header, 0, frame, 0, 2);
 
                                     if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                                        Logger.log("NetworkLayer.NetworkReceive.Work : size=" + size);
+                                        Logger.log(this + ".run: size=" + size);
                                     }
 
 
@@ -228,13 +239,13 @@ class NetworkLayer implements ISocketLayer {
 
                     } catch (IOException ex) {
                         if (Logger.BUILD_CRITICAL) {
-                            Logger.log("NetworkLayer.NetworkReceiv.work:1", ex);
+                            Logger.log(this + ".run:1", ex);
                         }
                         disconnect();
                         break;
                     } catch (Exception ex) {
                         if (Logger.BUILD_CRITICAL) {
-                            Logger.log("NetworkLayer.NetworkReceive.work:2", ex, true);
+                            Logger.log(this + ".run:2", ex, true);
                         }
                         break;
                     }
@@ -248,13 +259,17 @@ class NetworkLayer implements ISocketLayer {
 
         private void resetFrame() {
             if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                Logger.log("NetworkLayer.NetworkReceive.resetFrame();");
+                Logger.log(this + ".resetFrame();");
             }
             offset = 0;
             frame = null;
         }
 
         private void stop(boolean b) {
+        }
+
+        public String toString() {
+            return "NetworkReceive";
         }
     }
 
@@ -280,7 +295,7 @@ class NetworkLayer implements ISocketLayer {
         return frame;
     }
     long lastConnectCall = 0;
-    int _nbConnectAttempts = 0;
+    int nbConnectAttempts = 0;
 
     /**
      * Connects to a server
@@ -294,22 +309,22 @@ class NetworkLayer implements ISocketLayer {
             }
 
             if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-                Logger.log("NetworkLayer.connect();");
+                Logger.log(this + ".connect();");
             }
 
             // We don't want this to be called too soon !
             if (Math.abs(DateManagement.time() - lastConnectCall) < 10) {
                 if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-                    Logger.log("NetworkLayer.connect : Too soon !");
+                    Logger.log(this + ".connect: Too soon !");
                 }
                 Thread.sleep(1000);
                 return false;
             }
 
 
-            if (++_nbConnectAttempts % 3 == 0) {
+            if (++nbConnectAttempts % 3 == 0) {
                 if (Logger.BUILD_NOTICE && M2MPClientImpl.m2mpLog_) {
-                    Logger.log("NetworkLayer.connect : We need to quit and reconnect to the GSM Network...");
+                    Logger.log(this + ".connect: We need to quit and reconnect to the GSM Network...");
                 }
                 try {
                     ATExecution.setAirplaneMode(true);
@@ -318,11 +333,11 @@ class NetworkLayer implements ISocketLayer {
                     Thread.sleep(15000);
                 } catch (Exception ex) {
                     if (Logger.BUILD_CRITICAL) {
-                        Logger.log("NetworkLayer.connect:296", ex);
+                        Logger.log(this + ".connect:296", ex);
                     }
                 }
                 if (Logger.BUILD_NOTICE && M2MPClientImpl.m2mpLog_) {
-                    Logger.log("NetworkLayer.connect : Done...");
+                    Logger.log(this + ".connect: OK");
                 }
             }
 
@@ -343,7 +358,7 @@ class NetworkLayer implements ISocketLayer {
                         tcpOs = socket.openOutputStream();
 
                         if (Logger.BUILD_NOTICE && M2MPClientImpl.m2mpLog_) {
-                            Logger.log("NetworkLayer.connect : Successfully connected to " + server);
+                            Logger.log(this + ".connect: Successfully connected to " + server);
                         }
 
                         tcpOs.write(identMessage());
@@ -351,17 +366,17 @@ class NetworkLayer implements ISocketLayer {
                         tcpOs.flush();
 
                         if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-                            Logger.log("NetworkLayer.connect : Identification request sent...");
+                            Logger.log(this + ".connect: Identification request sent...");
                         }
 
                         lastDataRecvTime = DateManagement.time();
                         lastDataSendTime = DateManagement.time();
 
-                        _nbConnectAttempts = 0;
+                        nbConnectAttempts = 0;
                         return true;
                     } catch (Exception ex) {
                         if (Logger.BUILD_WARNING) {
-                            Logger.log("NetworkLayer.connect:314 : Could not connect to " + server, ex);
+                            Logger.log(this + ".connect: Could not connect to " + server, ex);
                         }
                     }
                 }
@@ -372,7 +387,7 @@ class NetworkLayer implements ISocketLayer {
                 return false;
             } catch (Exception ex) {
                 if (Logger.BUILD_WARNING) {
-                    Logger.log("NetworkLayer.connect:332", ex);
+                    Logger.log(this + ".connect:38", ex);
                 }
                 return false;
             } finally {
@@ -384,7 +399,7 @@ class NetworkLayer implements ISocketLayer {
             }
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
-                Logger.log("NetworLayer.connect:344", ex);
+                Logger.log(this + ".connect:39", ex);
             }
             return false;
         }
@@ -394,12 +409,15 @@ class NetworkLayer implements ISocketLayer {
      * Disconnects from the server
      */
     public void disconnect() {
+        if (socket != null) {
+            return;
+        }
         try {
             if (tcpIs != null) {
                 tcpIs.close();
             }
         } catch (Exception ex) {
-            Logger.log("NetworkLayer.Disconnect.tcpIn.close();", ex);
+            Logger.log(this + ".disconnect()/1;", ex);
         }
 
         try {
@@ -407,7 +425,7 @@ class NetworkLayer implements ISocketLayer {
                 tcpOs.close();
             }
         } catch (Exception ex) {
-            Logger.log("NetworkLayer.Disconnect.tcpIn.close();", ex);
+            Logger.log(this + ".disconnect()/2;", ex);
         }
 
         try {
@@ -415,7 +433,7 @@ class NetworkLayer implements ISocketLayer {
                 socket.close();
             }
         } catch (Exception ex) {
-            Logger.log("NetworkLayer.Disconnect.tcpIn.close();", ex);
+            Logger.log(this + ".disconnect()/3;", ex);
         }
 
         socket = null;
@@ -444,9 +462,9 @@ class NetworkLayer implements ISocketLayer {
      */
     public void sendFrame(byte[] data) {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log("NetworkLayer.sendFrame( " + Bytes.byteArrayToPrettyString(data) + " );");
+            Logger.log(this + ".sendFrame( " + Bytes.byteArrayToPrettyString(data) + " );");
         } else if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-            Logger.log("NetworkLayer.sendFrame( byte[" + data.length + "] );");
+            Logger.log(this + ".sendFrame( byte[" + data.length + "] );");
         }
 
         lastDataSendTime = DateManagement.time();
@@ -461,9 +479,9 @@ class NetworkLayer implements ISocketLayer {
      */
     public void sendFrameFirst(byte[] data) {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log("NetworkLayer.SendFrameFirst( " + Bytes.byteArrayToPrettyString(data) + " );");
+            Logger.log(this + ".sendFrameFirst( " + Bytes.byteArrayToPrettyString(data) + " );");
         } else if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-            Logger.log("NetworkLayer.SendFrameFirst( byte[" + data.length + "] );");
+            Logger.log(this + ".sendFrameFirst( byte[" + data.length + "] );");
         }
 
         lastDataSendTime = DateManagement.time();
@@ -473,7 +491,7 @@ class NetworkLayer implements ISocketLayer {
 
     protected void onFrameReceived(byte[] data) {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log("NetworkLayer.NetworkReceive.onFrameReceived( " + Bytes.byteArrayToPrettyString(data) + " )");
+            Logger.log(this + ".onFrameReceived( " + Bytes.byteArrayToPrettyString(data) + " )");
         }
 
         updateLastRecvTime();
@@ -509,5 +527,9 @@ class NetworkLayer implements ISocketLayer {
 
     public void setProtoLayer(ProtocolLayer proto) {
         protocolLayer = proto;
+    }
+
+    public String toString() {
+        return "NetworkLayer";
     }
 }
