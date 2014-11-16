@@ -1,10 +1,12 @@
 package org.javacint.gps;
 
 import java.util.Hashtable;
+import java.util.TimerTask;
 import org.javacint.common.Strings;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
 import org.javacint.settings.SettingsProvider;
+import org.javacint.task.Timers;
 
 /**
  * GPS Position filtering code
@@ -160,6 +162,7 @@ public class GpsPositionFilter implements GpsPositionListener, SettingsProvider 
     private static final String SETTING_LOG_SENT = "gps.filter.log.sent";
     private static final String SETTING_LOG_PERIOD = "gps.filter.log.period";
     private static final String SETTING_FILTER_SPEEDS = "gps.filter.speeds";
+    private static final String SETTING_FILTER_SPEEDS_DEFAULT = "0:3600,10:10,25:60";
 
     /**
      * Get the default settings
@@ -176,7 +179,7 @@ public class GpsPositionFilter implements GpsPositionListener, SettingsProvider 
         settings.put(SETTING_LOG_RCVD, "0");
         settings.put(SETTING_LOG_SENT, "0");
         settings.put(SETTING_LOG_PERIOD, "0");
-        settings.put(SETTING_FILTER_SPEEDS, "0:3600,10:10,25:60");
+        settings.put(SETTING_FILTER_SPEEDS, SETTING_FILTER_SPEEDS_DEFAULT);
     }
 
     public void settingsChanged(String[] settings) {
@@ -204,13 +207,24 @@ public class GpsPositionFilter implements GpsPositionListener, SettingsProvider 
             for (int i = 0; i < filters.length; i++) {
                 String f = filters[i];
                 String[] values = Strings.split(':', f);
-                newSpeedFilters[i] = new SpeedFilter(Double.parseDouble(values[0]), Integer.parseInt(values[1]));
+                double speed = Double.parseDouble(values[0]);
+                int period = Integer.parseInt(values[1]);
+                if (speed > 900) {
+                    throw new RuntimeException("Speed of " + speed + " km/h is unreasonnable!");
+                }
+                newSpeedFilters[i] = new SpeedFilter(speed, period);
             }
             speedFilters = newSpeedFilters;
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
-                Logger.log(this + ".parseFilterSpeeds(\"" + value + "\")", ex);
+                Logger.log(this + ".parseFilterSpeeds(\"" + value + "\")", ex, true);
             }
+            Timers.getSlow().schedule(new TimerTask() {
+                public void run() {
+                    Settings.set(SETTING_FILTER_SPEEDS, SETTING_FILTER_SPEEDS_DEFAULT);
+                    Settings.save();
+                }
+            }, 0);
         }
     }
 
