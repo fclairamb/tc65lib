@@ -49,6 +49,12 @@ public final class APNAutodetection {
     public void addDefaultParameters() {
         try {
             Vector names = getSettingsListNames();
+
+            if (names == null) {
+                Logger.log("We couldn't find some settings names. Probably an issue with SIM card!");
+                return;
+            }
+
             sources.addElement( // My list of APNS
                     new GPRSParametersResourceReader(
                     new ResourceProvider(GPRSParametersResourceReader.class, "/apns.txt"),
@@ -66,29 +72,34 @@ public final class APNAutodetection {
     }
 
     private Vector getSettingsListNames() {
-        String mcc, mnc;
-        {
-            String[] monc = ATExecution.getMONC();
-            mcc = monc[0];
-            mnc = monc[1];
-        }
-        String operator = ATExecution.getCopsOperator().
-                trim().
-                toLowerCase().
-                replace(' ', '_');
-        if (Logger.BUILD_DEBUG && LOG) {
-            Logger.log("Operator: " + operator);
-            Logger.log("MCC: " + mcc);
-            Logger.log("MNC: " + mnc);
-        }
+        try {
+            String mcc, mnc;
+            {
+                String[] monc = ATExecution.getMONC();
+                mcc = monc[0];
+                mnc = monc[1];
+            }
+            String operator = ATExecution.getCopsOperator().
+                    trim().
+                    toLowerCase().
+                    replace(' ', '_');
+            if (Logger.BUILD_DEBUG && LOG) {
+                Logger.log("Operator: " + operator);
+                Logger.log("MCC: " + mcc);
+                Logger.log("MNC: " + mnc);
+            }
 
 
-        Vector names = new Vector();
-        // These are the different types of configuration that might have been defined
-        names.addElement(mcc + "-" + operator); // covers "MVNO"
-        names.addElement(mcc + "-" + mnc); // This is the most important one
-        names.addElement(mcc); // This is the per-country one
-        return names;
+            Vector names = new Vector();
+            // These are the different types of configuration that might have been defined
+            names.addElement(mcc + "-" + operator); // covers "MVNO"
+            names.addElement(mcc + "-" + mnc); // This is the most important one
+            names.addElement(mcc); // This is the per-country one
+            return names;
+        } catch (Exception ex) {
+            Logger.log(this + ".getSettingsListNames", ex);
+            return null;
+        }
     }
 
     /**
@@ -101,6 +112,15 @@ public final class APNAutodetection {
         String apn = null;
         try { // Let's detect the IMSI
             String simDetected, simSaved;
+
+            { // We check the SIM card pin status
+                int pinStatus = ATExecution.PIN.pinStatus();
+                if (pinStatus != ATExecution.PIN.PINSTATUS_READY) {
+                    Logger.log("SIM PIN is not READY ! / status = " + pinStatus);
+                    return apn;
+                }
+            }
+
             simDetected = ATExecution.getIccid();
             simSaved = Settings.get(Settings.SETTING_ICCID);
 
@@ -183,7 +203,7 @@ public final class APNAutodetection {
             }
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
-                Logger.log(this+".autoLoadRightGPRSSettings", ex);
+                Logger.log(this + ".autoLoadRightGPRSSettings", ex);
             }
         }
         return apn;
