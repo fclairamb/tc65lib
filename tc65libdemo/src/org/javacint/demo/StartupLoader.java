@@ -15,6 +15,7 @@ import org.javacint.console.GPSTestCommand;
 import org.javacint.console.IDCommand;
 import org.javacint.console.NTPTestCommand;
 import org.javacint.console.PinManagementCommandReceiver;
+import org.javacint.console.SettingsCommand;
 import org.javacint.console.SmsSenderCommand;
 import org.javacint.console.UpdateCommand;
 import org.javacint.console.UptimeCommand;
@@ -93,6 +94,7 @@ public class StartupLoader extends TimerTask {
             public void run() {
                 try {
                     Global.console = new Console(Connections.serial(0, 115200));
+                    Global.console.addCommandReceiver(new SettingsCommand());
                     Global.console.addCommandReceiver(new DateCommand());
                     Global.console.addCommandReceiver(new NTPTestCommand());
                     Global.console.addCommandReceiver(new ConsiderUpdateCommand(version));
