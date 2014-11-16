@@ -5,15 +5,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Vector;
 import javax.microedition.io.StreamConnection;
 import org.javacint.at.ATCommands;
 import org.javacint.at.ATExecution;
 import org.javacint.common.Strings;
-import org.javacint.common.sorting.Sorter;
 import org.javacint.logging.Logger;
-import org.javacint.settings.Settings;
 
 /**
  * Console management.
@@ -116,49 +113,9 @@ public class Console implements Runnable {
             ATExecution.restart();
         } else if (line.equals("help")) {
             writeLine("[HELP] help                             - This help");
-            writeLine("[HELP] conf list                        - List all configuration settings");
-            writeLine("[HELP] conf <key>=<value>               - Define a configuration setting");
-            writeLine("[HELP] conf <key>                       - Get a configuration setting");
-            writeLine("[HELP] conf save                        - Save the configuration settings");
             writeLine("[HELP] restart                          - Restart the device");
             writeLine("[HELP] AT***                            - Send AT commads");
             writeLine("[HELP] stats                            - Get some system stats");
-        } else if (line.equals("conf list") || line.equals("conf")) {
-            
-            Hashtable defSettings = Settings.getDefaultSettings();
-            
-            Object keys[] = new Object[defSettings.size()];
-            
-            { // Filling and sorting keys
-                Enumeration e = defSettings.keys();
-                for (int i = 0; e.hasMoreElements(); i++) {
-                    keys[i] = e.nextElement();
-                }
-                Sorter s = new Sorter();
-                s.sort(keys);
-            }
-            
-            for (int i = 0; i < keys.length; i++) {
-                String key = (String) keys[i];
-                String defValue = (String) defSettings.get(key);
-                String value = (String) Settings.get(key);
-                writeLine("[CONF LIST] " + key + " = \"" + value + "\"" + (!defValue.equals(value) ? " (\"" + defValue + "\")" : ""));
-            }
-        } else if (line.equals("conf save")) {
-            Settings.save();
-        } else if (line.startsWith("conf ")) {
-            String content = line.substring("conf ".length());
-            int p = content.indexOf('=');
-            if (p != -1) {
-                String key = content.substring(0, p);
-                String value = content.substring(p + 1);
-                Settings.set(key, value);
-                value = Settings.get(key);
-                writeLine("[CONF SET] " + key + " = \"" + value + "\"");
-            } else {
-                String value = Settings.get(content);
-                writeLine("[CONF GET] " + content + " = \"" + value + "\"");
-            }
         } else if (line.equals("stats")) {
             Runtime.getRuntime().
                     gc();
