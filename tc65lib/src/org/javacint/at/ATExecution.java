@@ -416,6 +416,11 @@ public class ATExecution {
     public static class PIN {
 
         public static boolean pinLock(boolean lock, String code) {
+            if (!lock) {
+                // When we send an unlock command, we usually also want to send the
+                // current pin.
+                pinSend(code);
+            }
             try {
                 String ret = ATCommands.send("AT+CLCK=\"SC\"," + (lock ? "1" : "0") + ",\"" + code + "\"");
                 String[] spl = Strings.split('\n', ret);
