@@ -135,21 +135,22 @@ public class Settings {
      * @param names Names of the settings
      */
     public static void onSettingsChanged(String[] names, SettingsProvider caller) {
-        try {
-            synchronized (providers) {
-                for (Enumeration en = providers.elements(); en.hasMoreElements();) {
-                    SettingsProvider cons = (SettingsProvider) en.nextElement();
+
+        synchronized (providers) {
+            for (Enumeration en = providers.elements(); en.hasMoreElements();) {
+                SettingsProvider cons = (SettingsProvider) en.nextElement();
+                try {
 
                     if (cons == caller) {
                         continue;
                     }
 
                     cons.settingsChanged(names);
+                } catch (Exception ex) {
+                    if (Logger.BUILD_CRITICAL) {
+                        Logger.log(THIS + ".onSettingsChanged: " + cons + ".settingsChanged", ex);
+                    }
                 }
-            }
-        } catch (Exception ex) {
-            if (Logger.BUILD_CRITICAL) {
-                Logger.log(THIS + ".onSettingsChanged", ex);
             }
         }
     }
