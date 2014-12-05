@@ -52,9 +52,9 @@ public class M2MPClientWithQueue extends M2MPClientImpl {
             case STATE_SENDING_QUEUE:
                 return "SENDING_QUEUE";
             case STATE_WAITING_FOR_ACK_RT:
-                return "WAITING_ACK_RT";
+                return "WAITING_FOR_ACK_RT";
             case STATE_WAITING_FOR_ACK_QUEUE:
-                return "WAITING_ACK_QUEUE";
+                return "WAITING_FOR_ACK_QUEUE";
         }
         return null;
     }

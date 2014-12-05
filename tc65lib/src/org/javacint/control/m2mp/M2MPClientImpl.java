@@ -72,7 +72,7 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
      * Capacities could be defined like this :<br>
      * gpioState,chat,sms,batteryState
      */
-    public void setCapacities(String capacities) {
+    public void setCapabilities(String capacities) {
         statuses.put(STATUS_CAPABILITIES, capacities);
     }
 
@@ -81,7 +81,7 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
      *
      * @return Capacities of the equipment
      */
-    public String getCapacities() {
+    public String getCapabilities() {
         return (String) statuses.get(STATUS_CAPABILITIES);
     }
 
@@ -116,22 +116,25 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
     }
 
     void onReceivedData(String channelName, byte[][] data) {
+        try {
+            if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
+                Logger.log("AppLayer.receivedData( \"" + channelName + "\", byte[" + data.length + "][] );");
+            }
 
-        if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log("AppLayer.receivedData( \"" + channelName + "\", byte[" + data.length + "][] );");
+            if (channelName.compareTo(CHANNEL_SETTING) == 0) {
+                treatMsgSetting(data);
+            } else if (channelName.compareTo(CHANNEL_COMMAND) == 0) {
+                treatMsgCommand(data);
+            } else if (channelName.compareTo(CHANNEL_STATUS) == 0) {
+                treatMsgStatus(data);
+            } else if (protRecv != null) {
+                protRecv.receivedData(channelName, data);
+            }
+        } catch (Exception ex) {
+            if (Logger.BUILD_CRITICAL) {
+                Logger.log("AppLayer.receivedData( \"" + channelName + "\" )", ex);
+            }
         }
-
-        if (channelName.compareTo(CHANNEL_SETTING) == 0) {
-            treatMsgSetting(data);
-        } else if (channelName.compareTo(CHANNEL_COMMAND) == 0) {
-            treatMsgCommand(data);
-        } else if (channelName.compareTo(CHANNEL_STATUS) == 0) {
-            treatMsgStatus(data);
-        } else if (protRecv != null) {
-            protRecv.receivedData(channelName, data);
-        }
-
-
     }
 
     private void treatMsgStatus(byte[][] data) {
@@ -175,6 +178,7 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
             response.addElement("g");
         }
         Vector settingsChanged = new Vector();
+        Hashtable defaultSettings = Settings.getDefaultSettings();
 
         for (int i = 1; i < data.length; i++) {
             String str = new String(data[i]);
@@ -203,19 +207,21 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
             }
 
 
-            String finalValue = Settings.get(var);
-            if (cmdGet) {
+            String defaultValue = (String) defaultSettings.get(var);
+            if (defaultValue == null) {
+                if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
+                    Logger.log("Unknown setting \"" + var + "\" !");
+                }
+                Vector unknownResponse = new Vector();
+                unknownResponse.addElement("u");
+                unknownResponse.addElement(var);
+                protSend.sendData(CHANNEL_SETTING, unknownResponse);
+            } else if (cmdGet) {
+                String finalValue = Settings.get(var);
                 if (finalValue == null) {
                     response.addElement(var);
                 } else {
                     response.addElement(var + "=" + finalValue);
-                }
-            } else {
-                if (finalValue == null) {
-                    Vector unknownResponse = new Vector();
-                    unknownResponse.addElement("u");
-                    unknownResponse.addElement(var);
-                    protSend.sendData(CHANNEL_SETTING, unknownResponse);
                 }
             }
         }

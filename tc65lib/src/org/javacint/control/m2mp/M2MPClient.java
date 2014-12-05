@@ -18,7 +18,7 @@ public interface M2MPClient extends IProtocolLayerSend {
 
 	public void setIdent(String string);
 
-	public void setCapacities(String echoloc);
+	public void setCapabilities(String echoloc);
 
 	public void sendCapabilities();
 

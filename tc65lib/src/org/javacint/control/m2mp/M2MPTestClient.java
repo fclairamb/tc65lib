@@ -22,7 +22,7 @@ public class M2MPTestClient implements ConsoleCommand, SettingsProvider, IProtoc
 //		this.atc = atc;
         rtclient = new M2MPClientImpl();
         rtclient.setIdent("imei:" + ATExecution.getImei());
-        rtclient.setCapacities("echo,loc,sensor");
+        rtclient.setCapabilities("echo,loc,sensor");
         rtclient.setListener(this);
     }
     private String channel = "echo:default";
