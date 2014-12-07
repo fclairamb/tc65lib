@@ -341,6 +341,31 @@ public class ATExecution {
         }
     }
 
+    public static String getChipIdentification() {
+        try {
+            String[] spl = Strings.split('\n', ATCommands.send("ATI").trim());
+            String make = spl[1].trim();
+            String model = spl[2].trim();
+            String version = spl[3].trim();
+            {
+                spl = Strings.split(' ', version);
+                if (spl.length > 1) {
+                    version = spl[1];
+                }
+                while (version.startsWith("0")) {
+                    version = version.substring(1);
+                }
+                while (version.endsWith("0")) {
+                    version = version.substring(0, version.length() - 1);
+                }
+            }
+
+            return make + "-" + model + "/" + version;
+        } catch (Exception ex) {
+            return THIS + ".getChipIdentification" + ex.getClass() + ":" + ex.getMessage();
+        }
+    }
+
     /**
      * Get our own phone number.
      *
