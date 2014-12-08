@@ -5,11 +5,13 @@ import java.util.Hashtable;
 import java.util.TimerTask;
 import java.util.Vector;
 import org.javacint.common.Base64;
+import org.javacint.common.Bytes;
 import org.javacint.common.safequeue.SafeQueue;
 import org.javacint.common.safequeue.SafeQueueLineReader;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
 import org.javacint.task.Timers;
+import org.javacint.time.DateManagement;
 
 /**
  *
@@ -248,6 +250,12 @@ public class M2MPClientWithQueue extends M2MPClientImpl {
     public void addQueuedData(String channelName, byte[][] data) {
         queue.addElement(new NamedArrayData(channelName, data));
         schedule();
+    }
+
+    public void addQueuedDatedData(String channelName, String data) {
+        byte[] timestamp = new byte[4];
+        Bytes.longToUInt32Bytes(DateManagement.time(), timestamp, 0);  // date [0...3]
+        this.addQueuedData(channelName, new byte[][]{timestamp, data.getBytes()});
     }
 
     private void schedule() {
