@@ -1,6 +1,5 @@
 package org.javacint.control.m2mp;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
@@ -18,7 +17,7 @@ import org.javacint.time.DateManagement;
  *
  * @author Florent Clairambault / www.webingenia.com
  */
-class NetworkLayer implements ISocketLayer {
+class NetworkLayer {
 
     private String clientId;
     private SocketConnection socket;
@@ -30,7 +29,7 @@ class NetworkLayer implements ISocketLayer {
         clientId = ident;
     }
 
-    public void setProtoLayer(IProtocolLayer proto) {
+    public void setProtoLayer(FrameType proto) {
     }
 
     /**
@@ -110,17 +109,6 @@ class NetworkLayer implements ISocketLayer {
             }
         }
 
-        public void queueSendFirst(byte[] data) {
-            if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-                Logger.log(this + ".queueSendFirst( byte[" + data.length + "] );");
-            }
-
-            synchronized (dataOutQueue) {
-                dataOutQueue.insertElementAt(data, 0);
-                dataOutQueue.notify();
-            }
-        }
-
         private void stop(boolean b) {
         }
 
@@ -141,129 +129,7 @@ class NetworkLayer implements ISocketLayer {
      */
     private class NetworkReceive implements Runnable {
 
-        private int offset = 0;
-        private byte[] frame;
-        private int type = 0;
-        private byte[] header = new byte[3];
 
-        public void run() {
-            if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-                Logger.log("Started send !");
-            }
-            try {
-                while (true) {
-                    try {
-
-                        if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                            Logger.log("...");
-                        }
-
-                        connect();
-
-                        // If we don't yet have a packet
-                        if (frame == null) {
-                            if (offset == 0) {
-                                type = tcpIs.read();
-                                header[offset++] = (byte) type;
-                                if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                                    Logger.log("_type = " + type + " / " + header[0]);
-                                }
-
-                                if (type < IProtocolLayer.NET_MSG_SPECIALIZED_MAX && (type == IProtocolLayer.NET_R_IDENT_RESULT
-                                        || type == IProtocolLayer.NET_R_ACK_REQUEST
-                                        || type == IProtocolLayer.NET_R_ACK_RESPONSE)) {
-                                    frame = new byte[2];
-                                    frame[0] = header[0];
-                                }
-                            } else {
-                                int b = tcpIs.read();
-
-                                if (b == -1) {
-                                    disconnect();
-                                }
-
-                                header[offset++] = (byte) b;
-
-//						if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog) {
-//							Logger.log("tcpIn=" + b + " / _offset=" + _offset);
-//						}
-
-                                // If it's a one-byte sized message
-                                if (offset == 2 && type < IProtocolLayer.NET_MSG_1BYTESIZED_MAX) {
-//							if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog) {
-//								Logger.log("_type = " + _type + " < " + IProtocolLayer.NET_MSG_1BYTESIZED_MAX);
-//							}
-
-                                    int size = Bytes.byteToInt(header[1]) + 2;
-                                    frame = new byte[size];
-                                    System.arraycopy(header, 0, frame, 0, 2);
-
-                                    if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                                        Logger.log(this + ".run: size=" + size);
-                                    }
-
-
-                                } // If it's two-bytes sized message
-                                else if (offset == 3 && type < IProtocolLayer.NET_MSG_2BYTESSIZED_MAX) {
-                                    if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                                        Logger.log("_type = " + type + " < " + IProtocolLayer.NET_MSG_2BYTESSIZED_MAX);
-                                    }
-
-                                    int size = Bytes.bytesToShort(header, 1) + 3;
-                                    frame = new byte[size];
-                                    System.arraycopy(header, 0, frame, 0, 3);
-
-                                    if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                                        Logger.log("NetworkLayer.NetworkReceive.Work : size=" + size);
-                                    }
-                                }
-                            }
-                        } else {
-                            // We try to read as much as possible
-//					if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog) {
-//						Logger.log("_offset=" + _offset + " / _frame.length=" + _frame.length);
-//					}
-                            offset += tcpIs.read(frame, offset, frame.length - offset);
-//					if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog) {
-//						Logger.log("_offset=" + _offset + " / _frame.length=" + _frame.length);
-//					}
-                        }
-                        // Could be used if we have zero sized messages
-                        if (frame != null && offset == frame.length) {
-                            try {
-                                onFrameReceived(frame);
-                            } finally {
-                                resetFrame();
-                            }
-                        }
-
-                    } catch (IOException ex) {
-                        if (Logger.BUILD_CRITICAL) {
-                            Logger.log(this + ".run:1", ex);
-                        }
-                        disconnect();
-                        break;
-                    } catch (Exception ex) {
-                        if (Logger.BUILD_CRITICAL) {
-                            Logger.log(this + ".run:2", ex);
-                        }
-                        break;
-                    }
-                }
-            } finally {
-                if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                    Logger.log("End!");
-                }
-            }
-        }
-
-        private void resetFrame() {
-            if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                Logger.log(this + ".resetFrame();");
-            }
-            offset = 0;
-            frame = null;
-        }
 
         private void stop(boolean b) {
         }
@@ -285,15 +151,7 @@ class NetworkLayer implements ISocketLayer {
         new Thread(send, "m2mp-send").start();
         new Thread(recv, "m2mp-recv").start();
     }
-
-    public byte[] identMessage() {
-        byte[] rawId = clientId.getBytes();
-        byte[] frame = new byte[(rawId.length + 2)];
-        frame[0] = ProtocolLayer.NET_S_IDENT;
-        frame[1] = (byte) rawId.length;
-        System.arraycopy(rawId, 0, frame, 2, rawId.length);
-        return frame;
-    }
+    
     long lastConnectCall = 0;
     int nbConnectAttempts = 0;
 
@@ -470,36 +328,6 @@ class NetworkLayer implements ISocketLayer {
         lastDataSendTime = DateManagement.time();
 
         send.queueSend(data);
-    }
-
-    /**
-     * Send frames on the top of the
-     *
-     * @param data Data
-     */
-    public void sendFrameFirst(byte[] data) {
-        if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log(this + ".sendFrameFirst( " + Bytes.byteArrayToPrettyString(data) + " );");
-        } else if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-            Logger.log(this + ".sendFrameFirst( byte[" + data.length + "] );");
-        }
-
-        lastDataSendTime = DateManagement.time();
-
-        send.queueSendFirst(data);
-    }
-
-    protected void onFrameReceived(byte[] data) {
-        if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log(this + ".onFrameReceived( " + Bytes.byteArrayToPrettyString(data) + " )");
-        }
-
-        updateLastRecvTime();
-
-        if (protocolLayer != null) {
-            protocolLayer.receivedFrame(data);
-        }
-
     }
 
     public long getLastRecvTime() {

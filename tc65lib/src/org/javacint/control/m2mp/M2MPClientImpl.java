@@ -8,6 +8,7 @@ import org.javacint.at.ATCommands;
 import org.javacint.at.ATExecution;
 import org.javacint.common.Bytes;
 import org.javacint.common.Vectors;
+import org.javacint.control.m2mp.data.Event;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
 import org.javacint.settings.SettingsProvider;
@@ -18,11 +19,10 @@ import org.javacint.sms.SimpleSMS;
  *
  * @author Florent Clairambault / www.webingenia.com
  */
-public class M2MPClientImpl implements M2MPClient, SettingsProvider {
+public class M2MPClientImpl implements M2MPClient, SettingsProvider, M2MPEventsListener {
 
     protected final Hashtable statuses = new Hashtable();
-    protected final ProtocolLayer protSend;
-    protected IProtocolLayerReceive protRecv;
+    protected M2MPEventsListener listener;
     public static boolean m2mpLog_;
     static final String SETTING_M2MP_LOG = "m2mp.log";
     static final String SETTING_M2MP_SERVERS = "m2mp.servers";
@@ -39,9 +39,6 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
         if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
             Logger.log(this + ".ctor();");
         }
-
-        protSend = new ProtocolLayer();
-        protSend.setAppLayer(this);
 
         Settings.addProvider(this);
     }
@@ -73,7 +70,7 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
      * gpioState,chat,sms,batteryState
      */
     public void setCapabilities(String capacities) {
-        statuses.put(STATUS_CAPABILITIES, capacities);
+        setStatus(STATUS_CAPABILITIES, capacities);
     }
 
     /**
@@ -99,8 +96,8 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
      *
      * @param listener Listener
      */
-    public void setListener(IProtocolLayerReceive listener) {
-        protRecv = listener;
+    public void setListener(M2MPEventsListener listener) {
+        this.listener = listener;
     }
 
     void onReceivedData(String channelName, byte[] data) {
@@ -110,8 +107,8 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
             Logger.log(this + ".receiveData( \"" + channelName + "\", byte[" + data.length + "] );");
         }
 
-        if (protRecv != null) {
-            protRecv.receivedData(channelName, data);
+        if (listener != null) {
+            listener.receivedData(channelName, data);
         }
     }
     //int errorCounter = 0;
@@ -128,8 +125,8 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
                 treatMsgCommand(data);
             } else if (channelName.compareTo(CHANNEL_STATUS) == 0) {
                 treatMsgStatus(data);
-            } else if (protRecv != null) {
-                protRecv.receivedData(channelName, data);
+            } else if (listener != null) {
+                listener.receivedData(channelName, data);
             }
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
@@ -335,8 +332,8 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
 //			listener.receivedAckRequest( b );
 //		}
 
-        if (protRecv != null) {
-            protRecv.receivedAckRequest(b);
+        if (listener != null) {
+            listener.receivedAckRequest(b);
         }
     }
 
@@ -349,14 +346,14 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
 //			IClientReceive listener = (IClientReceive) e.nextElement();
 //			listener.receivedAckResponse( b );
 //		}
-        if (protRecv != null) {
-            protRecv.receivedAckResponse(b);
+        if (listener != null) {
+            listener.receivedAckResponse(b);
         }
     }
 
     void onDisconnected() {
-        if (protRecv != null) {
-            protRecv.disconnected();
+        if (listener != null) {
+            listener.disconnected();
         }
     }
 
@@ -369,8 +366,8 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
 //			IClientReceive listener = (IClientReceive) e.nextElement();
 //			listener.receivedIdentificationResult( identified );
 //		}
-        if (protRecv != null) {
-            protRecv.receivedIdentificationResult(identified);
+        if (listener != null) {
+            listener.receivedIdentificationResult(identified);
         }
     }
 
@@ -479,8 +476,8 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
                 if (!executeCommand(cmdId, argv)) {
 
                     // And if we can't we give it to the listener
-                    if (protRecv != null) {
-                        protRecv.receivedCommand(cmdId, argv);
+                    if (listener != null) {
+                        listener.receivedCommand(cmdId, argv);
                     }
                 }
             }
@@ -573,5 +570,8 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
         }
 
         protSend.sendData(CHANNEL_SETTING, settingsMessage);
+    }
+
+    public void m2mpEvent(Event event) {
     }
 }

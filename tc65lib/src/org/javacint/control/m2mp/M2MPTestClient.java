@@ -6,14 +6,12 @@ import java.util.Hashtable;
 import org.javacint.at.ATExecution;
 import org.javacint.common.Bytes;
 import org.javacint.console.ConsoleCommand;
+import org.javacint.control.m2mp.data.AcknowledgeRequest;
+import org.javacint.control.m2mp.data.Event;
 import org.javacint.logging.Logger;
 import org.javacint.settings.SettingsProvider;
 
-/**
- *
- * @author Florent
- */
-public class M2MPTestClient implements ConsoleCommand, SettingsProvider, IProtocolLayerReceive {
+public class M2MPTestClient implements ConsoleCommand, SettingsProvider, M2MPEventsListener {
 
     private final M2MPClient rtclient;
 //	private final ATCommand atc;
@@ -36,8 +34,6 @@ public class M2MPTestClient implements ConsoleCommand, SettingsProvider, IProtoc
                     rtclient.start();
                 } else if (command.equals("stop")) {
                     rtclient.stop();
-                } else if (command.equals("send cap")) {
-                    rtclient.sendCapabilities();
                 } else if (command.startsWith("send ")) {
                     command = command.substring(5);
                     rtclient.sendData(channel, command);
@@ -67,42 +63,12 @@ public class M2MPTestClient implements ConsoleCommand, SettingsProvider, IProtoc
     public void settingsChanged(String[] settings) {
     }
 
-    public void receivedIdentificationResult(boolean identified) {
-        if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log(this + ".receivedIdentificationResult( " + identified + " );");
-        }
-    }
-
-    public void receivedAckResponse(byte b) {
-        if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log(this + ".receivedAckResponse( " + Bytes.byteToInt(b) + " );");
-        }
-    }
-
     public void receivedAckRequest(byte b) {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
             Logger.log(this + ".receivedAckRequest( " + Bytes.byteToInt(b) + " );");
         }
 
         rtclient.sendAckResponse(b);
-    }
-
-    public void receivedData(String channelName, byte[] data) {
-        if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log(this + ".receivedData( \"" + channelName + "\", " + Bytes.byteArrayToPrettyString(data) + " );");
-        }
-    }
-
-    public void receivedData(String channelName, byte[][] data) {
-        if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log(this + ".receivedData( \"" + channelName + "\", byte[][" + data.length + "] );");
-        }
-    }
-
-    public void receivedCommand(String cmdId, String[] argv) {
-        if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log(this + ".receiveCommand( \"" + cmdId + "\", String[" + argv.length + "] );");
-        }
     }
 
     public String toString() {
@@ -120,6 +86,12 @@ public class M2MPTestClient implements ConsoleCommand, SettingsProvider, IProtoc
     public void disconnected() {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
             Logger.log(this + ".disconnected();");
+        }
+    }
+
+    public void m2mpEvent(Event event) {
+        if (event instanceof AcknowledgeRequest) {
+            receivedAckRequest(((AcknowledgeRequest) event).nb);
         }
     }
 }
