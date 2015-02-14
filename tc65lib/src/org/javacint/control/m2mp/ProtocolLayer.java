@@ -276,6 +276,7 @@ public final class ProtocolLayer implements IProtocolLayer {
         }
 
         boolean identified = frame[1] == 0x01;
+        this.reset();
         app.onReceivedIdentificationResult(identified);
     }
 
@@ -346,6 +347,10 @@ public final class ProtocolLayer implements IProtocolLayer {
                 Logger.log(this + ".getName( " + channelId + " ) : \"" + name + "\";");
             }
 
+            if (name == null) {
+                Logger.log("M2MP: Channel: Could not find a name for " + iChannelId, true);
+            }
+
             return name;
         }
 
@@ -384,7 +389,8 @@ public final class ProtocolLayer implements IProtocolLayer {
     }
     private NetworkLayer net;
     private ChannelManagementNameToId cmSend;
-    private ChannelManagementIdToName cmRecv;
+    // We have no reason to reset this...
+    private final ChannelManagementIdToName cmRecv = new ChannelManagementIdToName();
 
     private void sendNamedChannel(String name, byte bId) {
         if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
@@ -583,7 +589,6 @@ public final class ProtocolLayer implements IProtocolLayer {
             Logger.log(this + ".reset(); / new cmSend, new cmRecv");
         }
         cmSend = new ChannelManagementNameToId();
-        cmRecv = new ChannelManagementIdToName();
     }
 
     public void disconnected() {

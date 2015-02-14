@@ -114,6 +114,7 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
             protRecv.receivedData(channelName, data);
         }
     }
+    //int errorCounter = 0;
 
     void onReceivedData(String channelName, byte[][] data) {
         try {
@@ -132,7 +133,7 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
             }
         } catch (Exception ex) {
             if (Logger.BUILD_CRITICAL) {
-                Logger.log("AppLayer.receivedData( \"" + channelName + "\" )", ex);
+                Logger.log("AppLayer.receivedData( \"" + channelName + "\" )", ex /*, errorCounter++ < 3*/);
             }
         }
     }
@@ -151,8 +152,17 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
             protSend.sendData(CHANNEL_STATUS, response);
         }
     }
+    // This is for debugging an issue found only on some remote devices.
+    // This bug turns out to be related to a bug inside the M2MP client. In some
+    // situations the channels where flushed after being connected, which meant
+    // received settings (which are the first thing we received) where dropped.
+    private static final boolean DEBUG_M2MP_2014_12 = false;
 
     private void treatMsgSetting(byte[][] data) {
+        if (true) {
+            Logger.log("M2MP: treatMsgSetting( " + data.length + " );", true);
+        }
+
 //        Settings settings = Settings.getInstance();
         String cmd = new String(data[0]);
 
@@ -162,6 +172,11 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
 
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
             Logger.log("Setting: cmd = \"" + cmd + "\"");
+        }
+
+
+        if (DEBUG_M2MP_2014_12) {
+            Logger.log("M2MP: Setting: cmd : " + cmd, true);
         }
 
         boolean cmdSet = (cmd.compareTo("s") == 0 || cmd.compareTo("sg") == 0);
@@ -206,6 +221,10 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
                 settingsChanged.addElement(var);
             }
 
+            if (DEBUG_M2MP_2014_12) {
+                Logger.log("M2MP: Setting: " + var + " = " + val, true);
+            }
+
 
             String defaultValue = (String) defaultSettings.get(var);
             if (defaultValue == null) {
@@ -225,14 +244,26 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider {
                 }
             }
         }
-        Settings.save();
+        if (DEBUG_M2MP_2014_12) {
+            Logger.log("M2MP: Setting: done 0!", true);
+        }
 
-        // We apply changed settings everywhere but here
-        Settings.onSettingsChanged(Vectors.toStringArray(settingsChanged), this);
+        Settings.save();
 
         // We send the reply if needed
         if (response != null) {
             protSend.sendData(CHANNEL_SETTING, response);
+        }
+
+        if (DEBUG_M2MP_2014_12) {
+            Logger.log("M2MP: Setting: done 1!", true);
+        }
+
+        // We only apply setting at the very end
+        Settings.onSettingsChanged(Vectors.toStringArray(settingsChanged), this);
+
+        if (DEBUG_M2MP_2014_12) {
+            Logger.log("M2MP: Setting: done 2!", true);
         }
     }
 

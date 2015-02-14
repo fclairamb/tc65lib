@@ -310,7 +310,6 @@ public class M2MPClientWithQueue extends M2MPClientImpl {
     public void stop() {
         safeQueue.saveMemoryInFile();
         super.stop();
-
     }
 
     public String toString() {
