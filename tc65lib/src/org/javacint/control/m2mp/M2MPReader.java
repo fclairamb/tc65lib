@@ -70,12 +70,11 @@ public class M2MPReader {
     private M2MPEventsListener app;
     private final InputStream is;
 
-    public M2MPReader(InputStream is, M2MPEventsListener listener) {
+    public M2MPReader(InputStream is) {
         this.is = is;
-        this.app = listener;
     }
 
-    public Message treatFrame(byte[] frame) throws IOException {
+    private Message treatFrame(byte[] frame) throws IOException {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
             Logger.log(this + ".receivedFrame( " + Bytes.byteArrayToPrettyString(frame));
         }
@@ -270,10 +269,11 @@ public class M2MPReader {
                     type = is.read();
                     header[offset++] = (byte) type;
                     if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                        Logger.log("_type = " + type + " / " + header[0]);
+                        Logger.log(this + ".read:27: _type = " + type);
                     }
 
-                    if (type < FrameType.MSG_SPECIALIZED_MAX && (type == FrameType.R_IDENT_RESULT
+                    if (type < FrameType.MSG_SPECIALIZED_MAX
+                            && (type == FrameType.R_IDENT_RESULT
                             || type == FrameType.R_ACK_REQUEST
                             || type == FrameType.R_ACK_RESPONSE)) {
                         frame = new byte[2];
@@ -283,7 +283,7 @@ public class M2MPReader {
                     int b = is.read();
 
                     if (b == -1) {
-                        throw new IOException("M2MPReader.read: We got disconnected !");
+                        throw new IOException(this + ".read:28: We got disconnected !");
                     }
 
                     header[offset++] = (byte) b;
@@ -303,7 +303,7 @@ public class M2MPReader {
                         System.arraycopy(header, 0, frame, 0, 2);
 
                         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                            Logger.log(this + ".run: size=" + size);
+                            Logger.log(this + ".read:30: size=" + size);
                         }
 
 
@@ -318,7 +318,7 @@ public class M2MPReader {
                         System.arraycopy(header, 0, frame, 0, 3);
 
                         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                            Logger.log("NetworkLayer.NetworkReceive.Work : size=" + size);
+                            Logger.log(this + ".read:32: size=" + size);
                         }
                     }
                 }
@@ -332,7 +332,8 @@ public class M2MPReader {
 //						Logger.log("_offset=" + _offset + " / _frame.length=" + _frame.length);
 //					}
             }
-            // Could be used if we have zero sized messages
+
+
             if (frame != null && offset == frame.length) {
                 try {
                     return treatFrame(frame);

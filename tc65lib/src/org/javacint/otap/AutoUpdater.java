@@ -11,6 +11,7 @@ import org.javacint.common.Strings;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
 import org.javacint.task.Timers;
+import org.javacint.watchdog.WatchdogStatusProvider;
 
 /**
  * Program auto-updating class.
@@ -24,7 +25,7 @@ import org.javacint.task.Timers;
  * process is triggered.
  *
  */
-public class AutoUpdater extends TimerTask {
+public class AutoUpdater extends TimerTask implements WatchdogStatusProvider {
 
     private final String version;
     protected final int timeBetweenUpdates;
@@ -98,6 +99,7 @@ public class AutoUpdater extends TimerTask {
     public AutoUpdater(String version) {
         this(version, 24 * 3600 * 1000);
     }
+    private String error;
 
     public void run() {
         if (Logger.BUILD_NOTICE && LOG) {
@@ -120,6 +122,7 @@ public class AutoUpdater extends TimerTask {
             if (Logger.BUILD_CRITICAL) {
                 Logger.log(this + ".run", ex, true);
             }
+            error = "OTAP.run" + ex.getClass();
         }
     }
 
@@ -236,5 +239,9 @@ public class AutoUpdater extends TimerTask {
             }
         }
         return null;
+    }
+
+    public String getWorkingStatus() {
+        return error;
     }
 }

@@ -7,7 +7,9 @@ import org.javacint.at.ATExecution;
 import org.javacint.common.Bytes;
 import org.javacint.console.ConsoleCommand;
 import org.javacint.control.m2mp.data.AcknowledgeRequest;
+import org.javacint.control.m2mp.data.AcknowledgeResponse;
 import org.javacint.control.m2mp.data.Event;
+import org.javacint.control.m2mp.data.NamedData;
 import org.javacint.logging.Logger;
 import org.javacint.settings.SettingsProvider;
 
@@ -36,12 +38,12 @@ public class M2MPTestClient implements ConsoleCommand, SettingsProvider, M2MPEve
                     rtclient.stop();
                 } else if (command.startsWith("send ")) {
                     command = command.substring(5);
-                    rtclient.sendData(channel, command);
+                    rtclient.send(new NamedData(channel, command));
                 } else if (command.startsWith("channel ")) {
                     channel = command.substring(8);
                     out.println("New channel: " + channel);
                 } else if (command.startsWith("ping ")) {
-                    rtclient.sendAckRequest(Byte.parseByte(command.substring(5)));
+                    rtclient.send(new AcknowledgeRequest(Byte.parseByte(command.substring(5))));
                 } else {
                     return false;
                 }
@@ -61,14 +63,6 @@ public class M2MPTestClient implements ConsoleCommand, SettingsProvider, M2MPEve
     }
 
     public void settingsChanged(String[] settings) {
-    }
-
-    public void receivedAckRequest(byte b) {
-        if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-            Logger.log(this + ".receivedAckRequest( " + Bytes.byteToInt(b) + " );");
-        }
-
-        rtclient.sendAckResponse(b);
     }
 
     public String toString() {
@@ -93,5 +87,13 @@ public class M2MPTestClient implements ConsoleCommand, SettingsProvider, M2MPEve
         if (event instanceof AcknowledgeRequest) {
             receivedAckRequest(((AcknowledgeRequest) event).nb);
         }
+    }
+
+    public void receivedAckRequest(byte b) {
+        if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
+            Logger.log(this + ".receivedAckRequest( " + Bytes.byteToInt(b) + " );");
+        }
+
+        rtclient.send(new AcknowledgeResponse(b));
     }
 }

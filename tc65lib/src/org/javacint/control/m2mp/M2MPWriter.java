@@ -3,7 +3,6 @@ package org.javacint.control.m2mp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Hashtable;
-import java.util.Vector;
 import org.javacint.common.Bytes;
 import org.javacint.control.m2mp.data.AcknowledgeRequest;
 import org.javacint.control.m2mp.data.AcknowledgeResponse;
@@ -50,7 +49,7 @@ public class M2MPWriter {
         this.os = os;
     }
 
-    public void send(Message m) throws IOException {
+    public void write(Message m) throws IOException {
         if (m instanceof NamedData) {
             NamedData msg = (NamedData) m;
             sendData(msg.name, msg.data);
@@ -59,29 +58,29 @@ public class M2MPWriter {
             sendData(msg.name, msg.data);
         } else if (m instanceof AcknowledgeRequest) {
             AcknowledgeRequest msg = (AcknowledgeRequest) m;
-            sendAckRequest((byte) msg.nb);
+            sendAckRequest(msg.nb);
         } else if (m instanceof AcknowledgeResponse) {
             AcknowledgeResponse msg = (AcknowledgeResponse) m;
-            sendAckResponse((byte) msg.nb);
+            sendAckResponse(msg.nb);
         } else if (m instanceof IdentificationRequest) {
             IdentificationRequest msg = (IdentificationRequest) m;
             sendIdentificationRequest(msg);
         }
     }
 
-    public void sendAckRequest(byte b) throws IOException {
+    private void sendAckRequest(byte b) throws IOException {
         os.write(new byte[]{FrameType.S_ACK_REQUEST, b});
     }
 
-    public void sendAckResponse(byte b) throws IOException {
+    private void sendAckResponse(byte b) throws IOException {
         os.write(new byte[]{FrameType.S_ACK_RESPONSE, b});
     }
 
-    public void sendData(String channelName, String data) throws IOException {
+    private void sendData(String channelName, String data) throws IOException {
         sendData(channelName, data.getBytes());
     }
 
-    public void sendData(String channelName, byte[] data) throws IOException {
+    private void sendData(String channelName, byte[] data) throws IOException {
         if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
             Logger.log(this + ".sendData( \"" + channelName + "\", byte[" + data.length + "] );");
         }
@@ -90,7 +89,7 @@ public class M2MPWriter {
         sendData(channelId, data);
     }
 
-    public void sendData(byte channelId, byte[] data) throws IOException {
+    private void sendData(byte channelId, byte[] data) throws IOException {
         if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
             Logger.log(this + ".sendData( byte, byte[" + data.length + "] );");
         }
@@ -141,26 +140,18 @@ public class M2MPWriter {
         return size;
     }
 
-    public void sendData(String channelName, Vector data) throws IOException {
-        sendData(channelName, Bytes.stringsToBytes(data));
-    }
-
-    public void sendData(String channelName, String[] data) throws IOException {
-        sendData(channelName, Bytes.stringsToBytes(data));
-    }
-
-    public void sendData(String channelName, byte[][] data) throws IOException {
+    private void sendData(String channelName, byte[][] data) throws IOException {
         byte channelId = (byte) cmSend.getId(channelName);
         sendData(channelId, data);
     }
 
-    public void sendData(byte channelId, byte[][] data) throws IOException {
+    private void sendData(byte channelId, byte[][] data) throws IOException {
         if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
             Logger.log(this + ".sendData( " + channelId + ", byte[" + data.length + "] );");
         }
         // We have 1 byte for the type
         int size = dataArraySize(data);
-        byte[] frame = null;
+        byte[] frame;
         int offset = 0;
         if (size <= 254) {
             frame = new byte[(size + 2)];

@@ -89,6 +89,9 @@ public class CallManager implements ATCommandListener, ATCommandResponseListener
         try {
             //String ret = _atCalling.send( "ATD" + number + ";\r" );
             callInAction = true;
+            if (callingAt != null) {
+                callingAt.release();
+            }
             callingAt = ATCommands.getATCommand();
             callingAt.atc().send("ATD" + number + ";", this);
             if (Logger.BUILD_DEBUG) {
