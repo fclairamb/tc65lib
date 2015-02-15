@@ -8,6 +8,10 @@ import org.javacint.common.Base64;
 import org.javacint.common.Bytes;
 import org.javacint.common.safequeue.SafeQueue;
 import org.javacint.common.safequeue.SafeQueueLineReader;
+import org.javacint.control.m2mp.data.AcknowledgeRequest;
+import org.javacint.control.m2mp.data.Message;
+import org.javacint.control.m2mp.data.NamedData;
+import org.javacint.control.m2mp.data.NamedDataArray;
 import org.javacint.logging.Logger;
 import org.javacint.settings.Settings;
 import org.javacint.task.Timers;
@@ -68,15 +72,15 @@ public class M2MPClientWithQueue extends M2MPClientImpl {
             queue.removeElementAt(0);
             if (obj instanceof NamedData) {
                 NamedData nd = (NamedData) obj;
-                sendData(nd.getChannelName(), nd.getData());
-                safeQueue.addLine(nd.getChannelName() + "," + Base64.encode(nd.getData()));
-            } else if (obj instanceof NamedArrayData) {
-                NamedArrayData nad = (NamedArrayData) obj;
-                byte[][] data = nad.getData();
-                sendData(nad.getChannelName(), data);
+                send(nd);
+                safeQueue.addLine(nd.name + "," + Base64.encode(nd.data));
+            } else if (obj instanceof NamedDataArray) {
+                NamedDataArray nda = (NamedDataArray) obj;
+                byte[][] data = nda.data;
+                send(nda);
                 StringBuffer sb = new StringBuffer();
                 sb.append('.');
-                sb.append(nad.getChannelName());
+                sb.append(nda.name);
                 for (int i = 0; i < data.length; i++) {
                     sb.append(',');
                     sb.append(Base64.encode(data[i]));
@@ -85,7 +89,8 @@ public class M2MPClientWithQueue extends M2MPClientImpl {
             }
             if (dataSent++ == LIMIT_BEFORE_ACK) {
                 changeState(STATE_WAITING_FOR_ACK_RT);
-                sendAckRequest((byte) 4);
+                //endAckRequest((byte) 4);
+                send(new AcknowledgeRequest((byte) 4));
                 workWaitingForAckRt();
                 break;
             }
@@ -129,10 +134,10 @@ public class M2MPClientWithQueue extends M2MPClientImpl {
 //					channelName = channelName.substring(1);
                 } else {
                     byte[] data = Base64.decode(line.substring(p + 1));
-                    sendData(channelName, data);
+                    send(new NamedData(channelName, data));
                 }
             }
-            sendAckRequest((byte) 5);
+            send(new AcknowledgeRequest((byte) 5));
             changeState(STATE_WAITING_FOR_ACK_QUEUE);
         } else {
             changeState(STATE_SENDING_RT);
@@ -162,42 +167,12 @@ public class M2MPClientWithQueue extends M2MPClientImpl {
         return System.currentTimeMillis() - stateStartedTime;
     }
 
-    private class NamedData {
-
-        private final String channelName;
-        private final byte[] data;
-
-        public NamedData(String channelName, byte[] data) {
-            this.channelName = channelName;
-            this.data = data;
-        }
-
-        public String getChannelName() {
-            return channelName;
-        }
-
-        public byte[] getData() {
-            return data;
-        }
+    public void addQueuedData(String name, byte[] data) {
+        send(new NamedData(name, data));
     }
 
-    public class NamedArrayData {
-
-        private final String channelName;
-        private final byte[][] data;
-
-        public NamedArrayData(String channelName, byte[][] data) {
-            this.channelName = channelName;
-            this.data = data;
-        }
-
-        public String getChannelName() {
-            return channelName;
-        }
-
-        public byte[][] getData() {
-            return data;
-        }
+    public void addQueuedData(String name, String data) {
+        send(new NamedData(name, data));
     }
 
     // <editor-fold desc="Send queue">
@@ -238,24 +213,15 @@ public class M2MPClientWithQueue extends M2MPClientImpl {
         super.start();
     }
 
-    public void addQueuedData(String channelName, String data) {
-        this.addQueuedData(channelName, data.getBytes());
-    }
-
-    public void addQueuedData(String channelName, byte[] data) {
-        queue.addElement(new NamedData(channelName, data));
-        schedule();
-    }
-
-    public void addQueuedData(String channelName, byte[][] data) {
-        queue.addElement(new NamedArrayData(channelName, data));
+    public void addQueuedData(Message msg) {
+        queue.addElement(msg);
         schedule();
     }
 
     public void addQueuedDatedData(String channelName, String data) {
         byte[] timestamp = new byte[4];
         Bytes.longToUInt32Bytes(DateManagement.time(), timestamp, 0);  // date [0...3]
-        this.addQueuedData(channelName, new byte[][]{timestamp, data.getBytes()});
+        this.addQueuedData(new NamedDataArray(channelName, new byte[][]{timestamp, data.getBytes()}));
     }
 
     private void schedule() {
@@ -264,7 +230,6 @@ public class M2MPClientWithQueue extends M2MPClientImpl {
 
     // If we got an ack from the server
     void onReceivedAckResponse(byte b) {
-        super.onReceivedAckResponse(b);
         try {
             // We reset the dataSentCounter
             dataSent = 0;
@@ -298,8 +263,6 @@ public class M2MPClientWithQueue extends M2MPClientImpl {
 
     // If we got disconnected
     void onDisconnected() {
-        super.onDisconnected();
-
         // We need to save the content of the safe queue in files
         safeQueue.saveMemoryInFile();
 

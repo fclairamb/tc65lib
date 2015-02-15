@@ -1,26 +1,20 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.javacint.control.m2mp;
 
-/**
- *
- * @author Florent
- */
-public interface M2MPClient extends IProtocolLayerSend {
+import org.javacint.control.m2mp.data.Event;
 
-	void setListener(IProtocolLayerReceive listener);
+public interface M2MPClient {
 
-	void start() throws Exception;
+    void start() throws Exception;
 
-	void stop() throws Exception;
+    void stop() throws Exception;
 
-	public void setIdent(String string);
+    void setListener(M2MPEventsListener listener);
 
-	public void setCapabilities(String echoloc);
+    public void setIdent(String string);
 
-	public void sendCapabilities();
+    public void setCapabilities(String echoloc);
 
-	public void setStatus(String name, String value);
+    public void setStatus(String name, String value);
+
+    public void send(Event event);
 }
