@@ -7,4 +7,8 @@ public class AcknowledgeResponse extends Message {
     public AcknowledgeResponse(byte nb) {
         this.nb = nb;
     }
+
+    public String toString() {
+        return "AcknowledgeResponse(" + nb + ")";
+    }
 }

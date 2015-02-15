@@ -51,7 +51,7 @@ public class M2MPReader {
             String name = _names[iChannelId];
 
             if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                Logger.log(this + ".getName( " + channelId + " ) : \"" + name + "\";");
+                Logger.log(this + ".getName( " + channelId + " ) : \"" + name + "\"");
             }
 
             if (name == null) {
@@ -350,5 +350,13 @@ public class M2MPReader {
         }
         offset = 0;
         frame = null;
+    }
+
+    public void close() throws IOException {
+        is.close();
+    }
+
+    public String toString() {
+        return "M2MPReader";
     }
 }

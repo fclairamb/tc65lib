@@ -24,6 +24,6 @@ public class NamedDataArray extends Message {
     }
 
     public String toString() {
-        return "NamedDataArray(" + name + ", byte[][" + data.length + "] );";
+        return "NamedDataArray( \"" + name + "\", byte[][" + data.length + "] )";
     }
 }

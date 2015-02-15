@@ -16,6 +16,6 @@ public class NamedData extends Message {
     }
 
     public String toString() {
-        return "NamedData(" + name + ", byte[" + data.length + "] );";
+        return "NamedData( \"" + name + "\", byte[" + data.length + "] )";
     }
 }

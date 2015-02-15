@@ -28,7 +28,7 @@ class NetworkHandler {
     private final NetworkReceive recv;
     private final NetworkSend send;
     // Identifier
-    private String ident;
+    private String ident = "__DEFAULT__";
     private SocketConnection socket;
     // M2MP protocol converters
     private M2MPReader reader;
@@ -45,6 +45,10 @@ class NetworkHandler {
 
     void setIdent(String ident) {
         this.ident = ident;
+    }
+
+    String getIdent() {
+        return ident;
     }
 
     void stop() {
@@ -75,25 +79,29 @@ class NetworkHandler {
             }
             try {
                 while (true) {
-                    if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
-                        Logger.log("...");
-                    }
                     try {
                         consider();
                         synchronized (dataOutQueue) {
-                            if (dataOutQueue.size() > 0) {
+                            if (writer != null && dataOutQueue.size() > 0) {
                                 Message msg = (Message) dataOutQueue.elementAt(0);
+                                if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
+                                    Logger.log(this + ".run: Sending... / size = " + dataOutQueue.size());
+                                }
                                 writer.write(msg);
                                 dataOutQueue.removeElement(msg);
                             } else {
-                                dataOutQueue.wait(keepAlive * 1000 / 3);
+                                long w = keepAlive * 1000 / 3;
+                                if (Logger.BUILD_DEBUG && M2MPClientImpl.m2mpLog_) {
+                                    Logger.log(this + ".run: Sleeping " + w + " ms.");
+                                }
+                                dataOutQueue.wait(w);
                             }
                         }
                     } catch (Exception ex) {
                         if (Logger.BUILD_CRITICAL) {
                             Logger.log(this + ".run", ex);
                         }
-                        break;
+                        writer = null;
                     }
                 }
             } finally {
@@ -109,13 +117,16 @@ class NetworkHandler {
             if (time - lastDataRecvTime > keepAlive && time - lastDataSendTime > (keepAlive / 2)) {
                 queue(new AcknowledgeRequest(requestNb++));
             }
+            if (writer == null) {
+                connect();
+            }
         }
 
         public void queue(Event evt) {
             if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-                Logger.log(this + ".queueSend( " + evt + " );");
+                Logger.log(this + ".queue( " + evt + " ); / size = " + dataOutQueue.size());
             }
-
+            lastDataSendTime = DateManagement.time();
             synchronized (dataOutQueue) {
                 dataOutQueue.addElement(evt);
                 dataOutQueue.notify();
@@ -129,10 +140,11 @@ class NetworkHandler {
          */
         public synchronized boolean connect() {
             try {
+                disconnect();
                 state = STATE_INITIAL;
                 long time = DateManagement.time();
                 if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-                    Logger.log(this + ".connect();");
+                    Logger.log(this + ".connect(); / nbAttempts = " + nbConnectAttempts);
                 }
 
                 // We don't want this to be called too soon !
@@ -140,7 +152,7 @@ class NetworkHandler {
                     if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
                         Logger.log(this + ".connect: Too soon !");
                     }
-                    Thread.sleep(1000);
+                    Thread.sleep(5000);
                     return false;
                 }
 
@@ -176,6 +188,8 @@ class NetworkHandler {
                             reader = new M2MPReader(is);
                             writer = new M2MPWriter(os);
 
+                            state = STATE_CONNECTED;
+
                             if (Logger.BUILD_NOTICE && M2MPClientImpl.m2mpLog_) {
                                 Logger.log(this + ".connect: Successfully connected to " + server);
                             }
@@ -186,7 +200,7 @@ class NetworkHandler {
                                 Logger.log(this + ".connect: Identification request sent...");
                             }
 
-                            state = STATE_CONNECTED;
+
                             startRecv();
 
                             lastDataRecvTime = DateManagement.time();
@@ -196,9 +210,16 @@ class NetworkHandler {
                             return true;
                         } catch (Exception ex) {
                             if (Logger.BUILD_WARNING) {
-                                Logger.log(this + ".connect: Could not connect to " + server, ex);
+                                Logger.log(this + ".connect: Error connecting to " + server, ex);
                             }
                         }
+                    }
+
+                    if (nbConnectAttempts > 50) {
+                        if (Logger.BUILD_CRITICAL) {
+                            Logger.log(this + ".connect: Too many failed attempts, restarting !");
+                        }
+                        ATExecution.restart();
                     }
 
                     // It means we don't have any server
@@ -268,6 +289,11 @@ class NetworkHandler {
         recv = new NetworkReceive();
     }
 
+    NetworkHandler(M2MPEventsListener listener) {
+        this();
+        this.listener = listener;
+    }
+
     void start() {
         startSend();
     }
@@ -285,9 +311,29 @@ class NetworkHandler {
      */
     public void disconnect() {
         try {
-            socket.close();
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception ex) {
+                    Logger.log(this + ".disconnect:1", ex);
+                }
+            }
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (Exception ex) {
+                    Logger.log(this + ".disconnect:2", ex);
+                }
+            }
+            if (socket != null) {
+                try {
+                    socket.close();
+                } catch (Exception ex) {
+                    Logger.log(this + ".disconnect:3", ex);
+                }
+            }
         } catch (Exception ex) {
-            Logger.log(this + ".disconnect", ex);
+            Logger.log(this + ".disconnect:4", ex);
         }
     }
 

@@ -1,5 +1,0 @@
-This is the M2MP implementation.
-
-I made some bad design choices and a quite bad implementation. I'm trying to
-do a rewrite of this codebase because it's used on the field and its concept
-are still valid.

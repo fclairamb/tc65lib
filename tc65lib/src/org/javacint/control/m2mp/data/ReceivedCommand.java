@@ -9,4 +9,8 @@ public class ReceivedCommand extends Event {
         this.id = cmdId;
         this.argv = argv;
     }
+
+    public String toString() {
+        return "ReceivedCommand(" + id + ", argv[" + argv.length + "])";
+    }
 }

@@ -26,7 +26,7 @@ import org.javacint.sms.SimpleSMS;
 public class M2MPClientImpl implements M2MPClient, SettingsProvider, M2MPEventsListener {
 
     protected final Hashtable statuses = new Hashtable();
-    protected final NetworkHandler network = new NetworkHandler();
+    protected final NetworkHandler network = new NetworkHandler(this);
     protected M2MPEventsListener listener;
     public static boolean m2mpLog_;
     static final String SETTING_M2MP_LOG = "m2mp.log";
@@ -47,7 +47,7 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider, M2MPEventsL
 
         Settings.addProvider(this);
     }
-    private String ident;
+    //private String ident;
 
     /**
      * Define the identifier sent to the server
@@ -55,7 +55,7 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider, M2MPEventsL
      * @param ident Identifier that will be sent to the server
      */
     public void setIdent(String ident) {
-        this.ident = ident;
+        network.setIdent(ident);
     }
 
     /**
@@ -64,7 +64,7 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider, M2MPEventsL
      * @return Identifier that will be sent to the server
      */
     public String getIdent() {
-        return ident;
+        return network.getIdent();
     }
 
     /**
@@ -465,7 +465,21 @@ public class M2MPClientImpl implements M2MPClient, SettingsProvider, M2MPEventsL
         send(new NamedDataArray(CHANNEL_SETTING, settingsMessage));
     }
 
+    private boolean treatM2mpEvent(Event event) {
+        if (event instanceof NamedDataArray) {
+            NamedDataArray msg = (NamedDataArray) event;
+            return onReceivedData(msg.name, msg.data);
+        } else {
+            return false;
+        }
+    }
+
     public void m2mpEvent(Event event) {
+        if (!treatM2mpEvent(event)) {
+            listener.m2mpEvent(event);
+        } else if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
+            Logger.log(this + ".m2mpEvent: converted " + event);
+        }
     }
 
     private void disconnect() {

@@ -14,6 +14,13 @@ import org.javacint.logging.Logger;
 
 public class M2MPWriter {
 
+    private final ChannelManagementNameToId cm = new ChannelManagementNameToId();
+    private final OutputStream os;
+
+    public M2MPWriter(OutputStream os) {
+        this.os = os;
+    }
+
     private class ChannelManagementNameToId {
 
         private short counter = 0;
@@ -42,12 +49,6 @@ public class M2MPWriter {
             return "ChannelManagementNameToId";
         }
     }
-    private final ChannelManagementNameToId cmSend = new ChannelManagementNameToId();
-    private final OutputStream os;
-
-    public M2MPWriter(OutputStream os) {
-        this.os = os;
-    }
 
     public void write(Message m) throws IOException {
         if (m instanceof NamedData) {
@@ -65,6 +66,8 @@ public class M2MPWriter {
         } else if (m instanceof IdentificationRequest) {
             IdentificationRequest msg = (IdentificationRequest) m;
             sendIdentificationRequest(msg);
+        } else {
+            throw new RuntimeException(this + ".write: Could not handle message " + m);
         }
     }
 
@@ -85,16 +88,18 @@ public class M2MPWriter {
             Logger.log(this + ".sendData( \"" + channelName + "\", byte[" + data.length + "] );");
         }
 
-        byte channelId = (byte) cmSend.getId(channelName);
+        byte channelId = (byte) cm.getId(channelName);
         sendData(channelId, data);
     }
 
     private void sendData(byte channelId, byte[] data) throws IOException {
-        if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
-            Logger.log(this + ".sendData( byte, byte[" + data.length + "] );");
-        }
+        /*
+         if (Logger.BUILD_VERBOSE && M2MPClientImpl.m2mpLog_) {
+         Logger.log(this + ".sendData( " + channelId + ", byte[" + data.length + "] );");
+         }
+         */
 
-        byte[] frame = null;
+        byte[] frame;
         int offset = 0;
         if (data.length <= 254) {
             frame = new byte[(data.length + 3)];
@@ -141,7 +146,7 @@ public class M2MPWriter {
     }
 
     private void sendData(String channelName, byte[][] data) throws IOException {
-        byte channelId = (byte) cmSend.getId(channelName);
+        byte channelId = (byte) cm.getId(channelName);
         sendData(channelId, data);
     }
 
@@ -156,7 +161,6 @@ public class M2MPWriter {
         if (size <= 254) {
             frame = new byte[(size + 2)];
             frame[offset++] = FrameType.S_NC_DATAARRAY;
-            //frame[offset++] = (byte) size;
             Bytes.intTo1Byte(size, frame, offset++);
             frame[offset++] = channelId;
 
@@ -167,9 +171,6 @@ public class M2MPWriter {
                 offset += subData.length;
             }
         } else if (size <= 65534) {
-//			if (Logger.BUILD_DEBUG) {
-//				Logger.log("m2mp.sendData: size=" + size);
-//			}
             frame = new byte[(size + 3)];
             frame[offset++] = FrameType.S_NC_DATAARRAY_LARGE;
             Bytes.intTo2Bytes(size, frame, offset);
@@ -177,9 +178,6 @@ public class M2MPWriter {
             frame[offset++] = channelId;
 
             for (int i = 0; i < data.length; ++i) {
-//				if (Logger.BUILD_DEBUG) {
-//					Logger.log("m2mp.sendData: i=" + i);
-//				}
                 byte[] subData = data[i];
                 Bytes.intTo2Bytes(subData.length, frame, offset);
                 offset += 2;
@@ -218,5 +216,13 @@ public class M2MPWriter {
         frame[1] = (byte) rawId.length;
         System.arraycopy(rawId, 0, frame, 2, rawId.length);
         os.write(frame);
+    }
+
+    public void close() throws IOException {
+        os.close();
+    }
+
+    public String toString() {
+        return "M2MPWriter";
     }
 }

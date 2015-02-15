@@ -7,4 +7,8 @@ public class AcknowledgeRequest extends Message {
     public AcknowledgeRequest(byte nb) {
         this.nb = nb;
     }
+
+    public String toString() {
+        return "AcknowledgeRequest(" + nb + ")";
+    }
 }
