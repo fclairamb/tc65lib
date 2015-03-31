@@ -67,7 +67,7 @@ The features that will be provided in this library are:
 - SMS receiving and sending (tested)
 - Call receiving and making (not done)
 - Automatic OTAP management (tested)
-- Communication with server: MQTT / M2MP / HTTP ? (HTTP comm is functionnal)
+- Communication with server: M2MP / HTTP (both tested)
 - Email sending (tested)
 - GPS management (tested)
 
