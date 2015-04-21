@@ -1,6 +1,8 @@
 TC65Lib (javacint)
 =======
 
+[![Join the chat at https://gitter.im/fclairamb/tc65lib](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/fclairamb/tc65lib?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 General library to simplify development around the Cinterion / Gemalto java enabled devices.
 
 Goals
